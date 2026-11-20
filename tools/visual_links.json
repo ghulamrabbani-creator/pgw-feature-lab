@@ -1,0 +1,7 @@
+{
+  "split-payout/docs/product.html": {
+    "money-flow": "../money-flow.html",
+    "worked-example": "../money-flow.html",
+    "outcomes": "../money-flow.html#outcomes"
+  }
+}

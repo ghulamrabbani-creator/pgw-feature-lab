@@ -6,6 +6,7 @@ Usage (run from the repo root):
 Requires pandoc. Images go to a media folder next to the output page.
 Section anchors are pandoc's heading ids, so links like product.html#money-flow keep working
 across versions as long as the heading text stays the same.
+After writing, buttons from tools/visual_links.json are re-added (warns on missing anchors).
 """
 import argparse, html, os, re, subprocess, sys
 
@@ -73,6 +74,11 @@ def main():
     with open(a.out, "w", encoding="utf-8") as f:
         f.write(page)
     print(f"wrote {a.out}: {len(toc)} toc entries")
+
+    # Re-add "View it visually" buttons listed in tools/visual_links.json
+    sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+    import add_visual_links
+    add_visual_links.main(a.out)
 
 
 if __name__ == "__main__":

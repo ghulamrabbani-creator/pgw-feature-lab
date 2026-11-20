@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Money flow · Split Payout · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 28px; }
+.vp-meta a.back { font-size: 14px; margin-left: 4px; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 24px; }
+.seg { display: inline-flex; flex-wrap: wrap; background: #F1F5F9; border: 1px solid var(--border); border-radius: 10px; padding: 4px; gap: 4px; margin-bottom: 8px; }
+.seg button { font: 500 14px var(--sans); color: var(--text-2); background: transparent; border: 0; border-radius: 7px; padding: 8px 14px; cursor: pointer; transition: background .2s, color .2s; }
+.seg button[aria-pressed="true"] { background: var(--card); color: var(--ink); box-shadow: 0 1px 2px rgba(15,23,42,.12); }
+.seg-note { font-size: 14px; color: var(--text-2); margin: 0 0 16px; min-height: 1.6em; }
+.flow-wrap { overflow-x: auto; }
+#flow { display: block; width: 100%; min-width: 680px; height: auto; }
+#flow .band { fill: var(--money); fill-opacity: .28; transition: fill-opacity .2s; }
+#flow .band.fee { fill: #64748B; fill-opacity: .3; }
+#flow .band:hover, #flow .band.hl { fill-opacity: .55; }
+#flow .node { fill: var(--money); }
+#flow .node.geidea { fill: #475569; }
+#flow .node.cust { fill: var(--ink); }
+#flow .lbl { font: 600 13px var(--sans); fill: var(--ink); }
+#flow .amt { font: 500 12px var(--mono); fill: var(--text-2); }
+#flow .col { font: 500 11px var(--mono); fill: var(--muted); letter-spacing: .04em; }
+.legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; color: var(--text-2); margin-top: 12px; }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; }
+.grid2 { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 20px; margin-top: 20px; }
+.calc h3, .residual h3 { font-size: 16px; color: var(--ink); margin: 0 0 4px; }
+.calc p.sub, .residual p.sub { font-size: 13px; color: var(--muted); margin: 0 0 14px; }
+.leg { border-top: 1px solid var(--border); padding: 12px 0; }
+.leg:first-of-type { border-top: 0; }
+.leg .who { font-weight: 600; color: var(--ink); font-size: 14px; margin-bottom: 6px; }
+.eq { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; font: 13px var(--mono); }
+.eq .chip { background: #F1F5F9; border-radius: 6px; padding: 3px 8px; color: var(--text); }
+.eq .chip small { font-family: var(--sans); color: var(--muted); margin-right: 4px; font-size: 11px; }
+.eq .chip.off { opacity: .35; text-decoration: line-through; }
+.eq .op { color: var(--muted); }
+.eq .res { background: var(--money-bg); color: var(--money); font-weight: 500; border-radius: 6px; padding: 3px 8px; }
+.wf { width: 100%; border-collapse: collapse; font-size: 14px; }
+.wf td { padding: 8px 0; border-top: 1px solid var(--border); vertical-align: top; }
+.wf tr:first-child td { border-top: 0; }
+.wf td.n { font-family: var(--mono); text-align: right; white-space: nowrap; padding-left: 12px; }
+.wf tr.tot td { font-weight: 600; color: var(--money); border-top: 2px solid var(--ink); }
+.wf .why { display: block; font-size: 12px; color: var(--muted); }
+.src { font: 12px var(--mono); color: var(--muted); margin-top: 14px; }
+.outs { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.out { background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 16px; }
+.out .s { font-weight: 600; color: var(--ink); font-size: 14px; margin: 8px 0 4px; }
+.out p { margin: 0; font-size: 14px; color: var(--text-2); }
+.st { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 5px; }
+.st.paid { background: var(--money-bg); color: var(--money); }
+.st.held { background: #FEE2E2; color: #991B1B; }
+.st.rel { background: #DBEAFE; color: #1E40AF; }
+.st.wait { background: var(--warn-bg); color: var(--warn-fg); }
+.open { margin-top: 20px; border-left: 3px solid var(--warn-fg); background: #FFFBEB; border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 14px; }
+.open b { color: var(--warn-fg); }
+.open ul { margin: 6px 0 0; padding-left: 18px; }
+.steps { counter-reset: s; list-style: none; padding: 0; margin: 0; display: grid; gap: 10px; }
+.steps li { counter-increment: s; position: relative; padding-left: 40px; font-size: 15px; }
+.steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--money); color: #fff; font: 500 13px/26px var(--mono); text-align: center; }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+@media (prefers-reduced-motion: no-preference) { #flow .band, #flow .node { transition: d .4s ease, y .4s ease, height .4s ease, fill-opacity .2s; } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Split Payout</a> / Money flow</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual · split payout</p>
+<h1 class="page">Money flow</h1>
+<p class="lead">Who is paid, and from where, for one AED 1,000 order. Band widths are to scale.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects product doc v1.6 · 10-Nov-2026</span>
+<a class="back" href="docs/product.html#money-flow">Read the requirement →</a>
+</div>
+
+<h2 class="section-title" style="margin-top:0">One order, end to end</h2>
+<div class="panel">
+<div class="seg" role="group" aria-label="Scenario">
+<button type="button" data-mode="none" aria-pressed="false">No split</button>
+<button type="button" data-mode="opt1" aria-pressed="true">Split · partner bears transfer fees</button>
+<button type="button" data-mode="opt2" aria-pressed="false">Split · vendors bear transfer fees</button>
+</div>
+<p class="seg-note" id="note" aria-live="polite"></p>
+<div class="flow-wrap"><svg id="flow" viewBox="0 0 960 500" role="img" aria-labelledby="flowTitle"><title id="flowTitle">Money flow for one order</title></svg></div>
+<div class="legend">
+<span><i style="background:var(--money)"></i>Money paid out</span>
+<span><i style="background:#64748B"></i>Kept by Geidea (MDR, remittance fees)</span>
+<span>Bands under AED 5 are drawn at a minimum width so they stay visible.</span>
+</div>
+</div>
+
+<div class="grid2">
+<div class="panel calc">
+<h3>How each payout is calculated</h3>
+<p class="sub">Calculated by APEX, not PGW. Split values here are amounts; a percentage split is first converted against the gross transaction amount.</p>
+<div id="legs"></div>
+</div>
+<div class="panel residual">
+<h3>What the partner receives</h3>
+<p class="sub">The residual: everything left of the partner's net after vendor payouts and fees.</p>
+<table class="wf" id="wf"></table>
+</div>
+</div>
+<p class="src">Source: product doc v1.6, 4.1 How funds move and 4.2 Worked example. MDR 1%, remittance fee AED 1.00 per payout (illustrative); VAT on MDR left out, as in the doc.</p>
+
+<h2 class="section-title">The sequence in APEX</h2>
+<div class="panel">
+<ol class="steps">
+<li>APEX calculates the partner's settlement and deducts Geidea's MDR and VAT on the MDR. The remainder is the partner's net.</li>
+<li>For a transaction with a valid split advice, APEX calculates each vendor's payout: split amount, minus commission on the vendor definition (if any), minus the remittance fee when the partner MID is set to deduct it from vendors. Rounded to 2 decimals.</li>
+<li>A remittance fee is charged for every payout: each vendor transfer and the partner's own payout. The fee on the partner's payout always comes from its residual.</li>
+<li>Commission taken from a vendor leg stays with the partner and reaches it in the residual.</li>
+<li>APEX transfers each vendor's net payout to its IBAN and settles the residual to the partner.</li>
+</ol>
+<div class="open"><b>Not yet defined (Finance)</b>
+<ul>
+<li>Whether vendor payouts go through a separate staging account, or APEX posts them directly from the merchant payout account.</li>
+<li>Accounting of fund movements, and VAT on vendor commission and remittance fees.</li>
+</ul></div>
+<p class="src">Source: product doc v1.6, <a href="docs/product.html#how-funds-move">4.1 How funds move</a>.</p>
+</div>
+
+<h2 class="section-title" id="outcomes">What happens in each situation</h2>
+<div class="outs">
+<div class="out"><span class="st paid">paid · normal</span><div class="s">Transaction not flagged for split</div><p>Settles to the partner through the normal process, after Geidea's MDR.</p></div>
+<div class="out"><span class="st paid">paid · split</span><div class="s">Flagged, valid advice processed</div><p>Vendors receive their net payouts; the partner receives the residual.</p></div>
+<div class="out"><span class="st held">held</span><div class="s">Flagged, advice rejected</div><p>Nothing is paid to vendors; the transaction stays held. The rejection and reason show in the split payout report. The partner may send a corrected, complete advice through the Payout Advice API.</p></div>
+<div class="out"><span class="st held">held</span><div class="s">Flagged, no advice received</div><p>The transaction stays held. Example: a deferred split never sent, or an advice lost in transit and not in the day-end file.</p></div>
+<div class="out"><span class="st rel">released</span><div class="s">Flagged, no valid advice within N days</div><p>Released to the partner after Geidea's MDR and listed in an exception report for Operations and Finance. N is set per partner MID, can be zero, and counts from the scheduled payout date.</p></div>
+<div class="out"><span class="st wait">parked</span><div class="s">Advice received before the transaction</div><p>Parked as <code>PENDING_MATCH</code> and linked when the transaction arrives; rejected with a reason if still unmatched at day end.</p></div>
+<div class="out"><span class="st held">held</span><div class="s">Advice in API but missing in the day-end file</div><p>Marked as mismatched; settlement held until resolved.</p></div>
+<div class="out"><span class="st wait">exception</span><div class="s">Transfer to a vendor fails</div><p>Existing exception process: retry up to the configured limit, then an exception record, shown in the split payout report. Geidea contacts the partner only, never the vendor.</p></div>
+</div>
+<p class="src">Source: product doc v1.6, <a href="docs/product.html#outcomes">4.3 Outcomes</a>.</p>
+</main>
+<footer class="lab-footer">Illustrative view of the product document. The document is the requirement; where they differ, the document wins.</footer>
+
+<script>
+(function () {
+  const TXN = 1000, MDR = 10, FEE = 1;
+  const VENDORS = [
+    { id: 'A', name: 'Vendor A', split: 500, pct: 2.0 },
+    { id: 'B', name: 'Vendor B', split: 300, pct: 1.5 },
+    { id: 'C', name: 'Vendor C', split: 100, pct: 0 }
+  ];
+  const f = n => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const r2 = n => Math.round(n * 100) / 100;
+  const NOTES = {
+    none: 'Transaction not flagged for split: the partner is settled through the normal process, after Geidea’s MDR.',
+    opt1: 'Option 1 – the partner bears the transfer cost of all four payouts (three vendors and its own).',
+    opt2: 'Option 2 – each vendor bears its own transfer cost; the fee on the partner’s own payout is still the partner’s.'
+  };
+
+  function compute(mode) {
+    const net = TXN - MDR;
+    if (mode === 'none') return { net, legs: [], fees: 0, residual: net, comm: 0 };
+    const legs = VENDORS.map(v => {
+      const comm = r2(v.split * v.pct / 100);
+      const fee = mode === 'opt2' ? FEE : 0;
+      return { ...v, comm, fee, payout: r2(v.split - comm - fee) };
+    });
+    const paid = r2(legs.reduce((s, l) => s + l.payout, 0));
+    const comm = r2(legs.reduce((s, l) => s + l.comm, 0));
+    const fees = (VENDORS.length + 1) * FEE;
+    return { net, legs, fees, comm, paid, residual: r2(net - paid - fees) };
+  }
+
+  // ---------- Sankey ----------
+  const svg = document.getElementById('flow');
+  const NS = 'http://www.w3.org/2000/svg';
+  const X = [40, 330, 620], W = 16, TOP = 40, H = 400, GAP = 16, MIN = 4;
+  const el = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  const px = v => Math.max(MIN, v * (H - 5 * GAP) / TXN);
+
+  function draw(mode) {
+    const c = compute(mode);
+    svg.querySelectorAll(':not(title)').forEach(n => n.remove());
+    ['CUSTOMER PAYS', 'ACQUIRING (GEIDEA / APEX)', 'PAID TO'].forEach((t, i) =>
+      svg.appendChild(el('text', { x: i === 2 ? X[2] : X[i], y: 20, class: 'col' })).textContent = t);
+
+    // column 2 nodes
+    const mdrH = px(MDR), netH = px(c.net);
+    const cust = { y: TOP, h: mdrH + netH };
+    const mdr = { y: TOP, h: mdrH };
+    const net = { y: TOP + mdrH + GAP, h: netH };
+    // column 3 nodes
+    const outs = [];
+    if (mode === 'none') {
+      outs.push({ key: 'p', label: 'Partner', sub: 'single settlement', v: c.net });
+    } else {
+      c.legs.forEach(l => outs.push({ key: l.id, label: l.name, sub: 'to vendor IBAN', v: l.payout }));
+      outs.push({ key: 'fee', label: 'Remittance fees', sub: (mode === 'opt1' ? '4 × 1.00, from partner' : '3 from vendors + 1 from partner'), v: c.fees, fee: true });
+      outs.push({ key: 'p', label: 'Partner residual', sub: 'incl. ' + f(c.comm) + ' commission', v: c.residual });
+    }
+    let y = net.y - (mode === 'none' ? 0 : 30);
+    const gap3 = mode === 'none' ? 0 : 24;
+    outs.forEach(o => { o.h = px(o.v); o.y = Math.max(y, TOP); y = o.y + o.h + gap3; });
+
+    // bands
+    const band = (x0, y0, x1, y1, h, cls, tip) => {
+      const m = (x0 + x1) / 2;
+      const d = `M${x0},${y0} C${m},${y0} ${m},${y1} ${x1},${y1} L${x1},${y1 + h} C${m},${y1 + h} ${m},${y0 + h} ${x0},${y0 + h} Z`;
+      const p = el('path', { d, class: 'band ' + cls });
+      p.appendChild(el('title', {})).textContent = tip;
+      svg.appendChild(p); return p;
+    };
+    band(X[0] + W, cust.y, X[1], mdr.y, mdrH, 'fee', 'Geidea MDR 1%: AED ' + f(MDR));
+    band(X[0] + W, cust.y + mdrH, X[1], net.y, netH, '', 'Partner net after MDR: AED ' + f(c.net));
+    let off = net.y;
+    outs.forEach(o => {
+      o.path = band(X[1] + W, off, X[2], o.y, o.h, o.fee ? 'fee' : '', o.label + ': AED ' + f(o.v));
+      o.path.dataset.key = o.key;
+      off += o.h;
+    });
+
+    // nodes + labels
+    const node = (x, n, cls) => svg.appendChild(el('rect', { x, y: n.y, width: W, height: n.h, rx: 2, class: 'node ' + cls }));
+    const label = (x, yMid, a, b, anchor) => {
+      const t1 = el('text', { x, y: yMid - 2, class: 'lbl', 'text-anchor': anchor || 'start' }); t1.textContent = a; svg.appendChild(t1);
+      const t2 = el('text', { x, y: yMid + 14, class: 'amt', 'text-anchor': anchor || 'start' }); t2.textContent = b; svg.appendChild(t2);
+    };
+    node(X[0], cust, 'cust');
+    label(X[0], cust.y + cust.h + 26, 'Customer', 'AED ' + f(TXN));
+    node(X[1], mdr, 'geidea');
+    label(X[1] + W + 10, mdr.y + 4, 'Geidea MDR', 'AED ' + f(MDR) + ' (1%)');
+    node(X[1], net, '');
+    label(X[1] - 10, net.y + net.h / 2, 'Partner net', 'AED ' + f(c.net) + (mode === 'none' ? '' : ' · held for split'), 'end');
+    outs.forEach(o => {
+      node(X[2], o, o.fee ? 'geidea' : '');
+      label(X[2] + W + 10, o.y + o.h / 2, o.label, 'AED ' + f(o.v) + ' · ' + o.sub);
+    });
+  }
+
+  // ---------- breakdown ----------
+  function breakdown(mode) {
+    const c = compute(mode);
+    const legs = document.getElementById('legs');
+    if (mode === 'none') {
+      legs.innerHTML = '<p style="margin:0;font-size:14px;color:var(--text-2)">No split advice: no vendor payouts are calculated. The partner’s net is settled as one payout.</p>';
+    } else {
+      legs.innerHTML = c.legs.map(l => `
+        <div class="leg" data-key="${l.id}"><div class="who">${l.name}</div><div class="eq">
+          <span class="chip"><small>split</small>${f(l.split)}</span><span class="op">−</span>
+          <span class="chip${l.comm ? '' : ' off'}"><small>commission ${l.pct ? l.pct.toFixed(2) + '%' : 'none'}</small>${f(l.comm)}</span><span class="op">−</span>
+          <span class="chip${l.fee ? '' : ' off'}"><small>remittance fee</small>${f(l.fee)}</span><span class="op">=</span>
+          <span class="res">${f(l.payout)}</span></div></div>`).join('');
+    }
+    const rows = mode === 'none'
+      ? [['Transaction amount', f(TXN)], ['Less: Geidea MDR (1%)', '−' + f(MDR)]]
+      : [
+          ['Transaction amount less Geidea MDR', f(c.net), '1,000.00 − 10.00'],
+          ['Less: net payouts to vendors', '−' + f(c.paid), 'payouts 1 to 3'],
+          mode === 'opt1'
+            ? ['Less: remittance fees', '−' + f(c.fees), '4 payouts × 1.00, all charged to the partner']
+            : ['Less: remittance fees deducted from vendor payouts, to Geidea', '−' + f(3 * FEE), '3 × 1.00'],
+          ...(mode === 'opt2' ? [['Less: remittance fee on the partner’s payout', '−' + f(FEE), '1 × 1.00']] : [])
+        ];
+    const totWhy = mode === 'none' ? 'one payout, normal settlement'
+      : `payout 4: ${f(TXN - MDR - 900)} unallocated after MDR + ${f(c.comm)} commission − ${f(mode === 'opt1' ? c.fees : FEE)} remittance fee${mode === 'opt1' ? 's' : ''}`;
+    document.getElementById('wf').innerHTML = rows.map(r =>
+      `<tr><td>${r[0]}${r[2] ? `<span class="why">${r[2]}</span>` : ''}</td><td class="n">${r[1]}</td></tr>`).join('') +
+      `<tr class="tot"><td>Paid to the partner<span class="why">${totWhy}</span></td><td class="n">${f(c.residual)}</td></tr>`;
+  }
+
+  // ---------- controls ----------
+  const btns = document.querySelectorAll('.seg button');
+  function set(mode) {
+    btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
+    document.getElementById('note').textContent = NOTES[mode];
+    draw(mode); breakdown(mode);
+    document.querySelectorAll('.leg').forEach(l => {
+      l.addEventListener('mouseenter', () => svg.querySelectorAll(`.band[data-key="${l.dataset.key}"]`).forEach(p => p.classList.add('hl')));
+      l.addEventListener('mouseleave', () => svg.querySelectorAll('.band.hl').forEach(p => p.classList.remove('hl')));
+    });
+  }
+  btns.forEach(b => b.addEventListener('click', () => set(b.dataset.mode)));
+  set('opt1');
+})();
+</script>
+</body>
+</html>
