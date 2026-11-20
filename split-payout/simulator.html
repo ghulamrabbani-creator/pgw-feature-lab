@@ -1,0 +1,546 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Payment simulator · Split Payout · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 24px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.sim > * { min-width: 0; }
+.sim { display: grid; grid-template-columns: 290px minmax(0, 1fr); gap: 24px; align-items: start; }
+.picker { position: sticky; top: 72px; max-height: calc(100vh - 96px); overflow-y: auto; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px; }
+.picker h3 { font: 500 11px var(--mono); color: var(--muted); letter-spacing: .05em; text-transform: uppercase; margin: 12px 8px 6px; }
+.picker h3:first-child { margin-top: 4px; }
+.picker button { display: block; width: 100%; text-align: left; font: 14px/1.4 var(--sans); color: var(--text); background: none; border: 0; border-radius: 7px; padding: 7px 10px; cursor: pointer; }
+.picker button:hover { background: #F1F5F9; }
+.picker button[aria-current="true"] { background: var(--money-bg); color: var(--money); font-weight: 500; }
+.picker button .k { font: 11px var(--mono); color: var(--muted); display: block; }
+.head { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px 24px; margin-bottom: 16px; }
+.head h2 { margin: 0 0 4px; font-size: 20px; color: var(--ink); font-weight: 600; }
+.head p { margin: 0; color: var(--text-2); font-size: 15px; }
+.head .row2 { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 14px; }
+.ctrl { display: flex; gap: 8px; align-items: center; margin-left: auto; }
+.ctrl button { font: 500 13px var(--sans); border: 1px solid var(--border-2); background: var(--card); color: var(--ink); border-radius: 7px; padding: 6px 12px; cursor: pointer; }
+.ctrl button.primary { background: var(--money); border-color: var(--money); color: #fff; }
+.ctrl button:disabled { opacity: .4; cursor: default; }
+.ctrl .pos { font: 12px var(--mono); color: var(--muted); }
+.res { font: 500 12px var(--mono); padding: 3px 9px; border-radius: 6px; }
+.res.ok { background: var(--money-bg); color: var(--money); }
+.res.bad { background: #FEE2E2; color: #991B1B; }
+.res.hold { background: var(--warn-bg); color: var(--warn-fg); }
+.res.info { background: #DBEAFE; color: #1E40AF; }
+.steps { list-style: none; margin: 0; padding: 0; position: relative; }
+.step { position: relative; padding-left: 44px; margin-bottom: 14px; }
+.step::before { content: ""; position: absolute; left: 15px; top: 34px; bottom: -14px; width: 2px; background: var(--border); }
+.step:last-child::before { display: none; }
+.step .dot { position: absolute; left: 0; top: 12px; width: 32px; height: 32px; border-radius: 50%; background: var(--card); border: 2px solid var(--border-2); font: 500 12px/28px var(--mono); text-align: center; color: var(--text-2); }
+.step.ok .dot { border-color: var(--money); color: var(--money); }
+.step.bad .dot { border-color: #B91C1C; color: #B91C1C; background: #FEF2F2; }
+.step.hold .dot { border-color: var(--warn-fg); color: var(--warn-fg); background: #FFFBEB; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px 20px; }
+.step.bad .card { border-color: #FCA5A5; }
+.card .top { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 6px; }
+.lane { font: 500 11px var(--mono); padding: 2px 8px; border-radius: 5px; background: #F1F5F9; color: var(--text-2); }
+.lane.m { background: #EDE9FE; color: #5B21B6; }
+.lane.p { background: #E0F2FE; color: #075985; }
+.lane.a { background: #F1F5F9; color: #334155; }
+.lane.c { background: #FCE7F3; color: #9D174D; }
+.day { font: 11px var(--mono); color: var(--muted); }
+.card h4 { margin: 0 0 6px; font-size: 16px; color: var(--ink); font-weight: 600; }
+.card p { margin: 0 0 8px; font-size: 14px; color: var(--text); }
+.card .src { font: 11px var(--mono); color: var(--muted); margin-top: 8px; }
+.card .src a { color: var(--muted); }
+.chk { width: 100%; border-collapse: collapse; font-size: 13px; margin: 8px 0 4px; }
+.chk td { padding: 6px 8px; border-top: 1px solid var(--border); vertical-align: top; }
+.chk td.n { font-family: var(--mono); color: var(--muted); white-space: nowrap; width: 1%; }
+.chk td.r { white-space: nowrap; width: 1%; font: 500 12px var(--mono); }
+.chk tr.pass td.r { color: var(--money); }
+.chk tr.fail td { background: #FEF2F2; }
+.chk tr.fail td.r { color: #B91C1C; }
+.chk tr.na td { color: var(--muted); }
+.chk .msg { display: block; color: #991B1B; font-size: 12px; margin-top: 2px; }
+details.pl { margin-top: 8px; }
+details.pl summary { cursor: pointer; font: 500 12px var(--mono); color: var(--link); }
+pre.code { background: var(--code-bg); color: #E2E8F0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font-size: 12.5px; line-height: 1.55; margin: 8px 0 0; }
+pre.code .k { color: #93C5FD; }
+pre.code .s { color: var(--code-fg); font-weight: 500; }
+pre.code .c { color: #64748B; }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 13px; margin: 6px 0; }
+.kv dt { font-family: var(--mono); color: var(--text-2); }
+.kv dd { margin: 0; font-family: var(--mono); color: var(--ink); }
+.note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 8px; color: var(--text); }
+.note b { color: var(--warn-fg); }
+.calc { font: 13px var(--mono); background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 8px; }
+.calc div { display: flex; justify-content: space-between; gap: 16px; }
+.calc div.t { border-top: 1px solid var(--border-2); margin-top: 4px; padding-top: 4px; font-weight: 500; }
+.calc div.t.ok { color: var(--money); }
+.calc div.t.bad { color: #B91C1C; }
+.assume { font-size: 13px; color: var(--text-2); margin-top: 24px; }
+.assume table { border-collapse: collapse; margin-top: 6px; }
+.assume td { padding: 3px 14px 3px 0; font-family: var(--mono); font-size: 12px; }
+.hidden { display: none; }
+@media (max-width: 960px) { .sim { grid-template-columns: minmax(0, 1fr); } .picker { position: static; max-height: none; } .ctrl { margin-left: 0; } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Split Payout</a> / Payment simulator</nav>
+</div></header>
+<main class="wrap" style="max-width:1240px">
+<p class="eyebrow">visual · split payout</p>
+<h1 class="page">Payment simulator</h1>
+<p class="lead">Pick a scenario and step through it: what the merchant sends, what PGW checks and stores, what goes to APEX, and how APEX ends it.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects PGW stories v0.5 and product doc v1.6</span>
+<a href="docs/stories.html#sp-6-be-create-session-with-split-payout">Read the stories →</a>
+<a href="docs/product.html#transaction-flow">Read the product doc →</a>
+</div>
+<div class="terms"><b>Terms on this page follow the PGW stories.</b> Merchant = the MID with split payout on (the "partner" in the product doc). Partner = a payee of the split, with a Partner ID from APEX (a "vendor" or "beneficiary" in the product doc). Field names are the stories' proposals; APEX advice fields are draft until the Emcrey spec (P3).</div>
+
+<div class="sim">
+<nav class="picker" id="picker" aria-label="Scenarios"></nav>
+<section aria-live="polite">
+<div class="head">
+<h2 id="sTitle"></h2>
+<p id="sBlurb"></p>
+<div class="row2">
+<span class="res" id="sResult"></span>
+<div class="ctrl">
+<button type="button" id="prev">Back</button>
+<span class="pos" id="pos"></span>
+<button type="button" id="next" class="primary">Next step</button>
+<button type="button" id="all">Show all</button>
+</div>
+</div>
+</div>
+<ol class="steps" id="steps"></ol>
+<div class="assume">
+<b>Illustrative values</b> (not from configuration):
+<table>
+<tr><td>Partner IDs on the merchant</td><td>P000301 (2.00% commission), P000302 (1.50%), P000303 (none)</td></tr>
+<tr><td>Pricing at APEX</td><td>MDR 1% = 10.00, VAT on MDR 0.50, remittance fee 1.00 per payout, borne by the merchant</td></tr>
+<tr><td>Maximum legs (SP-2)</td><td>10 (default)</td></tr>
+<tr><td>IDs</td><td>MID 9000123, orderId a1b2c3d4-0001, interSystemID IS-000417, splitAdviceId ADV-n</td></tr>
+</table>
+</div>
+</section>
+</div>
+</main>
+<footer class="lab-footer">Illustrative simulation of the stories and product document. The documents are the requirement; where they differ, the documents win.</footer>
+
+<script>
+(function () {
+// ---------------- illustrative set-up ----------------
+const PARTNERS = { P000301: 2.0, P000302: 1.5, P000303: 0 };      // commission %
+const PRICING = { mdrPct: 1, vat: 0.5, fee: 1, bearer: 'MERCHANT' };
+const MAX_LEGS = 10;
+const MIDS = {
+  OFF: { mid: '9000123', enabled: false, mode: null },
+  DYNAMIC: { mid: '9000123', enabled: true, mode: 'DYNAMIC', partners: Object.keys(PARTNERS) },
+  FIXED: { mid: '9000123', enabled: true, mode: 'FIXED', partners: Object.keys(PARTNERS),
+    template: { type: 'PERCENTAGE', legs: [{ partnerId: 'P000301', value: 50 }, { partnerId: 'P000302', value: 30 }, { partnerId: 'P000303', value: 10 }] } },
+  PROFILE: { mid: '9000123', enabled: true, mode: 'PROFILE', partners: Object.keys(PARTNERS),
+    profiles: { 'PRF-INSURER-A': { type: 'AMOUNT', legs: [{ partnerId: 'P000301', value: 500 }, { partnerId: 'P000302', value: 300 }, { partnerId: 'P000303', value: 100 }] } } }
+};
+const BASE = { amount: 1000.00, currency: 'AED', merchantReferenceId: 'ORD-DEMO-1000', paymentOperation: 'Pay' };
+const L = (a, b, c) => [{ partnerId: 'P000301', value: a, reference: 'SELLER-A' }, { partnerId: 'P000302', value: b, reference: 'SELLER-B' }, { partnerId: 'P000303', value: c, reference: 'DELIVERY' }];
+
+// ---------------- scenarios ----------------
+const S = [
+ { g: 'Paid out', id: 'dynamic-amount', t: 'Dynamic, amount split', k: 'SP-6 · SP-7 · SP-9',
+   b: 'The merchant sends three legs in AED with Create Session. Values match the product doc worked example.',
+   mid: 'DYNAMIC', ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(500, 300, 100) }], ['pay'], ['dayend', 0], ['validate', 1], ['outcome']] },
+ { g: 'Paid out', id: 'dynamic-percentage', t: 'Dynamic, percentage split', k: 'SP-6 · SP-7',
+   b: 'Same split as percentages. PGW stores the percentages as sent; APEX converts them on the gross amount.',
+   mid: 'DYNAMIC', ph: [['session', { splitPayoutType: 'PERCENTAGE', splitPayoutTransaction: L(50, 30, 10) }], ['pay'], ['dayend', 0], ['validate', 1], ['outcome']] },
+ { g: 'Paid out', id: 'fixed', t: 'Fixed template', k: 'SP-4 · SP-6 row 2.6',
+   b: 'The merchant sends no split fields. PGW copies the Fixed template legs to the order.',
+   mid: 'FIXED', ph: [['session', {}], ['pay'], ['dayend', 0], ['validate', 1], ['outcome']] },
+ { g: 'Paid out', id: 'profile', t: 'Profile ID', k: 'SP-5 · SP-6 row 2.8',
+   b: 'The merchant sends splitPayoutProfileId. PGW copies the profile legs to the order.',
+   mid: 'PROFILE', ph: [['session', { splitPayoutProfileId: 'PRF-INSURER-A' }], ['pay'], ['dayend', 0], ['validate', 1], ['outcome']] },
+ { g: 'Paid out', id: 'deferred', t: 'Deferred split, sent later', k: 'SP-6 row 2.4 · SP-8 NEW',
+   b: 'The merchant does not know the split at payment. It sends deferredSplit = true, then the split with the Split Payout API.',
+   mid: 'DYNAMIC', ph: [['session', { deferredSplit: true }], ['pay'], ['api', { action: 'NEW', splitPayoutType: 'PERCENTAGE', splitPayoutTransaction: [{ partnerId: 'P000301', value: 60.00 }, { partnerId: 'P000302', value: 30.00 }] }], ['dayend', 0], ['validate', 1], ['outcome']] },
+ { g: 'Paid out', id: 'apex-down', t: 'APEX not reachable, file carries it', k: 'SP-7 section 4 · SP-9',
+   b: 'The real-time advice cannot reach APEX. PGW keeps it PENDING and retries; the day-end file carries the advice.',
+   mid: 'DYNAMIC', down: true, ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(500, 300, 100) }], ['pay'], ['dayend', 0], ['validate', 1], ['outcome']] },
+ { g: 'Paid out', id: 'no-split', t: 'Normal payment on a split MID', k: 'SP-6 row 2.5',
+   b: 'Dynamic MID, no split fields and no deferredSplit. A normal session; APEX pays the merchant as today.',
+   mid: 'DYNAMIC', ph: [['session', {}], ['pay'], ['outcome']] },
+
+ { g: 'Rejected at PGW', id: 'total-over', t: 'Legs total more than the order', k: 'SP-6 check 3.6',
+   b: 'Legs total AED 1,001 on an AED 1,000 order.', mid: 'DYNAMIC', ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(600, 300, 101) }]] },
+ { g: 'Rejected at PGW', id: 'unknown-partner', t: 'Unknown Partner ID', k: 'SP-6 check 3.4',
+   b: 'One leg names a Partner ID that is not on the merchant.', mid: 'DYNAMIC',
+   ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: [{ partnerId: 'P000301', value: 500 }, { partnerId: 'P000999', value: 300 }] }]] },
+ { g: 'Rejected at PGW', id: 'preauth', t: 'Split on PreAuthorize', k: 'SP-6 check 3.2',
+   b: 'In this release APEX handles split only on a sale.', mid: 'DYNAMIC',
+   ph: [['session', { paymentOperation: 'PreAuthorize', splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(500, 300, 100) }]] },
+ { g: 'Rejected at PGW', id: 'both', t: 'Split detail and deferredSplit together', k: 'SP-6 check 3.9',
+   b: 'The request carries legs and deferredSplit = true.', mid: 'DYNAMIC',
+   ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(500, 300, 100), deferredSplit: true }]] },
+ { g: 'Rejected at PGW', id: 'fixed-fields', t: 'Split fields on a Fixed MID', k: 'SP-6 row 2.7',
+   b: 'A Fixed MID sends its own legs. The template applies, so PGW rejects.', mid: 'FIXED',
+   ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(500, 300, 100) }]] },
+ { g: 'Rejected at PGW', id: 'split-off', t: 'Split fields on a MID with split off', k: 'SP-6 row 2.2',
+   b: 'The MID does not have split payout enabled.', mid: 'OFF',
+   ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(500, 300, 100) }]] },
+ { g: 'Rejected at PGW', id: 'new-twice', t: 'NEW on an order that has a split', k: 'SP-8 check 2.4',
+   b: 'The order was created with legs. The merchant then calls NEW.', mid: 'DYNAMIC',
+   ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(500, 300, 100) }], ['pay'], ['api', { action: 'NEW', splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(450, 300, 100) }]] },
+ { g: 'Rejected at PGW', id: 'old-advice', t: 'UPDATE with an older advice ID', k: 'SP-8 check 2.5',
+   b: 'A late retry of an old UPDATE must not overwrite a newer correction.', mid: 'DYNAMIC',
+   ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(500, 300, 100) }], ['pay'],
+        ['api', { action: 'UPDATE', splitAdviceId: '@latest', splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(450, 300, 100) }],
+        ['api', { action: 'UPDATE', splitAdviceId: 'ADV-1', splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(400, 300, 100) }]] },
+
+ { g: 'Held or rejected at APEX', id: 'rule1', t: 'Split equals the order amount', k: 'Product doc 6.5 Rule 1 · SP-8 UPDATE',
+   b: 'Legs total exactly AED 1,000, as in the SP-6 example. PGW accepts it (check 3.6 allows up to the order amount). APEX Rule 1 rejects it: after MDR, VAT and fees the merchant would go negative, and commission does not cover the gap. The merchant corrects it with UPDATE.',
+   mid: 'DYNAMIC', ph: [['session', { splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(300, 300, 400) }], ['pay'], ['dayend', 0], ['validate', 1],
+        ['api', { action: 'UPDATE', splitAdviceId: '@latest', splitPayoutType: 'AMOUNT', splitPayoutTransaction: L(300, 300, 380) }, 1], ['dayend', 1], ['validate', 2], ['outcome']] },
+ { g: 'Held or rejected at APEX', id: 'never-sent', t: 'Deferred split never sent', k: 'Product doc 4.3 · 6.4',
+   b: 'The merchant sets deferredSplit = true and never calls the Split Payout API. APEX holds the money, then releases it after N days.',
+   mid: 'DYNAMIC', ph: [['session', { deferredSplit: true }], ['pay'], ['dayend', 0], ['release'], ['outcome']] }
+];
+
+// ---------------- helpers ----------------
+const f = n => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const r2 = n => Math.round(n * 100) / 100;
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const SPLITKEYS = /^(split|deferredSplit|partnerId|value|action|orderId|Action|SplitRules|PartnerID|Percentage|Amount|TransactionReference|Merchant)/;
+function json(o) {
+  return esc(JSON.stringify(o, null, 2))
+    .replace(/&quot;([A-Za-z\[\]\.]+)&quot;:/g, (m, k) => `<span class="${SPLITKEYS.test(k) ? 's' : 'k'}">"${k}"</span>:`)
+    .replace(/&quot;(\.\.\.[^&]*)&quot;/g, '<span class="c">$1</span>');
+}
+const payload = (label, obj, open, note) => `<details class="pl"${open ? ' open' : ''}><summary>${label}</summary><pre class="code">${json(obj)}</pre>${note ? `<div class="src">${note}</div>` : ''}</details>`;
+const SRC = { s: 'docs/stories.html#', p: 'docs/product.html#' };
+const src = list => `<div class="src">Source: ${list.map(([t, a, d]) => `<a href="${SRC[d || 's']}${a}">${t}</a>`).join(' · ')}</div>`;
+function checks(rows) {
+  return `<table class="chk">${rows.map(r => {
+    const cls = r.na ? 'na' : r.ok ? 'pass' : 'fail';
+    return `<tr class="${cls}"><td class="n">${r.n}</td><td>${r.label}${!r.na && !r.ok && r.msg ? `<span class="msg">${esc(r.msg)}</span>` : ''}</td><td class="r">${r.na ? 'n/a' : r.ok ? 'pass' : 'FAIL'}</td></tr>`;
+  }).join('')}</table>`;
+}
+const dec2 = v => Math.abs(v * 100 - Math.round(v * 100)) < 1e-9;
+
+function legChecks(mid, legs, type, amount, numbers, opts = {}) {
+  const N = numbers;  // map: partner, legs, total, value
+  const ids = legs.map(l => l.partnerId);
+  const unknown = ids.find(i => !mid.partners.includes(i));
+  const dup = ids.find((i, x) => ids.indexOf(i) !== x);
+  const total = r2(legs.reduce((s, l) => s + l.value, 0));
+  const totOk = type === 'PERCENTAGE' ? total <= 100 : total <= amount;
+  const badVal = legs.find(l => !(l.value > 0) || !dec2(l.value));
+  const only36 = opts.only36;
+  return [
+    { n: N.partner, label: 'Each partnerId is a Partner ID of the MID and occurs once.', na: only36, ok: !unknown && !dup, msg: unknown ? `Unknown partner ID: ${unknown}.` : `Duplicate partner ID: ${dup}.` },
+    { n: N.legs, label: `Number of legs (${legs.length}) ≤ maximum legs (${MAX_LEGS}).`, na: only36, ok: legs.length <= MAX_LEGS, msg: `Maximum ${MAX_LEGS} legs.` },
+    { n: N.total, label: type === 'PERCENTAGE' ? `PERCENTAGE: total of legs (${f(total)}) ≤ 100.` : `AMOUNT: total of legs (${f(total)}) ≤ order amount (${f(amount)}).`, ok: totOk,
+      msg: type === 'PERCENTAGE' ? 'Split total is more than 100%.' : 'Split total is more than the order amount.' },
+    { n: N.value, label: 'Each value is above 0, up to 2 decimals.', na: only36, ok: !badVal, msg: 'Invalid split value.' }
+  ];
+}
+
+// ---------------- engine ----------------
+function run(sc) {
+  const mid = MIDS[sc.mid];
+  const steps = [];
+  const st = { order: null, advices: [], apex: null, advSeq: 0, rejected: false, day: 0 };
+  const add = s => steps.push(s);
+  const dayLbl = (d, t) => `Day ${d}${t ? ' · ' + t : ''}`;
+
+  // MID settings
+  const settings = { isSplitPayoutEnabled: mid.enabled, splitPayoutMode: mid.mode };
+  if (mid.enabled) settings.splitPayoutPartners = mid.partners;
+  if (mid.template) settings.splitPayoutFixedTemplate = mid.template;
+  if (mid.profiles) settings.splitPayoutProfiles = mid.profiles;
+  add({ lane: ['p', 'PGW config'], day: 'Before', st: 'info', title: 'MID settings',
+    body: `<p>Set by Geidea in the Split Payout tab (SP-1 to SP-5). The merchant cannot change them.</p>${payload('payment_gateway product instance (MID ' + mid.mid + ')', settings, true)}` +
+      src([['SP-2', 'sp-2-be-split-payout-configuration-setup'], ['SP-3', 'sp-3-febe-enable-split-partner-ids-and-dynamic-mode']]) });
+
+  for (const [type, arg, d] of sc.ph) {
+    if (st.rejected) break;
+    if (type === 'session') session(arg);
+    else if (type === 'pay') pay();
+    else if (type === 'api') api(arg, d || 0);
+    else if (type === 'dayend') dayend(arg);
+    else if (type === 'validate') validate(arg);
+    else if (type === 'release') release();
+    else if (type === 'outcome') outcome();
+  }
+  return { steps, result: st.result };
+
+  function session(extra) {
+    const req = { ...BASE, ...extra, timestamp: '...', signature: '...', callbackUrl: '...' };
+    const legsIn = (req.splitPayoutTransaction || []);
+    const hasDetail = legsIn.length > 0, hasProfile = !!req.splitPayoutProfileId, def = req.deferredSplit === true;
+    const anySplit = hasDetail || hasProfile || def || !!req.splitPayoutType;
+    add({ lane: ['m', 'Merchant → PGW'], day: dayLbl(0, '14:05'), st: 'info', title: 'Create Session',
+      body: `<p><code>POST /payment-intent/api/v2/direct/session</code>${mid.mode === 'FIXED' && !anySplit ? '. Fixed mode: no split fields.' : ''}</p>${payload('Request body', req, true)}` +
+        src([['SP-6 section 1', 'new-request-fields-create-session'], ['SP-6 section 7', 'example-dynamic-amount-split']]) });
+
+    // section 2: decide the row
+    let row, action, legs = null, sType = null, profileOk = true, mismatchMsg = null;
+    if (!mid.enabled) { row = anySplit ? '2.2' : '2.1'; action = anySplit ? 'Reject' : 'Normal session'; if (anySplit) mismatchMsg = 'Split payout is not enabled for this merchant.'; }
+    else if ((hasDetail || hasProfile) && def) { row = '2.11'; action = 'Reject'; }
+    else if (mid.mode === 'DYNAMIC') {
+      if (hasProfile) { row = '—'; action = 'Reject'; mismatchMsg = "Split fields do not match the merchant's split mode."; }
+      else if (hasDetail) { row = '2.3'; action = 'Check (section 3). Store the legs.'; legs = legsIn; sType = req.splitPayoutType; }
+      else if (def) { row = '2.4'; action = 'Store deferredSplit = true. No legs.'; }
+      else { row = '2.5'; action = 'Normal session. No split.'; }
+    } else if (mid.mode === 'FIXED') {
+      if (anySplit) { row = '2.7'; action = 'Reject'; mismatchMsg = "Split fields do not match the merchant's split mode."; }
+      else { row = '2.6'; action = 'Copy the Fixed template legs to the order. Check the amount (3.6).'; legs = mid.template.legs; sType = mid.template.type; }
+    } else if (mid.mode === 'PROFILE') {
+      if (hasDetail) { row = '2.10'; action = 'Reject'; mismatchMsg = "Split fields do not match the merchant's split mode."; }
+      else if (hasProfile) { row = '2.8'; action = 'Copy the profile legs to the order. Check (section 3).'; const p = mid.profiles[req.splitPayoutProfileId]; profileOk = !!p; if (p) { legs = p.legs; sType = p.type; } }
+      else if (def) { row = '2.9'; action = 'Store deferredSplit = true.'; }
+    }
+    const isSplit = ['2.3', '2.4', '2.6', '2.8', '2.9'].includes(row);
+    const rows = [
+      { n: '3.1', label: 'Split fields are allowed for this MID and mode (section 2).', ok: !mismatchMsg, na: !anySplit && !isSplit, msg: mismatchMsg },
+      { n: '3.2', label: `paymentOperation = Pay (sent: ${req.paymentOperation}).`, na: !isSplit && !anySplit, ok: req.paymentOperation === 'Pay', msg: 'Split payout is supported for Pay only.' },
+      { n: '3.3', label: `Order currency = AED (sent: ${req.currency}).`, na: !isSplit && !anySplit, ok: req.currency === 'AED', msg: 'Split payout is supported in AED only.' },
+      ...(legs ? legChecks(mid, legs, sType, req.amount, { partner: '3.4', legs: '3.5', total: '3.6', value: '3.7' }, { only36: row === '2.6' })
+         : ['3.4', '3.5', '3.6', '3.7'].map(n => ({ n, label: ({ '3.4': 'Partner IDs known and unique.', '3.5': 'Number of legs ≤ maximum legs.', '3.6': 'Split total ≤ order amount / 100%.', '3.7': 'Each value above 0, up to 2 decimals.' })[n], na: true }))),
+      { n: '3.8', label: 'splitPayoutProfileId is a profile of the MID.', na: !hasProfile || row === '2.11', ok: profileOk, msg: `Unknown split profile: ${req.splitPayoutProfileId}.` },
+      { n: '3.9', label: 'Not split detail and deferredSplit together.', na: !def && !(hasDetail || hasProfile), ok: row !== '2.11', msg: 'Send split detail or deferredSplit, not both.' }
+    ];
+    if (!anySplit && !isSplit) rows.forEach(r => r.na = true);
+    const fail = rows.find(r => !r.na && !r.ok) || (action === 'Reject' && !rows.find(r => !r.na && !r.ok) ? { msg: 'Reject' } : null);
+    const decision = `<div class="kv"><dt>Section 2 row</dt><dd>${row}</dd><dt>PGW action</dt><dd>${esc(action)}</dd><dt>splitPayout on the order</dt><dd>${fail ? '—' : isSplit}</dd></div>`;
+    if (fail) {
+      st.rejected = true; st.result = ['bad', 'Rejected at PGW · no payment taken'];
+      add({ lane: ['p', 'PGW'], day: dayLbl(0, '14:05'), st: 'bad', title: 'Checks before payment: rejected (HTTP 400)',
+        body: decision + checks(rows) + `<p>The session is not created. The customer is never asked to pay. PGW engineering sets the error codes.</p>` +
+          src([['SP-6 section 2', 'what-pgw-does-with-each-request'], ['SP-6 section 3', 'checks-before-payment']]) });
+      return;
+    }
+    add({ lane: ['p', 'PGW'], day: dayLbl(0, '14:05'), st: 'ok', title: isSplit ? 'Checks before payment: passed' : 'Normal session',
+      body: decision + checks(rows) + src([['SP-6 section 2', 'what-pgw-does-with-each-request'], ['SP-6 section 3', 'checks-before-payment']]) });
+    st.order = { orderId: 'a1b2c3d4-0001', amount: req.amount, currency: 'AED', splitPayout: isSplit, deferredSplit: def,
+      splitPayoutType: def ? null : (sType || null), splitPayoutProfileId: req.splitPayoutProfileId || null,
+      splitPayoutTransaction: legs ? legs.map(l => ({ ...l })) : [] };
+    if (isSplit) add({ lane: ['p', 'PGW'], day: dayLbl(0, '14:05'), st: 'ok', title: 'Split stored on the order',
+      body: `<p>${row === '2.6' ? 'Template legs copied as they are today. A later template change does not change this order.' : row === '2.8' ? 'Profile legs copied as they are today.' : def ? 'No legs yet. The merchant sends them later (SP-8).' : 'Legs stored as sent.'} ${sType === 'PERCENTAGE' ? 'Percentages are not converted; APEX converts them on the gross amount.' : ''}</p>` +
+        payload('Order (split fields)', st.order, true, 'Returned in order inquiry, the callback and the pay responses (SP-6 section 5).') +
+        src([['SP-6 section 4', 'store-on-the-order'], ['SP-6 section 5', 'return-to-the-merchant']]) });
+  }
+
+  function sendAdvice(action, when, d) {
+    st.advSeq++;
+    const id = 'ADV-' + st.advSeq;
+    const o = st.order, pct = o.splitPayoutType === 'PERCENTAGE';
+    const adv = { Action: action, Merchant: mid.mid, TransactionReference: 'IS-000417',
+      SplitRules: o.splitPayoutTransaction.map(l => ({ PartnerID: l.partnerId, Percentage: pct ? l.value : '', Amount: pct ? '' : l.value })) };
+    const prev = st.apex;
+    // APEX structural checks (product doc 6.4)
+    const linked = o.splitPayoutTransaction.every(l => mid.partners.includes(l.partnerId));
+    const aOk = action === 'A' ? !prev : true;
+    const uOk = action === 'U' ? !!prev && ['CREATED', 'REJECTED', 'PENDING_MATCH'].includes(prev.status) : true;
+    const sc2 = [
+      { n: 'a', label: 'Split enabled on the MID.', ok: mid.enabled },
+      { n: 'b', label: 'Every beneficiary found, active and linked to the MID.', ok: linked },
+      { n: 'c', label: 'MID matches the transaction; transaction carries the split flag.', ok: true },
+      { n: 'd', label: 'One of percentage or amount per rule.', ok: true },
+      { n: 'e', label: action === 'A' ? 'A only when no advice exists for the transaction.' : 'U only when the advice is CREATED, REJECTED or PENDING_MATCH.', ok: aOk && uOk }
+    ];
+    if (sc.down && action === 'A' && st.advSeq === 1) {
+      st.advices.push({ id, status: 'PENDING' }); st.pendingAdvice = adv;
+      add({ lane: ['p', 'PGW → APEX'], day: dayLbl(d, when), st: 'hold', title: `Payout advice ${action}: APEX not reachable`,
+        body: `<p>Timeout. PGW keeps the advice and retries (count and interval: PGW engineering). The payment result does not change.</p>` +
+          payload('Advice (APEX draft fields)', adv, false, 'Field names follow the APEX draft (P3) and can change.') +
+          `<div class="kv"><dt>splitAdviceId</dt><dd>${id}</dd><dt>splitAdviceStatus</dt><dd>PENDING</dd></div>` +
+          src([['SP-7 section 2', 'content-apex-draft'], ['SP-7 section 4', 'errors-and-retry']]) });
+      return id;
+    }
+    const ok = sc2.every(c => c.ok);
+    st.advices.push({ id, status: ok ? 'ACCEPTED' : 'REJECTED' });
+    if (ok) st.apex = { status: 'CREATED', adv };
+    add({ lane: ['p', 'PGW → APEX'], day: dayLbl(d, when), st: ok ? 'ok' : 'bad', title: `Payout advice sent: action ${action}`,
+      body: `<p>${action === 'A' ? 'Sent in real time when the split is known.' : 'Replaces the whole advice.'} APEX runs its structural checks in the call; amount validation runs later.</p>` +
+        payload('Advice (APEX draft fields)', adv, true, 'Field names follow the APEX draft (P3) and can change. Percentage or amount, never both.') +
+        checks(sc2) +
+        `<div class="kv"><dt>splitAdviceId</dt><dd>${id}</dd><dt>splitAdviceStatus</dt><dd>${ok ? 'ACCEPTED' : 'REJECTED'}</dd><dt>APEX advice status</dt><dd>${ok ? 'CREATED' : '—'}</dd></div>` +
+        src([['SP-7 section 1', 'when-pgw-sends-an-advice'], ['SP-7 section 3', 'advice-record-on-the-order'], ['Product doc 6.4', 'split-advice-intake', 'p']]) });
+    return id;
+  }
+
+  function pay() {
+    const o = st.order;
+    add({ lane: ['c', 'Customer → PGW'], day: dayLbl(0, '14:06'), st: 'ok', title: 'Customer pays',
+      body: `<p>PGW authorises through the existing route (MPGS or CyberSource) and confirms the payment to the merchant. Pay succeeds.</p>` + src([['Product doc 7.7', 'transaction-flow', 'p']]) });
+    add({ lane: ['p', 'PGW → APEX'], day: dayLbl(0, '14:06'), st: 'ok', title: `Transaction federation: splitPayout = ${o.splitPayout ? 'Y' : 'N'}`,
+      body: `<p>${o.splitPayout ? 'APEX holds this transaction until it receives a valid split, or releases it after N days.' : 'APEX pays the merchant as today.'}</p>` +
+        payload('createTransaction (new field only)', { '...': '... existing fields, unchanged', splitPayout: o.splitPayout ? 'Y' : 'N' }, true, 'New field added at the end of the payload. PTLF: same value in field 49 (waits on P4).') +
+        src([['SP-6 section 6', 'split-flag-to-apex']]) });
+    if (o.splitPayout && o.splitPayoutTransaction.length) sendAdvice('A', '14:06', 0);
+    else if (o.splitPayout) add({ lane: ['p', 'PGW'], day: dayLbl(0, '14:06'), st: 'hold', title: 'No advice sent yet',
+      body: '<p>deferredSplit = true and no legs: PGW sends nothing to APEX until the merchant calls the Split Payout API. APEX holds the transaction.</p>' + src([['SP-7 section 1', 'when-pgw-sends-an-advice']]) });
+  }
+
+  function api(body, d) {
+    const o = st.order, latest = st.advices.length ? st.advices[st.advices.length - 1].id : null;
+    const req = { action: body.action, orderId: o.orderId };
+    if (body.splitAdviceId) req.splitAdviceId = body.splitAdviceId === '@latest' ? latest : body.splitAdviceId;
+    if (body.splitPayoutType) req.splitPayoutType = body.splitPayoutType;
+    if (body.splitPayoutTransaction) req.splitPayoutTransaction = body.splitPayoutTransaction;
+    const t = d ? '10:20' : '16:40';
+    add({ lane: ['m', 'Merchant → PGW'], day: dayLbl(d, t), st: 'info', title: `Split Payout API: ${body.action}`,
+      body: `<p><code>POST /pgw/api/v1/direct/splitPayout</code> (name and path: PGW engineering). The request always carries the full split.</p>${payload('Request body', req, true)}` +
+        src([['SP-8 section 1', 'request'], ['SP-8 section 5', 'example-2']]) });
+    const legs = req.splitPayoutTransaction || [];
+    const rows = [
+      { n: '2.1', label: 'Split is on for the MID. Mode is Dynamic or Profile.', ok: mid.enabled && mid.mode !== 'FIXED', msg: mid.enabled ? 'Not allowed for Fixed split.' : 'Split payout is not enabled for this merchant.' },
+      { n: '2.2', label: 'The order exists, belongs to the calling MID and has a successful Pay.', ok: true },
+      { n: '2.3', label: 'The order has splitPayout = true.', ok: o.splitPayout, msg: 'Order is not a split order.' },
+      { n: '2.4', label: 'NEW: the order has deferredSplit = true and no advice yet.', na: body.action !== 'NEW', ok: o.deferredSplit && !latest, msg: 'A split already exists for this order. Use UPDATE.' },
+      { n: '2.5', label: `UPDATE: splitAdviceId (${req.splitAdviceId || '—'}) is the latest advice ID (${latest || '—'}).`, na: body.action !== 'UPDATE', ok: req.splitAdviceId === latest, msg: 'Advice ID is not the latest.' },
+      ...legChecks(mid, legs, req.splitPayoutType, o.amount, { partner: '2.6 (3.4)', legs: '2.6 (3.5)', total: '2.6 (3.6)', value: '2.6 (3.7)' })
+    ];
+    const fail = rows.find(r => !r.na && !r.ok);
+    if (fail) {
+      st.rejected = true; st.result = ['bad', `Rejected at PGW (SP-8 ${fail.n})`];
+      add({ lane: ['p', 'PGW'], day: dayLbl(d, t), st: 'bad', title: 'Checks: rejected (HTTP 400)',
+        body: checks(rows) + `<p>Nothing is sent to APEX. The order keeps its current split${latest ? ` and advice ${latest}` : ''}.</p>` + src([['SP-8 section 2', 'checks']]) });
+      return;
+    }
+    add({ lane: ['p', 'PGW'], day: dayLbl(d, t), st: 'ok', title: 'Checks: passed', body: checks(rows) + src([['SP-8 section 2', 'checks']]) });
+    o.splitPayoutType = req.splitPayoutType; o.splitPayoutTransaction = legs.map(l => ({ ...l }));
+    const id = sendAdvice(body.action === 'NEW' ? 'A' : 'U', t, d);
+    const a = st.advices[st.advices.length - 1];
+    add({ lane: ['p', 'PGW → Merchant'], day: dayLbl(d, t), st: a.status === 'REJECTED' ? 'bad' : 'ok', title: 'Response to the merchant',
+      body: payload('Response', { splitAdviceId: id, splitAdviceStatus: a.status }, true, 'reasonCode and reasonMessage are added when rejected. The final payout result reaches the merchant in the APEX split payout report.') +
+        src([['SP-8 section 3', 'processing'], ['SP-8 section 4', 'response']]) });
+  }
+
+  function dayend(d) {
+    const latestToday = st.pendingAdvice || (st.apex && st.apex.adv);
+    const n = latestToday && (st.lastFileAdv !== latestToday) ? 1 : 0;
+    st.lastFileAdv = latestToday;
+    let body = `<p>Sent after the Ecomm cut-off (midnight, UAE time) for Day ${d}. Every advice created or updated that day, in its latest state. Format from P3.</p>` +
+      `<div class="kv"><dt>Records</dt><dd>${n ? '1 (action ' + latestToday.Action + ')' : '0'}</dd><dt>Trailer</dt><dd>record count = ${n}</dd></div>`;
+    if (!n) body += '<p>No advice today: PGW still sends an empty file with a count of 0, so APEX can tell "no advices" from "file not received".</p>';
+    if (st.pendingAdvice) {
+      body += '<p>The real-time call never reached APEX. APEX finds the advice in the file only and processes it as new.</p>';
+      st.apex = { status: 'CREATED', adv: st.pendingAdvice }; st.pendingAdvice = null;
+    } else if (n) body += '<p>APEX reconciles the file against the API: same split in both, no action.</p>';
+    add({ lane: ['p', 'PGW → APEX'], day: dayLbl(d + 1, '00:30'), st: 'ok', title: 'Day-end split advice file', body: body +
+      src([['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', 'day-end-split-advice-file', 'p']]) });
+  }
+
+  function validate(d) {
+    const adv = st.apex.adv, amt = st.order.amount;
+    const mdr = r2(amt * PRICING.mdrPct / 100), net = r2(amt - mdr - PRICING.vat);
+    const legs = adv.SplitRules.map(r => {
+      const a = r.Amount !== '' ? Number(r.Amount) : r2(amt * Number(r.Percentage) / 100);
+      const c = r2(a * PARTNERS[r.PartnerID] / 100);
+      const fee = PRICING.bearer === 'PARTNER' ? PRICING.fee : 0;
+      return { id: r.PartnerID, a, c, fee, net: r2(a - c - fee), pct: r.Percentage };
+    });
+    const sa = r2(legs.reduce((s, l) => s + l.a, 0)), sc = r2(legs.reduce((s, l) => s + l.c, 0));
+    const fees = PRICING.fee * (legs.length + 1);
+    const resid = r2(net - sa + sc - fees);
+    const r1 = resid >= 0, r2ok = legs.every(l => l.net > 0);
+    const ok = r1 && r2ok;
+    st.apex.status = ok ? 'PROCESSED' : 'REJECTED';
+    st.apex.calc = { legs, resid }; st.vday = d;
+    if (!ok) { const a = st.advices[st.advices.length - 1]; if (a) a.apexRejected = true; }
+    const calc = `<div class="calc">
+      <div><span>net = 1,000.00 − MDR ${f(mdr)} − VAT ${f(PRICING.vat)}</span><span>${f(net)}</span></div>
+      <div><span>− Σ advised amounts${legs.some(l => l.pct !== '') ? ' (percentages converted on gross)' : ''}</span><span>−${f(sa)}</span></div>
+      <div><span>+ Σ partner commissions</span><span>+${f(sc)}</span></div>
+      <div><span>− remittance fees borne by the merchant (${legs.length + 1} payouts × ${f(PRICING.fee)})</span><span>−${f(fees)}</span></div>
+      <div class="t ${r1 ? 'ok' : 'bad'}"><span>Rule 1: merchant residual ≥ 0</span><span>${f(resid)}</span></div></div>` +
+      `<div class="calc">${legs.map(l => `<div><span>${l.id}: ${f(l.a)} − commission ${f(l.c)}${l.fee ? ' − fee ' + f(l.fee) : ''}</span><span>${f(l.net)}</span></div>`).join('')}
+      <div class="t ${r2ok ? 'ok' : 'bad'}"><span>Rule 2: every leg above zero</span><span>${r2ok ? 'yes' : 'no'}</span></div></div>`;
+    add({ lane: ['a', 'APEX'], day: dayLbl(d, '06:00'), st: ok ? 'ok' : 'bad', title: `Amount validation: ${ok ? 'passed' : 'rejected (Rule ' + (r1 ? 2 : 1) + ')'}`,
+      body: `<p>Scheduled process once pricing is available. Any failure rejects the whole advice with a reason code.</p>` + calc +
+        (ok ? '' : `<p>Advice status REJECTED. The rejection and reason appear in the split payout report. Nothing is paid to partners; the transaction stays held. The merchant can correct it with UPDATE within N days.</p>
+        <div class="note"><b>Not defined in stories v0.5:</b> whether PGW learns of this later rejection (its splitAdviceStatus stays ACCEPTED from the real-time call). The merchant learns it from the APEX split payout report.</div>`) +
+        src([['Product doc 6.5', 'amount-validation', 'p'], ['Advice statuses', 'advice-statuses', 'p']]) });
+    if (!ok) st.result = ['bad', 'Rejected at APEX'];
+  }
+
+  function release() {
+    st.apex = { status: 'RELEASED' };
+    add({ lane: ['a', 'APEX'], day: 'Day N', st: 'hold', title: 'No valid advice within N days: released',
+      body: '<p>APEX settles the transaction to the merchant after Geidea\'s MDR and lists it in an exception report for Operations and Finance. N is set per merchant MID, can be zero, and counts from the scheduled payout date. No further updates are accepted.</p>' +
+        src([['Product doc 4.3', 'outcomes', 'p'], ['Advice statuses', 'advice-statuses', 'p']]) });
+  }
+
+  function outcome() {
+    const o = st.order;
+    if (!o.splitPayout) {
+      st.result = ['ok', 'Settled to the merchant as today'];
+      add({ lane: ['a', 'APEX'], day: dayLbl(1), st: 'ok', title: 'Normal settlement', body: '<p>Not flagged for split: the merchant is settled through the normal process, after Geidea\'s MDR.</p>' + src([['Product doc 4.3', 'outcomes', 'p']]) });
+      return;
+    }
+    if (st.apex.status === 'RELEASED') { st.result = ['hold', 'Released to the merchant after N days']; return; }
+    const c = st.apex.calc;
+    st.result = ['ok', st.advices.some(a => a.apexRejected) ? 'Rejected at APEX, corrected with UPDATE, paid out' : 'Paid out · advice PROCESSED'];
+    add({ lane: ['a', 'APEX'], day: dayLbl(st.vday || 1, '09:00'), st: 'ok', title: 'Paid out',
+      body: `<div class="kv">${c.legs.map(l => `<dt>${l.id}</dt><dd>${f(l.net)} to partner IBAN</dd>`).join('')}<dt>Merchant residual</dt><dd>${f(c.resid)}</dd></div>
+        <p>Advice status PROCESSED. No further updates. A failed transfer follows the existing exception process.</p>
+        <p><a href="money-flow.html">See who is paid, and from where, on the Money flow page →</a></p>` +
+        src([['Product doc 4.1', 'how-funds-move', 'p'], ['Advice statuses', 'advice-statuses', 'p']]) });
+  }
+}
+
+// ---------------- UI ----------------
+const picker = document.getElementById('picker');
+let groups = [...new Set(S.map(s => s.g))];
+picker.innerHTML = groups.map(g => `<h3>${g}</h3>` + S.filter(s => s.g === g).map(s =>
+  `<button type="button" data-id="${s.id}">${esc(s.t)}<span class="k">${esc(s.k)}</span></button>`).join('')).join('');
+const stepsEl = document.getElementById('steps');
+let cur = 0, total = 0, showAll = false;
+
+function render(id) {
+  const sc = S.find(s => s.id === id) || S[0];
+  picker.querySelectorAll('button').forEach(b => b.setAttribute('aria-current', b.dataset.id === sc.id));
+  const out = run(sc);
+  document.getElementById('sTitle').textContent = sc.t;
+  document.getElementById('sBlurb').textContent = sc.b;
+  const r = document.getElementById('sResult'); r.className = 'res ' + out.result[0]; r.textContent = out.result[1];
+  stepsEl.innerHTML = out.steps.map((s, i) => `<li class="step ${s.st}" data-i="${i}"><span class="dot">${i + 1}</span><div class="card">
+    <div class="top"><span class="lane ${s.lane[0]}">${s.lane[1]}</span><span class="day">${s.day}</span></div>
+    <h4>${s.title}</h4>${s.body}</div></li>`).join('');
+  total = out.steps.length; cur = showAll ? total : Math.min(2, total);
+  if (location.hash !== '#' + sc.id) history.replaceState(null, '', '#' + sc.id);
+  update();
+}
+function update() {
+  stepsEl.querySelectorAll('.step').forEach((li, i) => li.classList.toggle('hidden', i >= cur));
+  document.getElementById('pos').textContent = `${cur} / ${total}`;
+  document.getElementById('prev').disabled = cur <= 1;
+  document.getElementById('next').disabled = cur >= total;
+  document.getElementById('all').textContent = cur >= total ? 'Collapse' : 'Show all';
+}
+function go(n) {
+  cur = Math.max(1, Math.min(total, n)); update();
+  const li = stepsEl.querySelector(`.step[data-i="${cur - 1}"]`);
+  if (li && n > 1) li.scrollIntoView({ block: 'nearest', behavior: matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+}
+picker.addEventListener('click', e => { const b = e.target.closest('button'); if (b) { showAll = false; render(b.dataset.id); } });
+document.getElementById('next').onclick = () => go(cur + 1);
+document.getElementById('prev').onclick = () => go(cur - 1);
+document.getElementById('all').onclick = () => { if (cur >= total) { showAll = false; go(2); } else { showAll = true; cur = total; update(); } };
+document.addEventListener('keydown', e => {
+  if (e.target.closest('input, textarea, summary')) return;
+  if (e.key === 'ArrowRight') go(cur + 1); else if (e.key === 'ArrowLeft') go(cur - 1);
+});
+window.addEventListener('hashchange', () => render(location.hash.slice(1)));
+render(location.hash.slice(1));
+window.__sim = { S, run };
+})();
+</script>
+</body>
+</html>

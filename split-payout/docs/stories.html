@@ -1152,6 +1152,7 @@ shown.</p></li>
 </ol>
 <h1 id="sp-6-be-create-session-with-split-payout">SP-6 — BE – Create
 session with split payout</h1>
+<a class="visual-link" data-auto href="../simulator.html#dynamic-amount"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <h2 id="background-5">Background</h2>
 <p>A merchant starts every payment with Create Session (POST
 /payment-intent/api/v2/direct/session). This covers the hosted payment
@@ -1409,6 +1410,7 @@ request</h3>
 </tbody>
 </table>
 <h3 id="checks-before-payment">3. Checks before payment</h3>
+<a class="visual-link" data-auto href="../simulator.html#total-over"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <p>Any failure rejects the session (HTTP 400). PGW engineering sets the
 error codes.</p>
 <table>
@@ -1755,6 +1757,7 @@ correct it with an UPDATE (SP-8).</p></li>
 <p>To be completed when P3 is received.</p>
 <h1 id="sp-8-be-pgw-split-payout-api">SP-8 — BE – PGW Split Payout
 API</h1>
+<a class="visual-link" data-auto href="../simulator.html#deferred"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <h2 id="background-7">Background</h2>
 <p>Some merchants do not know the split when the customer pays. They
 create the session with deferredSplit = true (SP-6) and send the split
@@ -1980,6 +1983,7 @@ Advice ID returned.</p></li>
 </ol>
 <h1 id="sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3">SP-9 —
 BE – Day-end split advice file (waiting on Emcrey, P3)</h1>
+<a class="visual-link" data-auto href="../simulator.html#apex-down"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <h2 id="background-8">Background</h2>
 <p>APEX uses a day-end file as a backup to the real-time API, the same
 way as transaction federation today. If an advice is lost on the API,

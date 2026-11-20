@@ -851,6 +851,7 @@ file with a zero count on days with no advices, so APEX can tell “no
 advices today” from “file not received”. File format to be defined by
 APEX.</p>
 <h2 id="amount-validation">6.5 Amount validation</h2>
+<a class="visual-link" data-auto href="../simulator.html#rule1"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <p>Run by APEX as a scheduled process once pricing is available (in-call
 validation if the platform vendor can support it). Any failure rejects
 the whole advice with a reason code.</p>
@@ -1160,6 +1161,7 @@ team. Used to validate the partner’s requests.</td>
 beneficiary ID that is wrong or no longer active is rejected by
 APEX.</p>
 <h2 id="order-creation-request">7.2 Order creation request</h2>
+<a class="visual-link" data-auto href="../simulator.html#dynamic-amount"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <p>The split travels in the existing order creation request. The partner
 never sends bank details, fees or commission.</p>
 <table>
@@ -1337,6 +1339,7 @@ Profile)</h3>
 PGW applies the MID’s fixed template and stores the resulting split
 against the order.</p>
 <h2 id="payout-advice-api">7.3 Payout Advice API</h2>
+<a class="visual-link" data-auto href="../simulator.html#deferred"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <p>A PGW API through which a partner sends a split advice for an
 existing order, or updates one. Available to Dynamic and Profile MIDs; a
 Fixed MID gets its split from the template. Endpoint and field naming to
@@ -1500,6 +1503,7 @@ advice ID is the latest for the order.</td>
 </tbody>
 </table>
 <h2 id="transaction-flow">7.7 Transaction flow</h2>
+<a class="visual-link" data-auto href="../simulator.html#dynamic-amount"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <ol type="1">
 <li><p>The partner creates the order with split detail (Dynamic), a
 profile ID (Profile), deferredSplit (split to follow), or no split
