@@ -1,0 +1,2097 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PGW dev stories · PGW Feature Lab</title>
+<link rel="stylesheet" href="../../assets/lab.css">
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="../">Split Payout</a> / PGW dev stories</nav>
+</div></header>
+<div class="doc-layout">
+<aside class="toc" aria-label="Contents"><p>contents</p><ol>
+<li class="l1"><a href="#story-map">Story map</a></li>
+<li class="l1"><a href="#prerequisites-not-pgw-work">Prerequisites (not PGW work)</a></li>
+<li class="l1"><a href="#rules-for-every-story">Rules for every story</a></li>
+<li class="l1"><a href="#sp-1-fe-split-payout-configuration-screen">SP-1 — FE – Split
+payout configuration screen</a></li>
+<li class="l1"><a href="#sp-2-be-split-payout-configuration-setup">SP-2 — BE – Split
+payout configuration setup</a></li>
+<li class="l1"><a href="#sp-3-febe-enable-split-partner-ids-and-dynamic-mode">SP-3 —
+FE/BE – Enable split, Partner IDs and Dynamic mode</a></li>
+<li class="l1"><a href="#sp-4-febe-fixed-mode">SP-4 — FE/BE – Fixed mode</a></li>
+<li class="l1"><a href="#sp-5-febe-profile-mode">SP-5 — FE/BE – Profile mode</a></li>
+<li class="l1"><a href="#sp-6-be-create-session-with-split-payout">SP-6 — BE – Create
+session with split payout</a></li>
+<li class="l1"><a href="#sp-8-be-pgw-split-payout-api">SP-8 — BE – PGW Split Payout
+API</a></li>
+<li class="l1"><a href="#sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3">SP-9 —
+BE – Day-end split advice file (waiting on Emcrey, P3)</a></li>
+<li class="l1"><a href="#open-points">Open points</a></li>
+</ol></aside>
+<main>
+<div class="doc-meta"><span class="tag">v0.5</span><span class="tag grey">Published 20-Nov-2026</span><span class="tag grey">Source: Vendor Payout Service - PGW Stories v0.5.docx</span></div>
+<article class="doc">
+<p>Version 0.5 draft · 17-Nov-2026 · Prepared by Ghulam Rabbani
+(Product)</p>
+<p>Team: PGW (Sidra, Muhammad ElTabbakh)</p>
+<p>These stories are the requirement. Each story can be read alone. A
+story refers to another story only for work that must be built
+first.</p>
+<h1 id="story-map">Story map</h1>
+<table style="width:100%;">
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 22%" />
+<col style="width: 36%" />
+<col style="width: 15%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Story</strong></th>
+<th><strong>What it delivers</strong></th>
+<th><strong>Depends on</strong></th>
+<th><strong>Status</strong></th>
+</tr>
+<tr class="odd">
+<th>SP-1</th>
+<th>FE – Split payout configuration screen</th>
+<th>The new tab in PGW Configuration as a screen the user can navigate.
+No save.</th>
+<th>—</th>
+<th>Written</th>
+</tr>
+<tr class="header">
+<th>SP-2</th>
+<th>BE – Split payout configuration setup</th>
+<th>New settings on the product instance. Leg and profile limits.
+Partner ID search across MIDs.</th>
+<th>—</th>
+<th>Written</th>
+</tr>
+<tr class="odd">
+<th>SP-3</th>
+<th>FE/BE – Enable split, Partner IDs and Dynamic mode</th>
+<th>Turn split on and off, manage Partner IDs, select Dynamic. Save and
+checks.</th>
+<th>SP-1, SP-2</th>
+<th>Written</th>
+</tr>
+<tr class="header">
+<th>SP-4</th>
+<th>FE/BE – Fixed mode</th>
+<th>Fixed template. Save and checks.</th>
+<th>SP-3</th>
+<th>Written</th>
+</tr>
+<tr class="odd">
+<th>SP-5</th>
+<th>FE/BE – Profile mode</th>
+<th>Profile catalog. Save and checks.</th>
+<th>SP-3</th>
+<th>Written</th>
+</tr>
+<tr class="header">
+<th>SP-6</th>
+<th>BE – Create session with split payout</th>
+<th>Split fields on Create Session. PGW checks and stores the split.
+Split flag to APEX.</th>
+<th>SP-2</th>
+<th>Written (PTLF part waits on P4)</th>
+</tr>
+<tr class="odd">
+<th>SP-7</th>
+<th>BE – APEX Payout Advice API integration</th>
+<th>PGW sends each split to APEX.</th>
+<th>SP-6, P3</th>
+<th>Waiting on Emcrey</th>
+</tr>
+<tr class="header">
+<th>SP-8</th>
+<th>BE – PGW Split Payout API</th>
+<th>Merchant API to send a split later (NEW) or correct it
+(UPDATE).</th>
+<th>SP-6, SP-7</th>
+<th>Written</th>
+</tr>
+<tr class="odd">
+<th>SP-9</th>
+<th>BE – Day-end split advice file</th>
+<th>All advices of the day to APEX after the midnight cut-off.</th>
+<th>SP-7, P3</th>
+<th>Waiting on Emcrey</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p><strong>Build order:</strong> SP-1 and SP-2 in parallel → SP-3 →
+SP-4, SP-5 → SP-6 → SP-8. SP-7 and SP-9 after P3.</p>
+<h1 id="prerequisites-not-pgw-work">Prerequisites (not PGW work)</h1>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 41%" />
+<col style="width: 26%" />
+<col style="width: 26%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Item</strong></th>
+<th><strong>Needed for</strong></th>
+<th><strong>Owner</strong></th>
+</tr>
+<tr class="odd">
+<th>P1</th>
+<th>Risk approves the merchant for split payout. Operations onboards and
+screens each partner (Operations SOP).</th>
+<th>Before a MID is set up (SP-3)</th>
+<th>Risk (Manjunath), Operations (Nancy)</th>
+</tr>
+<tr class="header">
+<th>P2</th>
+<th>APEX enables split on the merchant MID, creates the partner
+definitions and shares the Partner IDs.</th>
+<th>Before a MID is set up (SP-3)</th>
+<th>APEX (Arul, Talha)</th>
+</tr>
+<tr class="odd">
+<th>P3</th>
+<th>Emcrey shares the APEX Payout Advice API spec and the day-end advice
+file spec.</th>
+<th>SP-7, SP-9</th>
+<th>APEX / Emcrey</th>
+</tr>
+<tr class="header">
+<th>P4</th>
+<th>Arul approves the PTLF spec with the split flag as field 49.</th>
+<th>SP-6 (PTLF part)</th>
+<th>Arul</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h1 id="rules-for-every-story">Rules for every story</h1>
+<ol type="1">
+<li><p><strong>Terms.</strong> <em>Merchant</em> = the Geidea merchant
+whose MID has split payout enabled. <em>Partner</em> = a business that
+the merchant shares its payout with (for example a seller on a
+marketplace). The merchant tells PGW how much each partner gets. APEX
+pays the partner from the merchant's settlement. A partner is defined in
+APEX. It is not a MID. <em>Partner ID</em> = the ID APEX gives to a
+partner. <em>Leg</em> = one line of a split: one Partner ID and its
+amount or percentage.</p></li>
+<li><p><strong>Field names.</strong> PGW field names are camelCase.
+Names in these stories are proposals. PGW engineering can rename them.
+Keep the meaning.</p></li>
+<li><p>The PGW backend applies every rule, also when the screen already
+blocks the action.</p></li>
+<li><p>Identify the merchant by MID in every API and in all
+documentation.</p></li>
+<li><p>New fields in merchant APIs are additions. Do not change or
+remove existing fields.</p></li>
+<li><p>Times are UAE time (UTC+4).</p></li>
+</ol>
+<h1 id="sp-1-fe-split-payout-configuration-screen">SP-1 — FE – Split
+payout configuration screen</h1>
+<h2 id="background">Background</h2>
+<p>The PGW integration team sets merchant settings in the Backoffice:
+Merchants → Impersonate merchant → Payment Gateway → Configuration.
+Split payout needs a new tab there. This story builds the screen only.
+SP-3, SP-4 and SP-5 connect it to the backend.</p>
+<h2 id="goal">Goal</h2>
+<p>The tab <em>Split Payout Settings</em> exists and the user can
+navigate all of it. Nothing is saved.</p>
+<h2 id="story-summary">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 64%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-1</th>
+</tr>
+<tr class="header">
+<th>Users</th>
+<th>PGW integration team (Backoffice)</th>
+</tr>
+<tr class="odd">
+<th>Depends on</th>
+<th>—</th>
+</tr>
+<tr class="header">
+<th>Followed by</th>
+<th>SP-3, SP-4, SP-5</th>
+</tr>
+<tr class="odd">
+<th>Out of scope</th>
+<th>Save. Checks. Data from the backend.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements">Requirements</h2>
+<h3 id="tab">1. Tab</h3>
+<ol type="1">
+<li><p>Add the tab <em>Split Payout Settings</em> after <em>Visa
+installment Settings</em> and before <em>NOTIFICATION
+Settings</em>.</p></li>
+<li><p>The <em>gateway_Instance</em> selector (Live / Test) applies, as
+on the other tabs.</p></li>
+<li><p>Only Backoffice users who can open Payment Gateway Configuration
+see the tab. The merchant's own portal login does not show it.</p></li>
+</ol>
+<h3 id="content-of-the-tab">2. Content of the tab</h3>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 16%" />
+<col style="width: 32%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Section</strong></th>
+<th><strong>Shows</strong></th>
+<th><strong>Component (existing example)</strong></th>
+</tr>
+<tr class="odd">
+<th>2.1</th>
+<th><em>Split payout</em></th>
+<th>Title, one-line description, ENABLED / Disabled toggle. When off,
+the tab shows nothing else.</th>
+<th>Section with toggle (NOTIFICATION Settings)</th>
+</tr>
+<tr class="header">
+<th>2.2</th>
+<th><em>Split mode</em></th>
+<th>Shown when the toggle is on. Three tiles: <em>Dynamic</em>,
+<em>Fixed</em>, <em>Profile</em>, each with one line of text. One can be
+selected.</th>
+<th>Bordered tiles (Gateway Settings: Payment methods)</th>
+</tr>
+<tr class="odd">
+<th>2.3</th>
+<th><em>Partner IDs</em></th>
+<th>Shown when the toggle is on. Table: Partner ID, Partner name, Used
+in, edit and delete icons. Link <em>+ Add Partner ID</em>.</th>
+<th>Table with Add, edit, delete (Provider Settings: Provider
+Accounts)</th>
+</tr>
+<tr class="header">
+<th>2.4</th>
+<th>Partner ID pop-up</th>
+<th>Opens from <em>+ Add Partner ID</em> and from edit. Fields:
+<em>Partner ID</em>, <em>Partner name (optional)</em>. Buttons:
+<em>Cancel</em>, <em>Save changes</em>. On edit, <em>Partner ID</em> is
+read-only.</th>
+<th>Pop-up (Provider Settings: Edit Account)</th>
+</tr>
+<tr class="odd">
+<th>2.5</th>
+<th><em>Fixed template</em></th>
+<th>Shown when <em>Fixed</em> is selected. Split type radio: <em>Amount
+(AED)</em> / <em>Percentage of gross order amount</em>. One row per leg:
+Partner ID dropdown, value field, delete icon. Link <em>+ Add leg</em>.
+Total below the rows.</th>
+<th>Grey fields, dropdown (all tabs)</th>
+</tr>
+<tr class="header">
+<th>2.6</th>
+<th><em>Profile catalog</em></th>
+<th>Shown when <em>Profile</em> is selected. Table: Profile ID,
+Description, Split type, Legs, edit and delete icons. Link <em>+ Add
+profile</em>.</th>
+<th>Table with Add, edit, delete</th>
+</tr>
+<tr class="odd">
+<th>2.7</th>
+<th>Profile pop-up</th>
+<th>Opens from <em>+ Add profile</em> and from edit. Fields: <em>Profile
+ID</em>, <em>Description (optional)</em>, split type radio, leg rows as
+in 2.5. Buttons: <em>Cancel</em>, <em>Save changes</em>. On edit,
+<em>Profile ID</em> is read-only.</th>
+<th>Pop-up</th>
+</tr>
+<tr class="header">
+<th>2.8</th>
+<th>Buttons</th>
+<th><em>Discard Changes</em> and <em>Save changes</em> at the bottom of
+the tab.</th>
+<th>All tabs</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h3 id="behaviour-in-this-story">3. Behaviour in this story</h3>
+<ol type="1">
+<li><p>The toggle, tiles and radios change what the tab shows, as in
+section 2.</p></li>
+<li><p>In the pop-ups, <em>Save changes</em> adds or updates the row on
+the screen only. <em>Cancel</em> closes the pop-up.</p></li>
+<li><p><em>+ Add leg</em> adds an empty leg row. The delete icon removes
+a row from the screen.</p></li>
+<li><p>The Partner ID dropdown in a leg lists the Partner IDs in the
+table (2.3).</p></li>
+<li><p><em>+ Add leg</em> is hidden when a template or profile has 10
+legs. <em>+ Add profile</em> is hidden when there are 10 profiles. (SP-2
+makes these limits configurable. SP-4 and SP-5 read them.)</p></li>
+<li><p><em>Save changes</em> (2.8) does nothing in this story.
+<em>Discard Changes</em> clears all changes on the screen.</p></li>
+<li><p>The tab does not read data from the backend. When opened, the
+toggle is off and the tables are empty.</p></li>
+</ol>
+<p><img
+src="media-stories/media/87d44b2cac4d2609baed32ee1e56fffa78d8ef52.png"
+title="Profile mode: the full tab" style="width:6.25in;height:4.875in"
+alt="Profile mode: the full tab" /></p>
+<p><em>Profile mode: the full tab</em></p>
+<p><img
+src="media-stories/media/080a686fae7a8fa2c6c7bc44beb79225152218e6.png"
+title="Profile pop-up" style="width:6.25in;height:4.875in"
+alt="Profile pop-up" /></p>
+<p><em>Profile pop-up</em></p>
+<h2 id="acceptance-criteria">Acceptance criteria</h2>
+<ol type="1">
+<li><p>The tab shows after <em>Visa installment Settings</em> in the
+Backoffice. A merchant portal login does not show it.</p></li>
+<li><p>Toggle off: only the <em>Split payout</em> section shows. Toggle
+on: <em>Split mode</em> and <em>Partner IDs</em> show.</p></li>
+<li><p><em>Fixed</em> selected: <em>Fixed template</em> shows.
+<em>Profile</em> selected: <em>Profile catalog</em> shows.
+<em>Dynamic</em> selected: neither shows.</p></li>
+<li><p>Add, edit and delete a Partner ID, a leg and a profile on the
+screen.</p></li>
+<li><p>With 10 legs, <em>+ Add leg</em> is hidden. With 10 profiles,
+<em>+ Add profile</em> is hidden.</p></li>
+<li><p><em>Save changes</em> sends no request.</p></li>
+</ol>
+<h1 id="sp-2-be-split-payout-configuration-setup">SP-2 — BE – Split
+payout configuration setup</h1>
+<h2 id="background-1">Background</h2>
+<p>Merchant PGW settings are stored on the MID's PAYMENT_GATEWAY product
+instance, in its data object. The Configuration screen reads it with the
+existing product instance search and saves with the existing product
+instance update (PATCH
+/product/api/v1/productInstance/{productInstanceId}, JSON-Patch replace
+on data/&lt;key&gt;). The key isSplitPayoutEnabled already exists in
+data (value false). No screen uses it.</p>
+<h2 id="goal-1">Goal</h2>
+<ol type="1">
+<li><p>The product instance data holds all split payout
+settings.</p></li>
+<li><p>The leg limit and the profile limit are system settings.</p></li>
+<li><p>PGW can find if a Partner ID is already used on another
+MID.</p></li>
+</ol>
+<h2 id="story-summary-1">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 65%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-2</th>
+</tr>
+<tr class="header">
+<th>Depends on</th>
+<th>—</th>
+</tr>
+<tr class="odd">
+<th>Followed by</th>
+<th>SP-3, SP-4, SP-5, SP-6</th>
+</tr>
+<tr class="header">
+<th>Out of scope</th>
+<th>Screen (SP-1). Save checks (SP-3 to SP-5).</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements-1">Requirements</h2>
+<h3
+id="settings-in-data-payment_gateway-product-instance-live-and-test-separately">1.
+Settings in data (PAYMENT_GATEWAY product instance, Live and Test
+separately)</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 10%" />
+<col style="width: 12%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Values</strong></th>
+</tr>
+<tr class="odd">
+<th>isSplitPayoutEnabled</th>
+<th>Boolean</th>
+<th>false</th>
+<th>Existing key. true = split payout on.</th>
+</tr>
+<tr class="header">
+<th>splitPayoutMode</th>
+<th>String</th>
+<th>null</th>
+<th>DYNAMIC / FIXED / PROFILE</th>
+</tr>
+<tr class="odd">
+<th>splitPayoutPartners</th>
+<th>Array</th>
+<th>[]</th>
+<th>Item: partnerId (String), partnerName (String, max 100,
+optional)</th>
+</tr>
+<tr class="header">
+<th>splitPayoutFixedTemplate</th>
+<th>Object</th>
+<th>null</th>
+<th>splitType (String: AMOUNT / PERCENTAGE), legs (Array)</th>
+</tr>
+<tr class="odd">
+<th>splitPayoutProfiles</th>
+<th>Array</th>
+<th>[]</th>
+<th>Item: profileId (String), description (String, optional), splitType
+(String), legs (Array)</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>Leg item: partnerId (String), value (Number, 2 decimals).</p>
+<ol type="1">
+<li><p>Existing MIDs: add the new fields with the defaults above. Do not
+change isSplitPayoutEnabled.</p></li>
+<li><p>The existing product instance search returns the new fields. The
+existing product instance update accepts them.</p></li>
+<li><p>partnerName is for the integration team only. Do not send it to
+the merchant or to APEX.</p></li>
+</ol>
+<h3 id="limits-system-settings-not-per-mid">2. Limits (system settings,
+not per MID)</h3>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 12%" />
+<col style="width: 57%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Setting</strong></th>
+<th><strong>Default</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+<tr class="odd">
+<th>Maximum legs per split</th>
+<th>10</th>
+<th>Applies to the Fixed template, each profile, and each split received
+in SP-6 and SP-8.</th>
+</tr>
+<tr class="header">
+<th>Maximum profiles per MID</th>
+<th>10</th>
+<th>Applies to splitPayoutProfiles.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<ol type="1">
+<li><p>Store both as configuration. Do not write the values in
+code.</p></li>
+<li><p>The Configuration screen can read both values.</p></li>
+</ol>
+<h3 id="partner-id-search">3. Partner ID search</h3>
+<ol type="1">
+<li><p>Input: Partner ID, instance (Live or Test).</p></li>
+<li><p>Output: the MID that has this Partner ID in splitPayoutPartners,
+or none.</p></li>
+<li><p>Compare without case.</p></li>
+</ol>
+<h2 id="acceptance-criteria-1">Acceptance criteria</h2>
+<ol type="1">
+<li><p>Product instance search for an existing MID returns the new
+fields with their defaults.</p></li>
+<li><p>Update splitPayoutMode with the existing product instance update.
+The search returns the new value.</p></li>
+<li><p>Change the leg limit to 5 in configuration. The screen reads
+5.</p></li>
+<li><p>Partner ID search returns the MID that has the ID, and none for
+an unused ID. Live and Test results are separate.</p></li>
+</ol>
+<h1 id="sp-3-febe-enable-split-partner-ids-and-dynamic-mode">SP-3 —
+FE/BE – Enable split, Partner IDs and Dynamic mode</h1>
+<h2 id="background-2">Background</h2>
+<p>SP-1 built the tab. SP-2 added the settings. This story connects them
+for the base settings that every mode needs: the split toggle, the split
+mode and the Partner IDs. With this story, a MID can be fully set up for
+Dynamic mode. In Dynamic mode the merchant sends the split with each
+order (SP-6) or later through the Split Payout API (SP-8). No template
+is needed.</p>
+<h2 id="goal-2">Goal</h2>
+<p>The PGW integration team can turn split payout on for a MID, select a
+mode, add the merchant's Partner IDs and save. For Dynamic mode, the
+set-up is then complete.</p>
+<h2 id="story-summary-2">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 32%" />
+<col style="width: 67%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-3</th>
+</tr>
+<tr class="header">
+<th>Users</th>
+<th>PGW integration team (Backoffice)</th>
+</tr>
+<tr class="odd">
+<th>Fields written</th>
+<th>isSplitPayoutEnabled, splitPayoutMode, splitPayoutPartners</th>
+</tr>
+<tr class="header">
+<th>Save</th>
+<th>Existing product instance update, as the other tabs</th>
+</tr>
+<tr class="odd">
+<th>Depends on</th>
+<th>SP-1, SP-2. Before a MID is set up: P1, P2.</th>
+</tr>
+<tr class="header">
+<th>Followed by</th>
+<th>SP-4, SP-5</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements-2">Requirements</h2>
+<h3 id="load">1. Load</h3>
+<ol type="1">
+<li><p>When the tab opens, show the saved values of the selected
+instance.</p></li>
+<li><p>Show the <em>Used in</em> column of the Partner ID table from the
+saved Fixed template and profiles (SP-4, SP-5). Until those exist, show
+"—".</p></li>
+</ol>
+<h3 id="split-toggle">2. Split toggle</h3>
+<ol type="1">
+<li><p>On → store isSplitPayoutEnabled = true. Off → false.</p></li>
+<li><p>Turning the toggle off keeps the other settings stored. They are
+not applied while split is off.</p></li>
+</ol>
+<h3 id="split-mode">3. Split mode</h3>
+<ol type="1">
+<li><p>Store the selected tile in splitPayoutMode: DYNAMIC, FIXED or
+PROFILE.</p></li>
+<li><p>When the mode changes, the template or profiles of the old mode
+stay stored. They are not applied. Show a note under the mode: "The
+Fixed template / profiles are stored but not applied in this
+mode."</p></li>
+</ol>
+<h3 id="partner-ids">4. Partner IDs</h3>
+<p>Add and edit in the pop-up. The pop-up checks the entry when the user
+clicks <em>Save changes</em> in the pop-up:</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 34%" />
+<col style="width: 59%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>Message (under the field)</strong></th>
+</tr>
+<tr class="odd">
+<th>4.1</th>
+<th>Partner ID has 3–20 letters, digits or hyphens. Remove spaces at
+start and end.</th>
+<th>Use 3–20 letters, digits or hyphens.</th>
+</tr>
+<tr class="header">
+<th>4.2</th>
+<th>Partner ID is not already in the table. Compare without case.</th>
+<th>This Partner ID is already in the list.</th>
+</tr>
+<tr class="odd">
+<th>4.3</th>
+<th>Partner ID is not on another MID of the same instance (SP-2
+search).</th>
+<th>This Partner ID is configured on another MID (MID nnnnnnnnnnn). A
+partner belongs to one merchant MID only.</th>
+</tr>
+<tr class="header">
+<th>4.4</th>
+<th>Partner name: maximum 100 characters.</th>
+<th>Use up to 100 characters.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>Delete from the table:</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 48%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>Message</strong></th>
+</tr>
+<tr class="odd">
+<th>4.5</th>
+<th>The Partner ID is not used in the Fixed template or in a
+profile.</th>
+<th>P000301 is used in Fixed template. Remove it there first.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p><strong>Why 4.3.</strong> APEX links each partner to one merchant
+MID. A Partner ID on a second MID makes APEX reject every split from
+that MID after the customer has paid.</p>
+<p>Note 4.1 is a placeholder until the Partner ID convention is agreed
+(open point 1).</p>
+<h3 id="save">5. Save</h3>
+<p>On <em>Save changes</em> (bottom of the tab):</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 50%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>Message</strong></th>
+</tr>
+<tr class="odd">
+<th>5.1</th>
+<th>Split on → a mode is selected.</th>
+<th>Select a split mode.</th>
+</tr>
+<tr class="header">
+<th>5.2</th>
+<th>Split on → at least one Partner ID.</th>
+<th>Add at least one Partner ID.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<ol type="1">
+<li><p>Any failure: do not save. Show the message under the section and
+the banner "Changes not saved. Fix the highlighted fields."</p></li>
+<li><p>No failure: save the changed fields with the existing product
+instance update.</p></li>
+<li><p>After a successful save, use the saved values as the new starting
+point for <em>Save changes</em> and <em>Discard Changes</em>. Example:
+turn split off, save, turn it on, save again → the second save stores
+true.</p></li>
+<li><p><em>Save changes</em> is off when nothing changed. <em>Discard
+Changes</em> returns to the last saved values.</p></li>
+</ol>
+<h3 id="effect-of-a-saved-change">6. Effect of a saved change</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 76%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Change</strong></th>
+<th><strong>Effect</strong></th>
+</tr>
+<tr class="odd">
+<th>Split turned off</th>
+<th>New sessions with split fields are rejected (SP-6). Split Payout API
+calls are rejected (SP-8). Orders already flagged stay flagged; APEX
+releases them after N days. Operations also turns split off in
+APEX.</th>
+</tr>
+<tr class="header">
+<th>Partner ID deleted</th>
+<th>New sessions and API calls with this ID are rejected. Splits already
+sent to APEX do not change.</th>
+</tr>
+<tr class="odd">
+<th>Any other change</th>
+<th>Applies to sessions created after the save.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p><img
+src="media-stories/media/e349aa8ba4fc723e09577b8d2b91a4a053a94b2c.png"
+title="Split payout off" style="width:6.25in;height:4.13542in"
+alt="Split payout off" /></p>
+<p><em>Split payout off</em></p>
+<p><img
+src="media-stories/media/33a0fe8cb3d9543938724582842ac431603af8a2.png"
+title="Dynamic mode with Partner IDs"
+style="width:6.25in;height:4.41667in"
+alt="Dynamic mode with Partner IDs" /></p>
+<p><em>Dynamic mode with Partner IDs</em></p>
+<p><img
+src="media-stories/media/579c9eceb8fefaa87ca95177f8f45bb8405471a7.png"
+title="Add Partner ID blocked by 4.3"
+style="width:6.25in;height:5.92708in"
+alt="Add Partner ID blocked by 4.3" /></p>
+<p><em>Add Partner ID blocked by 4.3</em></p>
+<h2 id="acceptance-criteria-2">Acceptance criteria</h2>
+<ol type="1">
+<li><p>Open the tab on a new MID: split off, no mode, no Partner
+IDs.</p></li>
+<li><p>Turn split on, save without a mode: message 5.1. Nothing is
+saved.</p></li>
+<li><p>Select Dynamic, save without a Partner ID: message 5.2.</p></li>
+<li><p>Add P000301, then add p000301: message 4.2.</p></li>
+<li><p>Add an ID that is on another MID: message 4.3 with that
+MID.</p></li>
+<li><p>Select Dynamic, add two Partner IDs, save, reload: values are
+shown.</p></li>
+<li><p>Turn split off, save, turn split on, save, reload: split is
+on.</p></li>
+<li><p>Change on the Test instance: the Live instance does not
+change.</p></li>
+</ol>
+<h1 id="sp-4-febe-fixed-mode">SP-4 — FE/BE – Fixed mode</h1>
+<h2 id="background-3">Background</h2>
+<p>In Fixed mode the merchant sends a normal order with no split fields.
+PGW applies the same split to every order of the MID. The integration
+team sets this split once, as the Fixed template. SP-3 is in place:
+split is on and Partner IDs exist.</p>
+<h2 id="goal-3">Goal</h2>
+<p>The PGW integration team can set and save the Fixed template. With
+this story, a MID can be fully set up for Fixed mode.</p>
+<h2 id="story-summary-3">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 30%" />
+<col style="width: 69%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-4</th>
+</tr>
+<tr class="header">
+<th>Users</th>
+<th>PGW integration team (Backoffice)</th>
+</tr>
+<tr class="odd">
+<th>Fields written</th>
+<th>splitPayoutFixedTemplate (splitType, legs[] with partnerId,
+value)</th>
+</tr>
+<tr class="header">
+<th>Save</th>
+<th>Existing product instance update</th>
+</tr>
+<tr class="odd">
+<th>Depends on</th>
+<th>SP-3</th>
+</tr>
+<tr class="header">
+<th>Followed by</th>
+<th>SP-6 (applies the template to each order)</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements-3">Requirements</h2>
+<h3 id="template">1. Template</h3>
+<ol type="1">
+<li><p>Split type: <em>Amount (AED)</em> → AMOUNT. <em>Percentage of
+gross order amount</em> → PERCENTAGE. One type for all legs.</p></li>
+<li><p>Each leg: Partner ID from the MID's Partner IDs, and a
+value.</p></li>
+<li><p>Show the total of all legs below the rows.</p></li>
+</ol>
+<h3 id="checks-on-save-changes">2. Checks on Save changes</h3>
+<p>These checks apply when splitPayoutMode = FIXED.</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 35%" />
+<col style="width: 59%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>Message (under the leg or the total)</strong></th>
+</tr>
+<tr class="odd">
+<th>2.1</th>
+<th>At least one leg.</th>
+<th>Add at least one leg.</th>
+</tr>
+<tr class="header">
+<th>2.2</th>
+<th>Each leg has a Partner ID.</th>
+<th>Select a Partner ID.</th>
+</tr>
+<tr class="odd">
+<th>2.3</th>
+<th>Each Partner ID occurs once in the template.</th>
+<th>Each partner can appear once.</th>
+</tr>
+<tr class="header">
+<th>2.4</th>
+<th>Each value is above 0, with up to 2 decimals.</th>
+<th>Enter a value above 0, up to 2 decimals.</th>
+</tr>
+<tr class="odd">
+<th>2.5</th>
+<th>Number of legs ≤ maximum legs (SP-2, default 10). At the maximum,
+hide <em>+ Add leg</em>.</th>
+<th>Maximum 10 legs.</th>
+</tr>
+<tr class="header">
+<th>2.6</th>
+<th>Split type PERCENTAGE: total ≤ 100.</th>
+<th>Percentages cannot add up to more than 100%.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<ol type="1">
+<li><p>Any failure: do not save. Show the banner "Changes not saved. Fix
+the highlighted fields."</p></li>
+<li><p>No failure: save splitPayoutFixedTemplate with the existing
+product instance update. Save and discard work as in SP-3 section
+5.</p></li>
+<li><p>For AMOUNT, do not check the total at setup. The order amount is
+not known. SP-6 rejects an order when the legs add up to more than the
+order amount.</p></li>
+</ol>
+<h3 id="effect">3. Effect</h3>
+<ol type="1">
+<li><p>A saved template applies to sessions created after the
+save.</p></li>
+<li><p>Partner IDs used in the template show "Fixed template" in the
+<em>Used in</em> column. They cannot be deleted (SP-3 check
+4.5).</p></li>
+</ol>
+<h3 id="example">4. Example</h3>
+<p>Template: PERCENTAGE, P000301 = 60, P000302 = 30. Order AED 200. PGW
+sends to APEX: P000301 60%, P000302 30% (SP-6, SP-7). APEX pays them
+from the merchant's net. The merchant keeps the rest.</p>
+<p>"splitPayoutFixedTemplate": {</p>
+<p>"splitType": "PERCENTAGE",</p>
+<p>"legs": [ { "partnerId": "P000301", "value": 60.00 },</p>
+<p>{ "partnerId": "P000302", "value": 30.00 } ] }</p>
+<p><img
+src="media-stories/media/0ff55b58511f4612d9b48091f0f3458db6384776.png"
+title="Fixed template" style="width:6.25in;height:4.875in"
+alt="Fixed template" /></p>
+<p><em>Fixed template</em></p>
+<p><img
+src="media-stories/media/13d76a404080abf437c8394d159d7e83b597faea.png"
+title="Save blocked by 2.3, 2.2, 2.4 and 2.6"
+style="width:6.25in;height:5.92708in"
+alt="Save blocked by 2.3, 2.2, 2.4 and 2.6" /></p>
+<p><em>Save blocked by 2.3, 2.2, 2.4 and 2.6</em></p>
+<h2 id="acceptance-criteria-3">Acceptance criteria</h2>
+<ol type="1">
+<li><p>Fixed, PERCENTAGE, 60 + 30: saved. Reload shows the
+template.</p></li>
+<li><p>60 + 30 + 15: message 2.6.</p></li>
+<li><p>Same Partner ID in two legs: message 2.3.</p></li>
+<li><p>Leg with value 0: message 2.4.</p></li>
+<li><p>10 legs: <em>+ Add leg</em> is hidden.</p></li>
+<li><p>Delete a Partner ID used in the template: message "P000301 is
+used in Fixed template. Remove it there first."</p></li>
+</ol>
+<h1 id="sp-5-febe-profile-mode">SP-5 — FE/BE – Profile mode</h1>
+<h2 id="background-4">Background</h2>
+<p>In Profile mode the merchant sends a profile ID with each order. Each
+profile holds a split that the integration team sets up front. Example:
+an insurance aggregator with one profile per insurer. SP-3 is in place:
+split is on and Partner IDs exist.</p>
+<h2 id="goal-4">Goal</h2>
+<p>The PGW integration team can add, edit, delete and save profiles.
+With this story, a MID can be fully set up for Profile mode.</p>
+<h2 id="story-summary-4">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-5</th>
+</tr>
+<tr class="header">
+<th>Users</th>
+<th>PGW integration team (Backoffice)</th>
+</tr>
+<tr class="odd">
+<th>Fields written</th>
+<th>splitPayoutProfiles[] (profileId, description, splitType,
+legs[])</th>
+</tr>
+<tr class="header">
+<th>Save</th>
+<th>Existing product instance update</th>
+</tr>
+<tr class="odd">
+<th>Depends on</th>
+<th>SP-3</th>
+</tr>
+<tr class="header">
+<th>Followed by</th>
+<th>SP-6, SP-8 (apply the profile the merchant sends)</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements-4">Requirements</h2>
+<h3 id="profile-pop-up">1. Profile pop-up</h3>
+<p>Fields: <em>Profile ID</em>, <em>Description (optional)</em>, split
+type (<em>Amount (AED)</em> / <em>Percentage of gross order
+amount</em>), legs (Partner ID and value). The pop-up checks the profile
+when the user clicks <em>Save changes</em> in the pop-up:</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 53%" />
+<col style="width: 40%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>Message</strong></th>
+</tr>
+<tr class="odd">
+<th>1.1</th>
+<th>Profile ID has 1–50 letters, digits, hyphens or underscores.</th>
+<th>Use 1–50 letters, digits, hyphens or underscores.</th>
+</tr>
+<tr class="header">
+<th>1.2</th>
+<th>Profile ID is not used by another profile of this MID. Compare
+without case.</th>
+<th>This profile ID already exists for this MID.</th>
+</tr>
+<tr class="odd">
+<th>1.3</th>
+<th>At least one leg.</th>
+<th>Add at least one leg.</th>
+</tr>
+<tr class="header">
+<th>1.4</th>
+<th>Each leg has a Partner ID.</th>
+<th>Select a Partner ID.</th>
+</tr>
+<tr class="odd">
+<th>1.5</th>
+<th>Each Partner ID occurs once in the profile.</th>
+<th>Each partner can appear once.</th>
+</tr>
+<tr class="header">
+<th>1.6</th>
+<th>Each value is above 0, with up to 2 decimals.</th>
+<th>Enter a value above 0, up to 2 decimals.</th>
+</tr>
+<tr class="odd">
+<th>1.7</th>
+<th>Number of legs ≤ maximum legs (SP-2, default 10). At the maximum,
+hide <em>+ Add leg</em>.</th>
+<th>Maximum 10 legs.</th>
+</tr>
+<tr class="header">
+<th>1.8</th>
+<th>Split type PERCENTAGE: total ≤ 100.</th>
+<th>Percentages cannot add up to more than 100%.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<ol type="1">
+<li><p>On edit, <em>Profile ID</em> is read-only. To change an ID,
+delete the profile and add a new one.</p></li>
+<li><p>The pop-up <em>Save changes</em> updates the table on the screen
+only.</p></li>
+</ol>
+<h3 id="checks-on-save-changes-bottom-of-the-tab">2. Checks on Save
+changes (bottom of the tab)</h3>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 62%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>Message</strong></th>
+</tr>
+<tr class="odd">
+<th>2.1</th>
+<th>Mode PROFILE: at least one profile.</th>
+<th>Add at least one profile.</th>
+</tr>
+<tr class="header">
+<th>2.2</th>
+<th>Number of profiles ≤ maximum profiles (SP-2, default 10). At the
+maximum, hide <em>+ Add profile</em>.</th>
+<th>Maximum 10 profiles.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<ol type="1">
+<li><p>Any failure: do not save. Show the banner "Changes not saved. Fix
+the highlighted fields."</p></li>
+<li><p>No failure: save splitPayoutProfiles with the existing product
+instance update. Save and discard work as in SP-3 section 5.</p></li>
+<li><p>For AMOUNT profiles, do not check the total at setup. SP-6
+rejects an order when the legs add up to more than the order
+amount.</p></li>
+</ol>
+<h3 id="effect-1">3. Effect</h3>
+<ol type="1">
+<li><p>Saved profiles apply to sessions and API calls after the
+save.</p></li>
+<li><p>A deleted profile: new sessions with this profile ID are rejected
+(SP-6).</p></li>
+<li><p>Partner IDs used in a profile show the profile ID in the <em>Used
+in</em> column. They cannot be deleted (SP-3 check 4.5).</p></li>
+</ol>
+<h3 id="example-1">4. Example</h3>
+<p>"splitPayoutProfiles": [</p>
+<p>{ "profileId": "PRF-INSURER-A", "description": "Motor policy -
+Insurer A",</p>
+<p>"splitType": "PERCENTAGE",</p>
+<p>"legs": [ { "partnerId": "P000401", "value": 90.00 },</p>
+<p>{ "partnerId": "P000403", "value": 5.00 } ] },</p>
+<p>{ "profileId": "PRF-INSURER-B", "description": "Motor policy -
+Insurer B",</p>
+<p>"splitType": "AMOUNT",</p>
+<p>"legs": [ { "partnerId": "P000402", "value": 500.00 },</p>
+<p>{ "partnerId": "P000403", "value": 25.00 } ] } ]</p>
+<p><img
+src="media-stories/media/87d44b2cac4d2609baed32ee1e56fffa78d8ef52.png"
+title="Profile catalog" style="width:6.25in;height:4.875in"
+alt="Profile catalog" /></p>
+<p><em>Profile catalog</em></p>
+<p><img
+src="media-stories/media/080a686fae7a8fa2c6c7bc44beb79225152218e6.png"
+title="Profile pop-up" style="width:6.25in;height:4.875in"
+alt="Profile pop-up" /></p>
+<p><em>Profile pop-up</em></p>
+<h2 id="acceptance-criteria-4">Acceptance criteria</h2>
+<ol type="1">
+<li><p>Add the two profiles in the example, save, reload: both are
+shown.</p></li>
+<li><p>Add a profile with ID prf-insurer-a: message 1.2.</p></li>
+<li><p>Profile with percentages 90 + 15: message 1.8.</p></li>
+<li><p>Mode Profile with no profile, save: message 2.1.</p></li>
+<li><p>10 profiles: <em>+ Add profile</em> is hidden.</p></li>
+</ol>
+<h1 id="sp-6-be-create-session-with-split-payout">SP-6 — BE – Create
+session with split payout</h1>
+<h2 id="background-5">Background</h2>
+<p>A merchant starts every payment with Create Session (POST
+/payment-intent/api/v2/direct/session). This covers the hosted payment
+page, the Direct API, and token CIT and MIT. The session becomes the
+order. For split payout, PGW must know the split of each order and tell
+APEX that the transaction is a split transaction. APEX then holds the
+settlement until it receives the split (SP-7). The PGW order already has
+the field splitPayoutTransaction (empty today).</p>
+<h2 id="goal-5">Goal</h2>
+<ol type="1">
+<li><p>A merchant with split payout on can send the split, a profile ID,
+or deferredSplit with Create Session.</p></li>
+<li><p>PGW checks the split before payment and rejects a wrong
+request.</p></li>
+<li><p>PGW stores the split on the order and returns it in order inquiry
+and callback.</p></li>
+<li><p>PGW sends the split flag to APEX with each successful split
+transaction.</p></li>
+</ol>
+<h2 id="story-summary-5">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 73%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-6</th>
+</tr>
+<tr class="header">
+<th>Geidea endpoint</th>
+<th>POST /payment-intent/api/v2/direct/session (HPP, Direct API, CIT,
+MIT)</th>
+</tr>
+<tr class="odd">
+<th>Settings read</th>
+<th>isSplitPayoutEnabled, splitPayoutMode, splitPayoutPartners,
+splitPayoutFixedTemplate, splitPayoutProfiles, maximum legs (SP-2)</th>
+</tr>
+<tr class="header">
+<th>Order fields written</th>
+<th>splitPayout, deferredSplit, splitPayoutType, splitPayoutProfileId,
+splitPayoutTransaction[]</th>
+</tr>
+<tr class="odd">
+<th>APEX</th>
+<th>createTransaction federation: new field splitPayout. PTLF: field 49
+(waits on P4).</th>
+</tr>
+<tr class="header">
+<th>Depends on</th>
+<th>SP-2. A MID set up with SP-3 to SP-5.</th>
+</tr>
+<tr class="odd">
+<th>Followed by</th>
+<th>SP-7, SP-8</th>
+</tr>
+<tr class="header">
+<th>Out of scope</th>
+<th>Sending the split to APEX (SP-7). Split after payment (SP-8). Pay by
+Link. Drop-in session v1. Refunds (no change: debited from the merchant
+as today).</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements-5">Requirements</h2>
+<h3 id="new-request-fields-create-session">1. New request fields (Create
+Session)</h3>
+<table>
+<colgroup>
+<col style="width: 21%" />
+<col style="width: 10%" />
+<col style="width: 22%" />
+<col style="width: 17%" />
+<col style="width: 28%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>M/O/C</strong></th>
+<th><strong>Mode</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+<tr class="odd">
+<th>splitPayoutType</th>
+<th>String</th>
+<th>C – M when splitPayoutTransaction is sent</th>
+<th>Dynamic</th>
+<th>AMOUNT or PERCENTAGE. One type for all legs.</th>
+</tr>
+<tr class="header">
+<th>splitPayoutTransaction</th>
+<th>Array</th>
+<th>O</th>
+<th>Dynamic</th>
+<th>One item per leg.</th>
+</tr>
+<tr class="odd">
+<th>splitPayoutTransaction[].partnerId</th>
+<th>String</th>
+<th>M</th>
+<th>Dynamic</th>
+<th>A Partner ID of the MID</th>
+</tr>
+<tr class="header">
+<th>splitPayoutTransaction[].value</th>
+<th>Number</th>
+<th>M</th>
+<th>Dynamic</th>
+<th>Above 0, up to 2 decimals. AED for AMOUNT. Percent of the order
+amount for PERCENTAGE.</th>
+</tr>
+<tr class="odd">
+<th>splitPayoutTransaction[].reference</th>
+<th>String</th>
+<th>O</th>
+<th>Dynamic</th>
+<th>Merchant's reference for the leg. Max 50.</th>
+</tr>
+<tr class="header">
+<th>splitPayoutTransaction[].description</th>
+<th>String</th>
+<th>O</th>
+<th>Dynamic</th>
+<th>Free text. Max 100.</th>
+</tr>
+<tr class="odd">
+<th>splitPayoutProfileId</th>
+<th>String</th>
+<th>O</th>
+<th>Profile</th>
+<th>A profile ID of the MID</th>
+</tr>
+<tr class="header">
+<th>deferredSplit</th>
+<th>Boolean</th>
+<th>O</th>
+<th>Dynamic, Profile</th>
+<th>true = the merchant sends the split later with the Split Payout API
+(SP-8).</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>Fixed mode: the merchant sends no split fields. PGW applies the Fixed
+template.</p>
+<p>An empty splitPayoutTransaction array counts as not sent.</p>
+<h3 id="what-pgw-does-with-each-request">2. What PGW does with each
+request</h3>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 18%" />
+<col style="width: 17%" />
+<col style="width: 20%" />
+<col style="width: 36%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>MID setting</strong></th>
+<th><strong>Request</strong></th>
+<th><strong>PGW action</strong></th>
+<th><strong>splitPayout on the order</strong></th>
+</tr>
+<tr class="odd">
+<th>2.1</th>
+<th>Split off</th>
+<th>No split fields</th>
+<th>Normal session</th>
+<th>false</th>
+</tr>
+<tr class="header">
+<th>2.2</th>
+<th>Split off</th>
+<th>Any split field or deferredSplit</th>
+<th>Reject</th>
+<th>—</th>
+</tr>
+<tr class="odd">
+<th>2.3</th>
+<th>Dynamic</th>
+<th>splitPayoutTransaction</th>
+<th>Check (section 3). Store the legs.</th>
+<th>true</th>
+</tr>
+<tr class="header">
+<th>2.4</th>
+<th>Dynamic</th>
+<th>deferredSplit = true, no legs</th>
+<th>Store deferredSplit = true. No legs.</th>
+<th>true</th>
+</tr>
+<tr class="odd">
+<th>2.5</th>
+<th>Dynamic</th>
+<th>No split fields, no deferredSplit</th>
+<th>Normal session. No split.</th>
+<th>false</th>
+</tr>
+<tr class="header">
+<th>2.6</th>
+<th>Fixed</th>
+<th>No split fields</th>
+<th>Copy the Fixed template legs to the order. Check the amount
+(3.6).</th>
+<th>true</th>
+</tr>
+<tr class="odd">
+<th>2.7</th>
+<th>Fixed</th>
+<th>Any split field or deferredSplit</th>
+<th>Reject</th>
+<th>—</th>
+</tr>
+<tr class="header">
+<th>2.8</th>
+<th>Profile</th>
+<th>splitPayoutProfileId</th>
+<th>Copy the profile legs to the order. Check (section 3).</th>
+<th>true</th>
+</tr>
+<tr class="odd">
+<th>2.9</th>
+<th>Profile</th>
+<th>deferredSplit = true, no profile ID</th>
+<th>Store deferredSplit = true.</th>
+<th>true</th>
+</tr>
+<tr class="header">
+<th>2.10</th>
+<th>Profile</th>
+<th>splitPayoutTransaction</th>
+<th>Reject</th>
+<th>—</th>
+</tr>
+<tr class="odd">
+<th>2.11</th>
+<th>Any</th>
+<th>Split detail or profile ID and deferredSplit = true</th>
+<th>Reject</th>
+<th>—</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h3 id="checks-before-payment">3. Checks before payment</h3>
+<p>Any failure rejects the session (HTTP 400). PGW engineering sets the
+error codes.</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 41%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>Message</strong></th>
+</tr>
+<tr class="odd">
+<th>3.1</th>
+<th>Split fields are allowed for this MID and mode (section 2).</th>
+<th>Split payout is not enabled for this merchant. / Split fields do not
+match the merchant's split mode.</th>
+</tr>
+<tr class="header">
+<th>3.2</th>
+<th>paymentOperation = Pay.</th>
+<th>Split payout is supported for Pay only.</th>
+</tr>
+<tr class="odd">
+<th>3.3</th>
+<th>Order currency = AED.</th>
+<th>Split payout is supported in AED only.</th>
+</tr>
+<tr class="header">
+<th>3.4</th>
+<th>Each partnerId is a Partner ID of the MID. Each occurs once.</th>
+<th>Unknown partner ID: {id}. / Duplicate partner ID: {id}.</th>
+</tr>
+<tr class="odd">
+<th>3.5</th>
+<th>Number of legs ≤ maximum legs (SP-2).</th>
+<th>Maximum {n} legs.</th>
+</tr>
+<tr class="header">
+<th>3.6</th>
+<th>AMOUNT: total of legs ≤ order amount. PERCENTAGE: total ≤ 100.</th>
+<th>Split total is more than the order amount. / Split total is more
+than 100%.</th>
+</tr>
+<tr class="odd">
+<th>3.7</th>
+<th>Each value is above 0, up to 2 decimals.</th>
+<th>Invalid split value.</th>
+</tr>
+<tr class="header">
+<th>3.8</th>
+<th>splitPayoutProfileId is a profile of the MID.</th>
+<th>Unknown split profile: {id}.</th>
+</tr>
+<tr class="odd">
+<th>3.9</th>
+<th>Not split detail and deferredSplit together.</th>
+<th>Send split detail or deferredSplit, not both.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p><strong>Why 3.2.</strong> In this release APEX handles split only on
+a sale. Authorize and capture are not included.</p>
+<h3 id="store-on-the-order">4. Store on the order</h3>
+<table>
+<colgroup>
+<col style="width: 34%" />
+<col style="width: 10%" />
+<col style="width: 55%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Order field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>splitPayout</th>
+<th>Boolean</th>
+<th>true when the order is a split order (section 2). Not a request
+field.</th>
+</tr>
+<tr class="header">
+<th>deferredSplit</th>
+<th>Boolean</th>
+<th>From the request. Default false.</th>
+</tr>
+<tr class="odd">
+<th>splitPayoutType</th>
+<th>String</th>
+<th>AMOUNT / PERCENTAGE. From the request, template or profile. null
+when deferred.</th>
+</tr>
+<tr class="header">
+<th>splitPayoutProfileId</th>
+<th>String</th>
+<th>From the request. null otherwise.</th>
+</tr>
+<tr class="odd">
+<th>splitPayoutTransaction[]</th>
+<th>Array</th>
+<th>Legs: partnerId, value, reference, description. Existing field.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<ol type="1">
+<li><p>Store the split as it is at session creation. A later change to
+the MID settings does not change the order.</p></li>
+<li><p>Do not convert percentages to amounts. APEX converts them on the
+gross amount.</p></li>
+</ol>
+<h3 id="return-to-the-merchant">5. Return to the merchant</h3>
+<p>Return the fields of section 4 in:</p>
+<ol type="1">
+<li><p>Order inquiry GET /pgw/api/v1/direct/order/{orderId} and GET
+/pgw/api/v1/direct/order?MerchantReferenceId=.</p></li>
+<li><p>The callback to callbackUrl.</p></li>
+<li><p>The pay responses (/pgw/api/v2/direct/pay,
+/pgw/api/v2/direct/pay/token).</p></li>
+</ol>
+<h3 id="split-flag-to-apex">6. Split flag to APEX</h3>
+<ol type="1">
+<li><p>When PGW federates a successful Pay transaction of an order with
+splitPayout = true, send splitPayout = Y in createTransaction. Add the
+field at the end of the payload.</p></li>
+<li><p>For all other transactions send splitPayout = N.</p></li>
+<li><p>PTLF: send the same value as field 49 (waits on P4).</p></li>
+</ol>
+<p><strong>Why.</strong> APEX holds a transaction with splitPayout = Y
+until it receives a valid split. If PGW does not send the split, APEX
+releases the money to the merchant after N days. Without the flag, APEX
+pays the merchant the next day and the partners' money stays with the
+merchant.</p>
+<h3 id="example-dynamic-amount-split">7. Example (Dynamic, amount
+split)</h3>
+<p>{</p>
+<p>"amount": 1000.00,</p>
+<p>"currency": "AED",</p>
+<p>"merchantReferenceId": "ORD-DEMO-1000",</p>
+<p>"paymentOperation": "Pay",</p>
+<p>"timestamp": "...", "signature": "...", "callbackUrl": "...",</p>
+<p>"splitPayoutType": "AMOUNT",</p>
+<p>"splitPayoutTransaction": [</p>
+<p>{ "partnerId": "P000301", "value": 600.00, "reference": "SELLER-A"
+},</p>
+<p>{ "partnerId": "P000302", "value": 300.00, "reference": "SELLER-B"
+},</p>
+<p>{ "partnerId": "P000303", "value": 100.00, "reference": "DELIVERY"
+}</p>
+<p>]</p>
+<p>}</p>
+<p>Profile: send "splitPayoutProfileId": "PRF-INSURER-A". Deferred: send
+"deferredSplit": true. Fixed: send no split fields.</p>
+<h2 id="acceptance-criteria-5">Acceptance criteria</h2>
+<ol type="1">
+<li><p>Dynamic MID, the example above: session created. Order inquiry
+returns splitPayout = true and the three legs.</p></li>
+<li><p>Same request on a MID with split off: rejected (3.1).</p></li>
+<li><p>Legs total AED 1,001 on an AED 1,000 order: rejected
+(3.6).</p></li>
+<li><p>Unknown Partner ID: rejected (3.4).</p></li>
+<li><p>paymentOperation = PreAuthorize with split: rejected
+(3.2).</p></li>
+<li><p>Fixed MID, order with no split fields: order has the template
+legs.</p></li>
+<li><p>Profile MID, splitPayoutProfileId = PRF-INSURER-A: order has the
+profile legs. Unknown profile: rejected (3.8).</p></li>
+<li><p>deferredSplit = true: order has splitPayout = true and no
+legs.</p></li>
+<li><p>Split detail and deferredSplit together: rejected (3.9).</p></li>
+<li><p>Successful split payment: createTransaction has splitPayout = Y.
+Normal payment: N.</p></li>
+<li><p>Change the Fixed template after a session: the order keeps the
+old legs.</p></li>
+</ol>
+<h1
+id="sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3">SP-7
+— BE – APEX Payout Advice API integration (waiting on Emcrey, P3)</h1>
+<h2 id="background-6">Background</h2>
+<p>APEX holds a split transaction until it receives the split (the
+"advice"). APEX provides a Payout Advice API. PGW must send each split
+to this API. The API spec is not final yet. This story gives the
+requirement from the agreed APEX requirement (Arul, 11-Nov-2026). Field
+names follow the APEX draft and can change with the final spec.</p>
+<h2 id="goal-6">Goal</h2>
+<ol type="1">
+<li><p>PGW sends the split of each successful split order to
+APEX.</p></li>
+<li><p>PGW sends new and updated splits from the Split Payout API
+(SP-8).</p></li>
+<li><p>PGW keeps the status of each advice.</p></li>
+</ol>
+<h2 id="story-summary-6">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 35%" />
+<col style="width: 64%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-7</th>
+</tr>
+<tr class="header">
+<th>APEX API used</th>
+<th>Payout Advice API (spec from Emcrey, P3)</th>
+</tr>
+<tr class="odd">
+<th>Depends on</th>
+<th>SP-6, P3</th>
+</tr>
+<tr class="header">
+<th>Followed by</th>
+<th>SP-8, SP-9</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements-6">Requirements</h2>
+<h3 id="when-pgw-sends-an-advice">1. When PGW sends an advice</h3>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 56%" />
+<col style="width: 37%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Trigger</strong></th>
+<th><strong>Action</strong></th>
+</tr>
+<tr class="odd">
+<th>1.1</th>
+<th>Pay succeeds on an order with legs in splitPayoutTransaction
+(Dynamic, Fixed, Profile)</th>
+<th>Send action A (create)</th>
+</tr>
+<tr class="header">
+<th>1.2</th>
+<th>SP-8 accepts a NEW</th>
+<th>Send action A</th>
+</tr>
+<tr class="odd">
+<th>1.3</th>
+<th>SP-8 accepts an UPDATE</th>
+<th>Send action U (replace the whole advice)</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>Orders with deferredSplit = true and no legs: send nothing until
+SP-8.</p>
+<h3 id="content-apex-draft">2. Content (APEX draft)</h3>
+<table>
+<colgroup>
+<col style="width: 39%" />
+<col style="width: 60%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>APEX field</strong></th>
+<th><strong>PGW source</strong></th>
+</tr>
+<tr class="odd">
+<th>Action</th>
+<th>A or U</th>
+</tr>
+<tr class="header">
+<th>Merchant</th>
+<th>MID</th>
+</tr>
+<tr class="odd">
+<th>TransactionReference</th>
+<th>interSystemID of the Pay transaction</th>
+</tr>
+<tr class="header">
+<th>SplitRules[].PartnerID</th>
+<th>splitPayoutTransaction[].partnerId</th>
+</tr>
+<tr class="odd">
+<th>SplitRules[].Percentage</th>
+<th>value when splitPayoutType = PERCENTAGE. Else empty.</th>
+</tr>
+<tr class="header">
+<th>SplitRules[].Amount</th>
+<th>value when splitPayoutType = AMOUNT. Else empty.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>Send percentage or amount, never both.</p>
+<h3 id="advice-record-on-the-order">3. Advice record on the order</h3>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Values</strong></th>
+</tr>
+<tr class="odd">
+<th>splitAdviceId</th>
+<th>Generated by PGW at the first advice of the order. A new ID for each
+UPDATE.</th>
+</tr>
+<tr class="header">
+<th>splitAdviceStatus</th>
+<th>PENDING (not sent yet), SENT, ACCEPTED, REJECTED</th>
+</tr>
+<tr class="odd">
+<th>splitAdviceReason</th>
+<th>APEX reason code and text when REJECTED</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h3 id="errors-and-retry">4. Errors and retry</h3>
+<ol type="1">
+<li><p>APEX not reachable or timeout: keep PENDING and retry. Retry
+count and interval: PGW engineering. The day-end file (SP-9) carries the
+advice in any case.</p></li>
+<li><p>APEX rejects: store REJECTED and the reason. The merchant can
+correct it with an UPDATE (SP-8).</p></li>
+<li><p>A failure here never changes the payment result.</p></li>
+</ol>
+<h2 id="acceptance-criteria-6">Acceptance criteria</h2>
+<p>To be completed when P3 is received.</p>
+<h1 id="sp-8-be-pgw-split-payout-api">SP-8 — BE – PGW Split Payout
+API</h1>
+<h2 id="background-7">Background</h2>
+<p>Some merchants do not know the split when the customer pays. They
+create the session with deferredSplit = true (SP-6) and send the split
+later. A merchant can also correct a split that APEX rejected. This
+story adds a merchant API for both. PGW checks the request and sends it
+to APEX (SP-7).</p>
+<h2 id="goal-7">Goal</h2>
+<ol type="1">
+<li><p>The merchant can send the split of a paid order (NEW).</p></li>
+<li><p>The merchant can replace the split of an order (UPDATE).</p></li>
+<li><p>PGW returns the result at once and sends the advice to
+APEX.</p></li>
+</ol>
+<h2 id="story-summary-7">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 74%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-8</th>
+</tr>
+<tr class="header">
+<th>Geidea endpoint</th>
+<th>New. Name and path: PGW engineering (e.g. POST
+/pgw/api/v1/direct/splitPayout). Same authentication as the other Direct
+API calls.</th>
+</tr>
+<tr class="odd">
+<th>Modes</th>
+<th>Dynamic and Profile. Fixed MIDs are rejected (the template
+applies).</th>
+</tr>
+<tr class="header">
+<th>Depends on</th>
+<th>SP-6, SP-7</th>
+</tr>
+<tr class="odd">
+<th>Out of scope</th>
+<th>Split inquiry API (later, with the Merchant Portal view).</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements-7">Requirements</h2>
+<h3 id="request">1. Request</h3>
+<table>
+<colgroup>
+<col style="width: 27%" />
+<col style="width: 8%" />
+<col style="width: 24%" />
+<col style="width: 39%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>M/O/C</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+<tr class="odd">
+<th>action</th>
+<th>String</th>
+<th>M</th>
+<th>NEW or UPDATE</th>
+</tr>
+<tr class="header">
+<th>orderId</th>
+<th>String</th>
+<th>M</th>
+<th>PGW order ID</th>
+</tr>
+<tr class="odd">
+<th>splitAdviceId</th>
+<th>String</th>
+<th>C – M for UPDATE</th>
+<th>The latest advice ID of the order</th>
+</tr>
+<tr class="header">
+<th>splitPayoutType</th>
+<th>String</th>
+<th>C – M for Dynamic</th>
+<th>AMOUNT / PERCENTAGE</th>
+</tr>
+<tr class="odd">
+<th>splitPayoutTransaction[]</th>
+<th>Array</th>
+<th>C – M for Dynamic</th>
+<th>Same as SP-6: partnerId, value, reference, description</th>
+</tr>
+<tr class="header">
+<th>splitPayoutProfileId</th>
+<th>String</th>
+<th>C – M for Profile</th>
+<th>A profile of the MID</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>The request always carries the full split, never one leg.</p>
+<h3 id="checks">2. Checks</h3>
+<p>Any failure: reject (HTTP 400) with the message. PGW engineering sets
+the error codes.</p>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 49%" />
+<col style="width: 44%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>Message</strong></th>
+</tr>
+<tr class="odd">
+<th>2.1</th>
+<th>Split is on for the MID. Mode is Dynamic or Profile.</th>
+<th>Split payout is not enabled for this merchant. / Not allowed for
+Fixed split.</th>
+</tr>
+<tr class="header">
+<th>2.2</th>
+<th>The order exists, belongs to the calling MID and has a successful
+Pay.</th>
+<th>Order not found. / Order is not paid.</th>
+</tr>
+<tr class="odd">
+<th>2.3</th>
+<th>The order has splitPayout = true.</th>
+<th>Order is not a split order.</th>
+</tr>
+<tr class="header">
+<th>2.4</th>
+<th>NEW: the order has deferredSplit = true and no advice yet.</th>
+<th>A split already exists for this order. Use UPDATE.</th>
+</tr>
+<tr class="odd">
+<th>2.5</th>
+<th>UPDATE: splitAdviceId is the latest advice ID of the order.</th>
+<th>Advice ID is not the latest.</th>
+</tr>
+<tr class="header">
+<th>2.6</th>
+<th>The split passes the SP-6 checks 3.4 to 3.8 (Partner IDs, legs
+limit, totals, values, profile).</th>
+<th>As in SP-6.</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p><strong>Why 2.3.</strong> An order without the flag was not held by
+APEX. Its money may already be paid to the merchant.</p>
+<p><strong>Why 2.5.</strong> A late retry of an old request must not
+overwrite a newer correction.</p>
+<h3 id="processing">3. Processing</h3>
+<ol type="1">
+<li><p>Repeat of the same NEW with the same content: return the first
+splitAdviceId. Do not create a second advice.</p></li>
+<li><p>Store the split on the order (fields as in SP-6 section 4). For
+UPDATE, replace the legs.</p></li>
+<li><p>Send to APEX with SP-7 (NEW → A, UPDATE → U).</p></li>
+<li><p>APEX accepts U only while the advice is not yet processed or
+released. APEX rejects it after that. Return the APEX reason.</p></li>
+</ol>
+<h3 id="response">4. Response</h3>
+<table>
+<colgroup>
+<col style="width: 38%" />
+<col style="width: 61%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>splitAdviceId</th>
+<th>New advice ID</th>
+</tr>
+<tr class="header">
+<th>splitAdviceStatus</th>
+<th>ACCEPTED or REJECTED (from APEX) or PENDING (APEX not reached)</th>
+</tr>
+<tr class="odd">
+<th>reasonCode, reasonMessage</th>
+<th>When rejected</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<p>The final payout result reaches the merchant in the APEX split payout
+report.</p>
+<h3 id="example-2">5. Example</h3>
+<p>{</p>
+<p>"action": "NEW",</p>
+<p>"orderId": "a1b2c3d4-...",</p>
+<p>"splitPayoutType": "PERCENTAGE",</p>
+<p>"splitPayoutTransaction": [</p>
+<p>{ "partnerId": "P000301", "value": 60.00 },</p>
+<p>{ "partnerId": "P000302", "value": 30.00 } ]</p>
+<p>}</p>
+<h2 id="acceptance-criteria-7">Acceptance criteria</h2>
+<ol type="1">
+<li><p>Order created with deferredSplit = true and paid: NEW accepted.
+Advice ID returned.</p></li>
+<li><p>NEW on an order that already has a split: rejected
+(2.4).</p></li>
+<li><p>UPDATE with an older advice ID: rejected (2.5).</p></li>
+<li><p>NEW on an order without the split flag: rejected (2.3).</p></li>
+<li><p>Call on a Fixed MID: rejected (2.1).</p></li>
+<li><p>Same NEW sent twice: same advice ID.</p></li>
+</ol>
+<h1 id="sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3">SP-9 —
+BE – Day-end split advice file (waiting on Emcrey, P3)</h1>
+<h2 id="background-8">Background</h2>
+<p>APEX uses a day-end file as a backup to the real-time API, the same
+way as transaction federation today. If an advice is lost on the API,
+the file carries it. If the file and the API differ, the file wins.</p>
+<h2 id="goal-8">Goal</h2>
+<p>PGW sends APEX one file each day with all advices of the day.</p>
+<h2 id="story-summary-8">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 86%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+<tr class="odd">
+<th>Story ID</th>
+<th>SP-9</th>
+</tr>
+<tr class="header">
+<th>Depends on</th>
+<th>SP-7, P3 (file format)</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+<h2 id="requirements-8">Requirements</h2>
+<ol type="1">
+<li><p>Send the file after the Ecomm cut-off (midnight, UAE time), for
+the day that ended.</p></li>
+<li><p>Include every advice created or updated that day, in its latest
+state (action A or U).</p></li>
+<li><p>Add a trailer with the number of records.</p></li>
+<li><p>On a day with no advices, send an empty file with a record count
+of 0.</p></li>
+<li><p>File name, format, delivery path: from P3.</p></li>
+</ol>
+<h2 id="acceptance-criteria-8">Acceptance criteria</h2>
+<p>To be completed when P3 is received.</p>
+<h1 id="open-points">Open points</h1>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 45%" />
+<col style="width: 18%" />
+<col style="width: 29%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Point</strong></th>
+<th><strong>Story</strong></th>
+<th><strong>Owner / status</strong></th>
+</tr>
+<tr class="odd">
+<th>1</th>
+<th>Partner ID convention: who issues it (PGW, Operations or APEX) and
+its format. MA must be able to use the same convention later.</th>
+<th>SP-3</th>
+<th>Rabbani – parked</th>
+</tr>
+<tr class="header">
+<th>2</th>
+<th>Where isSplitPayoutEnabled and the order field
+splitPayoutTransaction come from, and what reads them today.</th>
+<th>SP-2, SP-6</th>
+<th>PGW engineering</th>
+</tr>
+<tr class="odd">
+<th>3</th>
+<th>Partner ID search across MIDs: confirm it is possible on product
+instance data.</th>
+<th>SP-2</th>
+<th>PGW engineering</th>
+</tr>
+<tr class="header">
+<th>4</th>
+<th>The tab is in Merchant Portal Backoffice (owner: MA team). Confirm
+the PGW team builds it, as for Pay by Bank settings.</th>
+<th>SP-1</th>
+<th>Rabbani with Emir / Derya</th>
+</tr>
+<tr class="odd">
+<th>5</th>
+<th>Are all three modes in the first build, or Dynamic first?</th>
+<th>SP-3 to SP-5</th>
+<th>Rabbani</th>
+</tr>
+<tr class="header">
+<th>6</th>
+<th>After a mode change: how an UPDATE is checked for an order created
+in the old mode.</th>
+<th>SP-8</th>
+<th>Rabbani</th>
+</tr>
+<tr class="odd">
+<th>7</th>
+<th>Pay by Link with split payout.</th>
+<th>SP-6</th>
+<th>Later</th>
+</tr>
+</thead>
+<tbody>
+</tbody>
+</table>
+
+</article>
+</main>
+</div>
+<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+</body>
+</html>

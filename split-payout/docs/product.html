@@ -1,0 +1,1732 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Product document · PGW Feature Lab</title>
+<link rel="stylesheet" href="../../assets/lab.css">
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="../">Split Payout</a> / Product document</nav>
+</div></header>
+<div class="doc-layout">
+<aside class="toc" aria-label="Contents"><p>contents</p><ol>
+<li class="l1"><a href="#introduction">1. Introduction</a></li>
+<li class="l1"><a href="#use-cases">2. Use Cases</a></li>
+<li class="l1"><a href="#solution-overview">3. Solution Overview</a></li>
+<li class="l2"><a href="#solution-at-a-glance">3.1 Solution at a glance</a></li>
+<li class="l2"><a href="#split-modes">3.2 Split modes</a></li>
+<li class="l2"><a href="#design-principles">3.3 Design principles</a></li>
+<li class="l1"><a href="#money-flow">4. Money Flow</a></li>
+<li class="l2"><a href="#how-funds-move">4.1 How funds move</a></li>
+<li class="l2"><a href="#worked-example">4.2 Worked example</a></li>
+<li class="l2"><a href="#outcomes">4.3 Outcomes</a></li>
+<li class="l1"><a href="#partner-and-vendor-enablement-operational">5. Partner and Vendor
+Enablement (Operational)</a></li>
+<li class="l2"><a href="#partner-eligibility-and-agreement">5.1 Partner eligibility and
+agreement</a></li>
+<li class="l2"><a href="#setup-steps">5.2 Setup steps</a></li>
+<li class="l1"><a href="#apex">6. APEX</a></li>
+<li class="l2"><a href="#vendor-definition">6.1 Vendor definition</a></li>
+<li class="l2"><a href="#split-payout-enablement-on-the-partner-mid">6.2 Split payout
+enablement on the partner MID</a></li>
+<li class="l2"><a href="#hold-of-flagged-transactions">6.3 Hold of flagged
+transactions</a></li>
+<li class="l2"><a href="#split-advice-intake">6.4 Split advice intake</a></li>
+<li class="l2"><a href="#amount-validation">6.5 Amount validation</a></li>
+<li class="l2"><a href="#calculation-and-payout">6.6 Calculation and payout</a></li>
+<li class="l2"><a href="#reporting">6.7 Reporting</a></li>
+<li class="l2"><a href="#apex-work-items">6.8 APEX work items</a></li>
+<li class="l1"><a href="#pgw-ecomm">7. PGW (Ecomm)</a></li>
+<li class="l2"><a href="#configuration">7.1 Configuration</a></li>
+<li class="l2"><a href="#order-creation-request">7.2 Order creation request</a></li>
+<li class="l2"><a href="#payout-advice-api">7.3 Payout Advice API</a></li>
+<li class="l2"><a href="#split-flag-in-federation">7.4 Split flag in federation</a></li>
+<li class="l2"><a href="#forwarding-advices-to-apex">7.5 Forwarding advices to APEX</a></li>
+<li class="l2"><a href="#validations">7.6 Validations</a></li>
+<li class="l2"><a href="#transaction-flow">7.7 Transaction flow</a></li>
+<li class="l2"><a href="#pgw-work-items">7.8 PGW work items</a></li>
+<li class="l1"><a href="#refunds-and-chargebacks">8. Refunds and Chargebacks</a></li>
+<li class="l1"><a href="#out-of-scope-and-later-phases">9. Out of Scope and Later
+Phases</a></li>
+<li class="l1"><a href="#open-items">10. Open Items</a></li>
+</ol></aside>
+<main>
+<div class="doc-meta"><span class="tag">v1.6</span><span class="tag grey">10-Nov-2026</span><span class="tag grey">Source: Vendor Payout Service - MVP v1.6 (10-Nov-2026).docx</span></div>
+<article class="doc">
+<p>Product and implementation requirements · Ecomm (PGW) · Version 1.6 ·
+10-Nov-2026</p>
+<h1 id="introduction">1. Introduction</h1>
+<p>The Vendor Payout Service lets a partner (a Geidea merchant) instruct
+Geidea to pay part of each sale to its own vendors (suppliers). The
+customer pays once, on the partner’s MID, and the transaction is
+authorized and cleared with the scheme exactly as today. After
+settlement, Geidea transfers each vendor’s share to the vendor’s own UAE
+bank account under Geidea’s domestic fund transfer service and settles
+the remainder to the partner.</p>
+<p>This is the working requirements document for implementation. It
+carries the approved product design and sets out the work items for PGW
+and APEX, and is kept current as solutioning progresses with the APEX
+team and its platform vendor.</p>
+<h3 id="scope">Scope</h3>
+<ul>
+<li><p>Channel: Ecomm through PGW only.</p></li>
+<li><p>Split modes: Dynamic, Fixed and Profile based.</p></li>
+<li><p>Currency: AED only. The partner and its vendors are paid in
+AED.</p></li>
+<li><p>Vendors: UAE businesses holding a business registration (trade
+license). Payouts are domestic only (UAE IBANs, no
+cross-border).</p></li>
+<li><p>Partners: select large partners, approved case by case.
+Unlicensed aggregators are excluded.</p></li>
+<li><p>Expected volume: 10 to 20 partners a year.</p></li>
+</ul>
+<h3 id="terms-used-in-this-document">Terms used in this document</h3>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Term</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Partner</td>
+<td>The Geidea merchant that sells to the customer and instructs Geidea
+how to split the proceeds. Holds a normal Geidea MID.</td>
+</tr>
+<tr class="even">
+<td>Vendor / beneficiary</td>
+<td>A business the partner pays out to. Defined in APEX as a vendor
+definition, not a MID.</td>
+</tr>
+<tr class="odd">
+<td>Beneficiary ID</td>
+<td>Unique ID APEX generates for each vendor definition. The only vendor
+identifier the partner and PGW use.</td>
+</tr>
+<tr class="even">
+<td>Split advice</td>
+<td>The instruction for one transaction: which beneficiaries receive how
+much.</td>
+</tr>
+<tr class="odd">
+<td>Split flag</td>
+<td>Marker PGW sets on a transaction in its federation to APEX when a
+split advice is expected. APEX holds only flagged transactions.</td>
+</tr>
+<tr class="even">
+<td>Deferred split</td>
+<td>Order created without split detail, where the partner declares
+(deferredSplit) that it will send the advice later through the Payout
+Advice API.</td>
+</tr>
+<tr class="odd">
+<td>Residual</td>
+<td>What remains of the partner’s settlement after vendor payouts and
+remittance fees; settled to the partner.</td>
+</tr>
+<tr class="even">
+<td>Remittance fee</td>
+<td>Fee charged per payout (each vendor transfer and the partner’s own
+payout).</td>
+</tr>
+<tr class="odd">
+<td>N</td>
+<td>Days, set per partner MID, after which a flagged transaction without
+a valid advice is released to the partner.</td>
+</tr>
+<tr class="even">
+<td>EOD split advice file</td>
+<td>Day-end file from PGW to APEX carrying the day’s advices; backup and
+update channel to the real-time API.</td>
+</tr>
+<tr class="odd">
+<td>PENDING_MATCH</td>
+<td>Status of an advice APEX received before the transaction itself
+reached APEX.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="use-cases">2. Use Cases</h1>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 58%" />
+<col style="width: 16%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Use case</strong></th>
+<th><strong>Example</strong></th>
+<th><strong>Typical mode</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Marketplace</td>
+<td>A customer buys from several sellers in one checkout; each seller
+receives its share.</td>
+<td>Dynamic</td>
+</tr>
+<tr class="even">
+<td>Delivery platform</td>
+<td>An order payment is shared between the restaurant or store and the
+platform.</td>
+<td>Dynamic</td>
+</tr>
+<tr class="odd">
+<td>Aggregator with standard terms</td>
+<td>An insurance aggregator applies a different, pre-agreed split per
+insurance provider.</td>
+<td>Profile</td>
+</tr>
+<tr class="even">
+<td>Standing revenue share</td>
+<td>A business always passes the same share of every sale to a
+supplier.</td>
+<td>Fixed</td>
+</tr>
+</tbody>
+</table>
+<h1 id="solution-overview">3. Solution Overview</h1>
+<p>The solution has two parts. The operational setup is done once per
+partner and per vendor, by people, through agreed operational routes.
+The transaction and payout flow runs on every transaction, entirely in
+Geidea systems. Figure 1 shows both end to end. Section 5 describes the
+operational setup, and sections 6 and 7 what APEX and PGW need to
+deliver.</p>
+<h2 id="solution-at-a-glance">3.1 Solution at a glance</h2>
+<p><img src="media-product/media/image1.png"
+style="width:9.375in;height:6.40625in" /></p>
+<p><em>Figure 1. From partner setup to vendor payout</em></p>
+<h2 id="split-modes">3.2 Split modes</h2>
+<p>Each partner MID uses one split mode.</p>
+<table>
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 42%" />
+<col style="width: 42%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Mode</strong></th>
+<th><strong>How the split is defined</strong></th>
+<th><strong>What the partner sends</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Dynamic</td>
+<td>The partner sends the split with each transaction.</td>
+<td>Vendor legs in the order creation request, or later through the
+Payout Advice API (deferred split).</td>
+</tr>
+<tr class="even">
+<td>Fixed</td>
+<td>One split template, configured by Geidea in PGW, applies to every
+transaction.</td>
+<td>Nothing. PGW applies the template to every order.</td>
+</tr>
+<tr class="odd">
+<td>Profile</td>
+<td>Geidea configures a catalog of split templates in PGW, each with a
+profile ID.</td>
+<td>A profile ID in the order creation request, or later through the
+Payout Advice API (deferred split).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rules-common-to-all-modes">Rules common to all modes</h3>
+<ul>
+<li><p>A leg names a beneficiary ID and a value. The value is either an
+amount or a percentage of the <strong>gross transaction amount</strong>,
+never both.</p></li>
+<li><p>All legs of one advice use the same split type (all amounts or
+all percentages).</p></li>
+<li><p>Percentages are converted to amounts by APEX, not by PGW. Each
+amount is rounded to 2 decimals; the partner’s residual absorbs the
+rounding difference.</p></li>
+<li><p>Templates and profiles are configured by Geidea only. The partner
+has no access to split configuration.</p></li>
+<li><p>A split advice carries beneficiary IDs and values only. Bank
+details always come from Geidea’s records, never from the partner’s
+request.</p></li>
+</ul>
+<h2 id="design-principles">3.3 Design principles</h2>
+<ul>
+<li><p><strong>Geidea controls who is paid.</strong> Vendors are
+verified and defined by Geidea. A partner can only pay vendors defined
+against its own MID.</p></li>
+<li><p><strong>A vendor is not a merchant.</strong> Vendors are vendor
+definitions in APEX, not MIDs. They have no products, channels, users or
+portal access.</p></li>
+<li><p><strong>Payouts never exceed the partner’s net.</strong> The
+partner’s residual can never go negative and no vendor leg can be zeroed
+by commission or fees.</p></li>
+<li><p><strong>All or nothing.</strong> An advice is processed in full
+or rejected in full. A partial split is never paid.</p></li>
+<li><p><strong>Fail safe, not fail open.</strong> PGW flags every split
+transaction in its federation to APEX. APEX holds flagged transactions
+until a valid advice is processed, so a missing or failed advice delays
+the partner’s settlement rather than paying vendor money to the
+partner.</p></li>
+<li><p><strong>Real-time advice, settlement-time payout.</strong> Split
+advices reach APEX in real time through an API, with a day-end file as
+backup and update channel. Payouts still run with settlement.</p></li>
+<li><p><strong>Fully automated.</strong> Vendor payouts and the
+partner’s residual run without any manual finance step.</p></li>
+<li><p><strong>The scheme transaction is unchanged.</strong>
+Authorization and clearing work as today; federation to APEX only gains
+the split flag.</p></li>
+<li><p><strong>Risk approves every partner.</strong> The service is
+never enabled by default.</p></li>
+</ul>
+<h1 id="money-flow">4. Money Flow</h1>
+<h2 id="how-funds-move">4.1 How funds move</h2>
+<ol type="1">
+<li><p>APEX calculates the partner’s settlement for the transaction and
+deducts Geidea’s MDR and VAT on the MDR. The remainder is the partner’s
+net.</p></li>
+<li><p>APEX makes the vendor payouts from the partner’s net. Whether a
+separate staging account is used, or APEX posts the entries directly
+from the merchant payout account, is to be defined by Finance.</p></li>
+<li><p>For a transaction with a valid split advice, APEX calculates each
+vendor’s payout: split amount (converted from a percentage of the gross
+transaction amount where needed), minus the commission configured on the
+vendor definition, if any, minus the remittance fee when the partner MID
+is set to deduct it from vendor payouts, rounded to 2 decimals.</p></li>
+<li><p>A remittance fee is charged for each payout: every vendor
+transfer and the partner’s own payout of its residual. It is configured
+on the partner MID, with any applicable VAT. For vendor transfers, an
+option on the partner MID sets who bears the fee: the partner (deducted
+from its residual) or each vendor (deducted from that vendor’s payout).
+The fee on the partner’s own payout is always deducted from its
+residual.</p></li>
+<li><p>Commission deducted from a vendor’s leg stays with the partner
+and reaches it in its residual.</p></li>
+<li><p>APEX transfers each vendor’s net payout to its IBAN and settles
+the residual to the partner.</p></li>
+</ol>
+<p>Geidea’s revenue on the transaction is its MDR. Geidea invoices the
+partner VAT on its MDR for the full transaction amount, however the
+transaction is split; any invoicing between the partner and its vendors
+is the partner’s own matter. The movement of funds between accounts, its
+accounting, and VAT handling on vendor commission and remittance fees
+are to be defined by Finance.</p>
+<h2 id="worked-example">4.2 Worked example</h2>
+<p>Transaction AED 1,000. Geidea MDR 1% (VAT on MDR left out for
+simplicity). An amount split across three vendors; two have a commission
+configured. A remittance fee of AED 1.00 per payout (illustrative) is
+set on the partner MID. The transaction ends in four payouts: three to
+the vendors and one to the partner.</p>
+<h3 id="option-1-partner-bears-the-transfer-cost-of-all-payouts">Option
+1 – partner bears the transfer cost of all payouts</h3>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Vendor</strong></th>
+<th><strong>Split amount</strong></th>
+<th><strong>Commission</strong></th>
+<th><strong>Commission amount</strong></th>
+<th><strong>Net payout</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Vendor A</td>
+<td>500.00</td>
+<td>2.00%</td>
+<td>10.00</td>
+<td>490.00</td>
+</tr>
+<tr class="even">
+<td>Vendor B</td>
+<td>300.00</td>
+<td>1.50%</td>
+<td>4.50</td>
+<td>295.50</td>
+</tr>
+<tr class="odd">
+<td>Vendor C</td>
+<td>100.00</td>
+<td>None</td>
+<td>0.00</td>
+<td>100.00</td>
+</tr>
+<tr class="even">
+<td><strong>Total</strong></td>
+<td><strong>900.00</strong></td>
+<td></td>
+<td><strong>14.50</strong></td>
+<td><strong>885.50</strong></td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 81%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Partner settlement</strong></th>
+<th><strong>AED</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Transaction amount less Geidea MDR (1,000.00 − 10.00)</td>
+<td>990.00</td>
+</tr>
+<tr class="even">
+<td>Less: net payouts to vendors (payouts 1 to 3)</td>
+<td>885.50</td>
+</tr>
+<tr class="odd">
+<td>Less: remittance fees (4 payouts × 1.00)</td>
+<td>4.00</td>
+</tr>
+<tr class="even">
+<td><strong>Residual paid to the partner</strong> (payout 4: 90.00
+unallocated after MDR + 14.50 commission − 4.00 remittance fees)</td>
+<td><strong>100.50</strong></td>
+</tr>
+</tbody>
+</table>
+<h3 id="option-2-each-vendor-bears-its-own-transfer-cost">Option 2 –
+each vendor bears its own transfer cost</h3>
+<p>The same transaction, with the partner MID set to deduct the
+remittance fee from each vendor’s payout. The fee on the partner’s own
+payout is still charged to the partner.</p>
+<table>
+<colgroup>
+<col style="width: 23%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Vendor</strong></th>
+<th><strong>Split amount</strong></th>
+<th><strong>Commission amount</strong></th>
+<th><strong>Remittance fee</strong></th>
+<th><strong>Net payout</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Vendor A</td>
+<td>500.00</td>
+<td>10.00</td>
+<td>1.00</td>
+<td>489.00</td>
+</tr>
+<tr class="even">
+<td>Vendor B</td>
+<td>300.00</td>
+<td>4.50</td>
+<td>1.00</td>
+<td>294.50</td>
+</tr>
+<tr class="odd">
+<td>Vendor C</td>
+<td>100.00</td>
+<td>0.00</td>
+<td>1.00</td>
+<td>99.00</td>
+</tr>
+<tr class="even">
+<td><strong>Total</strong></td>
+<td><strong>900.00</strong></td>
+<td><strong>14.50</strong></td>
+<td><strong>3.00</strong></td>
+<td><strong>882.50</strong></td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 81%" />
+<col style="width: 18%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Partner settlement</strong></th>
+<th><strong>AED</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Transaction amount less Geidea MDR (1,000.00 − 10.00)</td>
+<td>990.00</td>
+</tr>
+<tr class="even">
+<td>Less: net payouts to vendors (payouts 1 to 3)</td>
+<td>882.50</td>
+</tr>
+<tr class="odd">
+<td>Less: remittance fees deducted from vendor payouts, to Geidea (3 ×
+1.00)</td>
+<td>3.00</td>
+</tr>
+<tr class="even">
+<td>Less: remittance fee on the partner’s payout (1 × 1.00)</td>
+<td>1.00</td>
+</tr>
+<tr class="odd">
+<td><strong>Residual paid to the partner</strong> (payout 4: 90.00
+unallocated after MDR + 14.50 commission − 1.00 remittance fee)</td>
+<td><strong>103.50</strong></td>
+</tr>
+</tbody>
+</table>
+<h2 id="outcomes">4.3 Outcomes</h2>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Situation</strong></th>
+<th><strong>What happens</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Transaction not flagged for split</td>
+<td>Settles to the partner through the normal process, after Geidea’s
+MDR.</td>
+</tr>
+<tr class="even">
+<td>Flagged, valid advice processed</td>
+<td>Vendors receive their net payouts; the partner receives the
+residual.</td>
+</tr>
+<tr class="odd">
+<td>Flagged, advice rejected</td>
+<td>Nothing is paid to vendors; the transaction stays held. The
+rejection and its reason appear in the split payout report. The partner
+may send a corrected, complete advice through the Payout Advice
+API.</td>
+</tr>
+<tr class="even">
+<td>Flagged, no advice received</td>
+<td>The transaction stays held (for example, a deferred split the
+partner never sent, or an advice lost in transit and not in the day-end
+file).</td>
+</tr>
+<tr class="odd">
+<td>Flagged, no valid advice within N days</td>
+<td>Released to the partner after Geidea’s MDR, and listed in an
+exception report for Operations and Finance. N is set per partner MID,
+can be zero, and counts from the transaction’s scheduled payout
+date.</td>
+</tr>
+<tr class="even">
+<td>Advice received before the transaction</td>
+<td>Parked as PENDING_MATCH and linked when the transaction arrives;
+rejected with a reason if still unmatched at day end.</td>
+</tr>
+<tr class="odd">
+<td>Advice in API but missing in the day-end file</td>
+<td>Marked as mismatched; settlement held until resolved.</td>
+</tr>
+<tr class="even">
+<td>Transfer to a vendor fails</td>
+<td>Existing exception process: retry up to the configured limit, then
+an exception record, with the case shown in the split payout report.
+Geidea contacts the partner only, never the vendor.</td>
+</tr>
+</tbody>
+</table>
+<h1 id="partner-and-vendor-enablement-operational">5. Partner and Vendor
+Enablement (Operational)</h1>
+<p>Partner and vendor setup is operational. It is handled by the teams
+below through agreed operational routes (for example, an email from
+Business carrying the vendor details), and is detailed in the Operations
+SOP. No system build is needed for these steps in the MVP.</p>
+<h2 id="partner-eligibility-and-agreement">5.1 Partner eligibility and
+agreement</h2>
+<ul>
+<li><p>The service is offered only to select large partners, case by
+case. Unlicensed aggregators are excluded.</p></li>
+<li><p>Business presents each partner request and its business case to
+Risk. Risk reviews and approves the partner before any onboarding; the
+service is never enabled by default.</p></li>
+<li><p>The partner agreement is revisited by Business with Legal so that
+it covers the payout service and its liabilities: dispute and chargeback
+liability, refunds and chargebacks deducted from the partner, recovery
+of any shortfall, and terms related to domestic fund transfer
+processing.</p></li>
+</ul>
+<h2 id="setup-steps">5.2 Setup steps</h2>
+<table>
+<colgroup>
+<col style="width: 5%" />
+<col style="width: 55%" />
+<col style="width: 19%" />
+<col style="width: 19%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Step</strong></th>
+<th><strong>Done by</strong></th>
+<th><strong>Result</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Request the service and share the vendors’ details and documents
+(business registration, relationship or contract with the partner,
+IBAN), the split configuration and any vendor commission.</td>
+<td>Partner</td>
+<td>Request with Business</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Present the partner request and its business case to Risk.</td>
+<td>Business</td>
+<td>Request with Risk</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Review and approve the partner and its business case.</td>
+<td>Risk</td>
+<td>Partner approved</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Onboard each vendor once: collect and check the due diligence
+documents (business registration, IBAN in the business’s name, agreement
+or contract with the partner) and keep them on record; screen the
+beneficiary. Screening hits go to Risk under the existing process.</td>
+<td>Operations</td>
+<td>Vendors verified</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Create the vendor definitions, linked to the partner MID with IBAN
+and any commission. Enable split payout on the partner MID with
+remittance fee, fee-bearer option and N. Share the beneficiary IDs with
+the PGW integration team.</td>
+<td>APEX team</td>
+<td>Beneficiary IDs</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Enable split payout on the partner MID and configure the split mode,
+template or profiles, and beneficiary IDs (section 7.1).</td>
+<td>PGW integration team</td>
+<td>Partner configured</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Share the beneficiary IDs and the API specs with the partner and
+support its integration.</td>
+<td>PGW integration team</td>
+<td>Partner integrated</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Go live.</td>
+<td>Partner</td>
+<td>Live</td>
+</tr>
+</tbody>
+</table>
+<p>Due diligence and screening are done once, when a vendor is
+onboarded, not on every payout. The documents are kept on record to
+support each payout (for example, under the Central Bank travel rule).
+New vendors, changes to a vendor’s details or commission, and
+deactivation follow the same operational route. Vendors have no portal
+access; Geidea communicates with the partner only.</p>
+<h1 id="apex">6. APEX</h1>
+<p>This section sets out what APEX needs to deliver. How each item is
+built, including the API and file formats, is for the APEX team to
+define with its platform vendor; structures shown here are the current
+working proposal.</p>
+<h2 id="vendor-definition">6.1 Vendor definition</h2>
+<ul>
+<li><p>APEX holds a vendor definition for each vendor, identified by a
+unique beneficiary ID generated by APEX. A vendor definition is not a
+MID.</p></li>
+<li><p>It holds at least the vendor’s name and IBAN, and is linked to
+the partner MID, so a partner can only pay its own vendors.</p></li>
+<li><p>A commission (fixed or percentage) can be set at vendor level
+when the partner requests it.</p></li>
+<li><p>A vendor can be activated and deactivated; a deactivated vendor
+can no longer be paid.</p></li>
+<li><p>Vendor definitions are created and maintained by the APEX team
+from the operational setup (section 5).</p></li>
+</ul>
+<h2 id="split-payout-enablement-on-the-partner-mid">6.2 Split payout
+enablement on the partner MID</h2>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Setting</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Split payout enabled</td>
+<td>Identifies a partner MID whose settlement follows the money flow in
+section 4.</td>
+</tr>
+<tr class="even">
+<td>Remittance fee</td>
+<td>Fee per payout (each vendor transfer and the partner’s own payout),
+with any applicable VAT.</td>
+</tr>
+<tr class="odd">
+<td>Fee bearer for vendor transfers</td>
+<td>Partner (deducted from residual) or vendor (deducted from each
+vendor’s payout). The fee on the partner’s own payout is always the
+partner’s.</td>
+</tr>
+<tr class="even">
+<td>N (days)</td>
+<td>Days after which a flagged transaction without a valid advice is
+released to the partner. Can be zero.</td>
+</tr>
+</tbody>
+</table>
+<p>The payout cap (%) does not apply to split payout partners. The
+payout schedule (scheme schedule, matched status or advance payout, as
+configured on the MID) continues to apply.</p>
+<h2 id="hold-of-flagged-transactions">6.3 Hold of flagged
+transactions</h2>
+<ul>
+<li><p>APEX receives the split flag with the transaction in PGW’s
+federation (real-time Create Transaction API and the day-end transaction
+file).</p></li>
+<li><p>Unflagged transactions of a split-enabled MID settle to the
+partner as normal.</p></li>
+<li><p>A flagged transaction is held from payout until a valid advice is
+PROCESSED for it.</p></li>
+<li><p>If no valid advice is processed within N days of the
+transaction’s scheduled payout date — whether the advice was never
+received or was rejected and not corrected — APEX releases the
+transaction to the partner after Geidea’s MDR, sets the advice status to
+RELEASED where one exists, and lists the transaction in an exception
+report for Operations and Finance. The timer runs on the flagged
+transaction, not on an advice record.</p></li>
+</ul>
+<h2 id="split-advice-intake">6.4 Split advice intake</h2>
+<p>APEX receives split advices from PGW through two channels, following
+the same model as transaction federation today.</p>
+<h3 id="real-time-split-advice-api">Real-time Split Advice API</h3>
+<p>PGW sends each advice as soon as it has one: at payment success for a
+split sent with the order, and on every Payout Advice API call. One
+request can carry several advices. Working structure (APEX to
+finalise):</p>
+<p>&lt;SplitAdvices&gt;</p>
+<p>  &lt;SplitAdvice&gt;</p>
+<p>    &lt;Action&gt;A | U&lt;/Action&gt;                       &lt;!-- A = create, U = update --&gt;</p>
+<p>    &lt;Merchant&gt;partner MID&lt;/Merchant&gt;</p>
+<p>    &lt;Transaction_Reference&gt;interSystemID&lt;/Transaction_Reference&gt;</p>
+<p>    &lt;Split_Rules&gt;</p>
+<p>      &lt;Split_Rule&gt;</p>
+<p>        &lt;BeneficiaryID&gt;BEN000301&lt;/BeneficiaryID&gt;</p>
+<p>        &lt;Percentage&gt;&lt;/Percentage&gt;                 &lt;!-- either Percentage ... --&gt;</p>
+<p>        &lt;Amount&gt;600.00&lt;/Amount&gt;                   &lt;!-- ... or Amount, not both --&gt;</p>
+<p>      &lt;/Split_Rule&gt;</p>
+<p>    &lt;/Split_Rules&gt;</p>
+<p>  &lt;/SplitAdvice&gt;</p>
+<p>&lt;/SplitAdvices&gt;</p>
+<table>
+<colgroup>
+<col style="width: 41%" />
+<col style="width: 58%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>PGW / product term</strong></th>
+<th><strong>APEX structure</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Partner (split-enabled merchant)</td>
+<td>&lt;Merchant&gt; MID</td>
+</tr>
+<tr class="even">
+<td>Beneficiary / beneficiaryId</td>
+<td>&lt;BeneficiaryID&gt; (APEX may name it PartnerID; “partner” in this
+document means the merchant)</td>
+</tr>
+<tr class="odd">
+<td>Payout Advice API NEW / UPDATE</td>
+<td>&lt;Action&gt; A / U</td>
+</tr>
+<tr class="even">
+<td>interSystemID</td>
+<td>&lt;Transaction_Reference&gt;</td>
+</tr>
+<tr class="odd">
+<td>Partner residual</td>
+<td>Settlement to the merchant</td>
+</tr>
+</tbody>
+</table>
+<p>The API runs the structural checks synchronously and returns them in
+the response: split enabled on the MID; every beneficiary found, active
+and linked to the MID; MID matches the transaction; transaction carries
+the split flag; one of percentage or amount per rule; A only when no
+advice exists for the transaction; U only when the existing advice is
+CREATED, REJECTED or PENDING_MATCH. Amount validation runs later
+(section 6.5).</p>
+<h3 id="transaction-not-yet-on-apex">Transaction not yet on APEX</h3>
+<p>An advice that arrives before its transaction is not rejected. APEX
+parks it as PENDING_MATCH and links it when the transaction arrives. If
+still unmatched at day end, it is rejected with a reason code so the
+partner sees it in the split payout report.</p>
+<h3 id="day-end-split-advice-file">Day-end split advice file</h3>
+<p>PGW sends a day-end file after the Ecomm cut-off (midnight) with
+every advice of the day, including updates. It is the backup to the API
+and the channel for updates. APEX reconciles it against the API:</p>
+<table>
+<colgroup>
+<col style="width: 46%" />
+<col style="width: 53%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Case</strong></th>
+<th><strong>APEX action</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Advice in the API and in the file, same split</td>
+<td>No action.</td>
+</tr>
+<tr class="even">
+<td>Advice in the file with a different split</td>
+<td>Overwrite with the file’s split and process.</td>
+</tr>
+<tr class="odd">
+<td>Advice in the file, not received over the API</td>
+<td>Process as new (covers an API failure).</td>
+</tr>
+<tr class="even">
+<td>Advice received over the API, missing in the file</td>
+<td>Mark as mismatched and hold settlement until resolved.</td>
+</tr>
+<tr class="odd">
+<td>No file received</td>
+<td>Process with what was received over the API.</td>
+</tr>
+</tbody>
+</table>
+<p>The file carries a trailer with the record count. PGW sends an empty
+file with a zero count on days with no advices, so APEX can tell “no
+advices today” from “file not received”. File format to be defined by
+APEX.</p>
+<h2 id="amount-validation">6.5 Amount validation</h2>
+<p>Run by APEX as a scheduled process once pricing is available (in-call
+validation if the platform vendor can support it). Any failure rejects
+the whole advice with a reason code.</p>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Rule</strong></th>
+<th><strong>Check</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Rule 1 – partner residual not negative</td>
+<td><p>net − Σ advised beneficiary amounts + Σ beneficiary commissions −
+remittance fees borne by the partner ≥ 0</p>
+<p>(net = transaction amount − MDR − VAT on MDR)</p></td>
+</tr>
+<tr class="even">
+<td>Rule 2 – every leg above zero</td>
+<td>advised amount − commission − remittance fee (only when the vendor
+bears it) &gt; 0, for every beneficiary</td>
+</tr>
+<tr class="odd">
+<td>Single payout</td>
+<td>A transaction is never paid out twice.</td>
+</tr>
+</tbody>
+</table>
+<p>“Split ≤ net” is not a sufficient check: it passes advices that leave
+the partner negative once fees are taken, and rejects valid advices
+where vendor commission covers the gap. Examples (transaction 1,000, MDR
+10, VAT 0.50, net 989.50, fee 1.00 per payout, three beneficiaries at 2%
+commission):</p>
+<table>
+<colgroup>
+<col style="width: 13%" />
+<col style="width: 23%" />
+<col style="width: 13%" />
+<col style="width: 28%" />
+<col style="width: 21%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Fee bearer</strong></th>
+<th><strong>Advised</strong></th>
+<th><strong>Commission</strong></th>
+<th><strong>Partner residual</strong></th>
+<th><strong>Result</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Partner</td>
+<td>400 / 300 / 250 = 950</td>
+<td>19.00</td>
+<td>989.50 − 950 + 19 − 4 = 54.50</td>
+<td>Valid</td>
+</tr>
+<tr class="even">
+<td>Partner</td>
+<td>400 / 300 / 300 = 1,000</td>
+<td>20.00</td>
+<td>989.50 − 1,000 + 20 − 4 = 5.50</td>
+<td>Valid (above net, covered by commission)</td>
+</tr>
+<tr class="odd">
+<td>Partner</td>
+<td>400 / 300 / 310 = 1,010</td>
+<td>20.20</td>
+<td>989.50 − 1,010 + 20.20 − 4 = −4.30</td>
+<td>Reject (Rule 1)</td>
+</tr>
+<tr class="even">
+<td>Vendor</td>
+<td>400 / 300 / 250 = 950</td>
+<td>19.00</td>
+<td>989.50 − 950 + 19 − 1 = 57.50</td>
+<td>Valid; vendors receive 391 / 293 / 244</td>
+</tr>
+<tr class="odd">
+<td>Vendor</td>
+<td>one leg of 0.80</td>
+<td>0.02</td>
+<td>—</td>
+<td>Reject (Rule 2): 0.80 − 0.02 − 1.00 = −0.22</td>
+</tr>
+<tr class="even">
+<td>Either</td>
+<td>one leg of 4.00, fixed commission 5.00</td>
+<td>5.00</td>
+<td>—</td>
+<td>Reject (Rule 2)</td>
+</tr>
+</tbody>
+</table>
+<h3 id="advice-statuses">Advice statuses</h3>
+<table>
+<colgroup>
+<col style="width: 24%" />
+<col style="width: 75%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Status</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>CREATED</td>
+<td>Received and passed structural checks; awaiting amount validation
+and payout.</td>
+</tr>
+<tr class="even">
+<td>PENDING_MATCH</td>
+<td>Received before the transaction reached APEX.</td>
+</tr>
+<tr class="odd">
+<td>REJECTED</td>
+<td>Failed a check; reason code recorded. Can be corrected with U within
+N days.</td>
+</tr>
+<tr class="even">
+<td>PROCESSED</td>
+<td>Paid out to vendors and residual settled. No further updates.</td>
+</tr>
+<tr class="odd">
+<td>RELEASED</td>
+<td>N days passed without a valid advice; settled to the partner after
+MDR. No further updates.</td>
+</tr>
+</tbody>
+</table>
+<p>Reason codes are shared with PGW and appear in the split payout
+report so the partner knows what to fix.</p>
+<h2 id="calculation-and-payout">6.6 Calculation and payout</h2>
+<ul>
+<li><p>Convert percentage splits to amounts against the gross
+transaction amount; round each to 2 decimals.</p></li>
+<li><p>Calculate each vendor’s commission and net payout, and the
+partner’s residual (section 4). Rounding differences go to the
+residual.</p></li>
+<li><p>Make the vendor payouts from the partner’s net as domestic fund
+transfers to each vendor’s IBAN, deduct remittance fees as set on the
+partner MID, and settle the residual to the partner, with no manual
+finance step. Account mechanics as defined by Finance.</p></li>
+<li><p>Handle failed transfers through the existing exception
+process.</p></li>
+</ul>
+<h2 id="reporting">6.7 Reporting</h2>
+<ul>
+<li><p><strong>Split payout report to the partner</strong>, per
+transaction: transaction amount, Geidea’s MDR, amount paid to each
+vendor, commission recovered from each vendor, remittance fees,
+residual, advice status and any rejection or failure reason. This is the
+partner’s channel for the outcome of its advices.</p></li>
+<li><p><strong>Payout report to each vendor</strong>: amount received
+against each transaction reference and any remittance fee
+deducted.</p></li>
+<li><p><strong>FinOps screen in APEX</strong>: split advices with
+filters (partner, status, date) and export.</p></li>
+<li><p><strong>Exception report</strong>: transactions released after N
+days, mismatched advices, failed transfers.</p></li>
+<li><p>Finance and reconciliation reports as required by Finance.
+Partner and vendor report content comes from Business. Format and
+delivery to be defined with APEX.</p></li>
+</ul>
+<h2 id="apex-work-items">6.8 APEX work items</h2>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 77%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Work item</strong></th>
+<th><strong>Section</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>APX-01</td>
+<td>Vendor definition with APEX-generated beneficiary ID, name, IBAN,
+partner MID link, optional commission, activation and deactivation.</td>
+<td>6.1</td>
+</tr>
+<tr class="even">
+<td>APX-02</td>
+<td>Split payout settings on the partner MID: enabled flag, remittance
+fee, fee-bearer option, N.</td>
+<td>6.2</td>
+</tr>
+<tr class="odd">
+<td>APX-03</td>
+<td>Accept the split flag in transaction federation (Create Transaction
+API and day-end transaction file).</td>
+<td>6.3</td>
+</tr>
+<tr class="even">
+<td>APX-04</td>
+<td>Hold flagged transactions from payout; release after N days from the
+scheduled payout date; exception report.</td>
+<td>6.3</td>
+</tr>
+<tr class="odd">
+<td>APX-05</td>
+<td>Real-time Split Advice API (A/U) with synchronous structural checks
+and response codes; store advices with status.</td>
+<td>6.4</td>
+</tr>
+<tr class="even">
+<td>APX-06</td>
+<td>PENDING_MATCH parking, matching on transaction arrival, day-end
+rejection with reason.</td>
+<td>6.4</td>
+</tr>
+<tr class="odd">
+<td>APX-07</td>
+<td>Day-end split advice file intake: reconciliation against the API,
+trailer check, empty-file handling, mismatch hold.</td>
+<td>6.4</td>
+</tr>
+<tr class="even">
+<td>APX-08</td>
+<td>Amount validation: Rule 1, Rule 2, single payout; percentage
+conversion on the gross amount; rounding.</td>
+<td>6.5</td>
+</tr>
+<tr class="odd">
+<td>APX-09</td>
+<td>Advice statuses (CREATED, PENDING_MATCH, REJECTED, PROCESSED,
+RELEASED) and reason codes.</td>
+<td>6.5</td>
+</tr>
+<tr class="even">
+<td>APX-10</td>
+<td>Payout calculation and execution: commission, remittance fees per
+fee-bearer option, domestic fund transfers, residual; payout cap not
+applied; failed-transfer exception handling.</td>
+<td>6.6</td>
+</tr>
+<tr class="odd">
+<td>APX-11</td>
+<td>Accounting entries and account mechanics as defined by Finance.</td>
+<td>4.1, 6.6</td>
+</tr>
+<tr class="even">
+<td>APX-12</td>
+<td>Split payout report (partner), vendor payout report, exception
+report, Finance reports.</td>
+<td>6.7</td>
+</tr>
+<tr class="odd">
+<td>APX-13</td>
+<td>FinOps screen with filters and export.</td>
+<td>6.7</td>
+</tr>
+</tbody>
+</table>
+<h1 id="pgw-ecomm">7. PGW (Ecomm)</h1>
+<h2 id="configuration">7.1 Configuration</h2>
+<p>Set by the PGW integration team per partner MID, from the operational
+setup in section 5.2. The partner has no access.</p>
+<table>
+<colgroup>
+<col style="width: 31%" />
+<col style="width: 68%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Setting</strong></th>
+<th><strong>Purpose</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Split payout enabled</td>
+<td>Turns the service on for the MID. Off by default.</td>
+</tr>
+<tr class="even">
+<td>Split mode</td>
+<td>Dynamic, Fixed or Profile.</td>
+</tr>
+<tr class="odd">
+<td>Fixed template</td>
+<td>Fixed mode only: list of legs (beneficiary ID + amount or
+percentage).</td>
+</tr>
+<tr class="even">
+<td>Profile catalog</td>
+<td>Profile mode only: profile IDs, each with its list of legs.</td>
+</tr>
+<tr class="odd">
+<td>Beneficiary IDs</td>
+<td>The partner’s beneficiary IDs, entered as received from the APEX
+team. Used to validate the partner’s requests.</td>
+</tr>
+</tbody>
+</table>
+<p>PGW holds no vendor bank details and does not check vendor status. A
+beneficiary ID that is wrong or no longer active is rejected by
+APEX.</p>
+<h2 id="order-creation-request">7.2 Order creation request</h2>
+<p>The split travels in the existing order creation request. The partner
+never sends bank details, fees or commission.</p>
+<table>
+<colgroup>
+<col style="width: 43%" />
+<col style="width: 9%" />
+<col style="width: 12%" />
+<col style="width: 34%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Mode</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>splitPayoutType</td>
+<td>string</td>
+<td>Dynamic</td>
+<td>AMOUNT or PERCENTAGE. Applies to every leg of the order.</td>
+</tr>
+<tr class="even">
+<td>splitPayoutTransaction</td>
+<td>array</td>
+<td>Dynamic</td>
+<td>One object per vendor leg.</td>
+</tr>
+<tr class="odd">
+<td>splitPayoutTransaction[].beneficiaryId</td>
+<td>string</td>
+<td>Dynamic</td>
+<td>Must be one of the partner’s configured beneficiary IDs.</td>
+</tr>
+<tr class="even">
+<td>splitPayoutTransaction[].value</td>
+<td>number</td>
+<td>Dynamic</td>
+<td>Amount in order currency (2 decimals) for AMOUNT; percentage of the
+order amount (up to 2 decimals) for PERCENTAGE.</td>
+</tr>
+<tr class="odd">
+<td>splitPayoutTransaction[].reference</td>
+<td>string</td>
+<td>Dynamic</td>
+<td>Optional. Partner’s own reference for the leg; returned in the split
+payout report.</td>
+</tr>
+<tr class="even">
+<td>splitPayoutTransaction[].description</td>
+<td>string</td>
+<td>Dynamic</td>
+<td>Optional. Free text.</td>
+</tr>
+<tr class="odd">
+<td>splitPayoutProfileId</td>
+<td>string</td>
+<td>Profile</td>
+<td>ID of a profile in the partner’s configured profile catalog.</td>
+</tr>
+<tr class="even">
+<td>deferredSplit</td>
+<td>boolean</td>
+<td>Dynamic, Profile</td>
+<td>Optional. true when the partner will send the split later through
+the Payout Advice API. Must not be sent together with split detail.</td>
+</tr>
+</tbody>
+</table>
+<p>PGW also keeps a derived order attribute, splitPayout (boolean), set
+when the order carries split detail or a profile ID, or is a Fixed-mode
+order. It is returned on the order and is not a request field.</p>
+<table>
+<colgroup>
+<col style="width: 26%" />
+<col style="width: 17%" />
+<col style="width: 37%" />
+<col style="width: 17%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Split detail / profile ID</strong></th>
+<th><strong>deferredSplit</strong></th>
+<th><strong>PGW action</strong></th>
+<th><strong>Split flag to APEX</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Present (or Fixed mode)</td>
+<td>false / absent</td>
+<td>Accept; splitPayout = true</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Absent</td>
+<td>true</td>
+<td>Accept; split expected through the Payout Advice API</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>Absent</td>
+<td>false / absent</td>
+<td>Normal order</td>
+<td>No</td>
+</tr>
+<tr class="even">
+<td>Present</td>
+<td>true</td>
+<td>Reject (ambiguous; use UPDATE to change an inline split)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<p>Sending split fields or deferredSplit for a MID where split payout is
+not enabled, or split fields that do not match the MID’s mode, rejects
+the order. An empty splitPayoutTransaction array counts as absent.</p>
+<h3 id="dynamic-mode-amount-split">Dynamic mode, amount split</h3>
+<p>{</p>
+<p>  "merchantId": "20100000101",</p>
+<p>  "merchantReferenceId": "ORD-DEMO-1000",</p>
+<p>  "amount": 1000.00,</p>
+<p>  "currency": "AED",</p>
+<p>  "paymentOperation": "Pay",</p>
+<p>  "splitPayoutType": "AMOUNT",</p>
+<p>  "splitPayoutTransaction": [</p>
+<p>    { "beneficiaryId": "BEN000301", "value": 600.00,</p>
+<p>      "reference": "SELLER-A", "description": "Products - Seller A" },</p>
+<p>    { "beneficiaryId": "BEN000302", "value": 300.00,</p>
+<p>      "reference": "SELLER-B", "description": "Products - Seller B" },</p>
+<p>    { "beneficiaryId": "BEN000303", "value": 100.00,</p>
+<p>      "reference": "DELIVERY-CO", "description": "Delivery fee" }</p>
+<p>  ]</p>
+<p>}</p>
+<h3 id="dynamic-mode-percentage-split-of-the-gross-order-amount">Dynamic
+mode, percentage split (of the gross order amount)</h3>
+<p>{</p>
+<p>  "merchantId": "20100000101",</p>
+<p>  "merchantReferenceId": "ORD-DEMO-1001",</p>
+<p>  "amount": 1000.00,</p>
+<p>  "currency": "AED",</p>
+<p>  "paymentOperation": "Pay",</p>
+<p>  "splitPayoutType": "PERCENTAGE",</p>
+<p>  "splitPayoutTransaction": [</p>
+<p>    { "beneficiaryId": "BEN000301", "value": 60.00, "reference": "SELLER-A" },</p>
+<p>    { "beneficiaryId": "BEN000302", "value": 30.00, "reference": "SELLER-B" },</p>
+<p>    { "beneficiaryId": "BEN000303", "value": 8.00,  "reference": "DELIVERY-CO" }</p>
+<p>  ]</p>
+<p>}</p>
+<p>Percentage splits should leave room for Geidea’s MDR and remittance
+fees: a split totalling 100% fails Rule 1 (section 6.5) unless vendor
+commission covers them.</p>
+<h3 id="profile-mode">Profile mode</h3>
+<p>{</p>
+<p>  "merchantId": "20100000101",</p>
+<p>  "merchantReferenceId": "POL-DEMO-2001",</p>
+<p>  "amount": 2500.00,</p>
+<p>  "currency": "AED",</p>
+<p>  "paymentOperation": "Pay",</p>
+<p>  "splitPayoutProfileId": "PRF-INSURER-A"</p>
+<p>}</p>
+<h3 id="deferred-split-dynamic-or-profile">Deferred split (Dynamic or
+Profile)</h3>
+<p>{</p>
+<p>  "merchantId": "20100000101",</p>
+<p>  "merchantReferenceId": "ORD-DEMO-4001",</p>
+<p>  "amount": 750.00,</p>
+<p>  "currency": "AED",</p>
+<p>  "paymentOperation": "Pay",</p>
+<p>  "deferredSplit": true</p>
+<p>}</p>
+<p>Fixed mode: the partner sends a normal order with no split fields.
+PGW applies the MID’s fixed template and stores the resulting split
+against the order.</p>
+<h2 id="payout-advice-api">7.3 Payout Advice API</h2>
+<p>A PGW API through which a partner sends a split advice for an
+existing order, or updates one. Available to Dynamic and Profile MIDs; a
+Fixed MID gets its split from the template. Endpoint and field naming to
+be finalised by PGW engineering.</p>
+<table>
+<colgroup>
+<col style="width: 22%" />
+<col style="width: 10%" />
+<col style="width: 66%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Content</strong></th>
+<th><strong>M/O/C</strong></th>
+<th><strong>Description</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Action</td>
+<td>M</td>
+<td>NEW or UPDATE.</td>
+</tr>
+<tr class="even">
+<td>Order reference</td>
+<td>M</td>
+<td>The PGW order the advice applies to.</td>
+</tr>
+<tr class="odd">
+<td>Advice ID</td>
+<td>C</td>
+<td>Mandatory for UPDATE: the advice ID returned by the latest NEW or
+UPDATE.</td>
+</tr>
+<tr class="even">
+<td>Split</td>
+<td>M</td>
+<td>Dynamic: splitPayoutType and splitPayoutTransaction as in section
+7.2. Profile: splitPayoutProfileId. Always the complete split, never a
+single leg.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="rules">Rules</h3>
+<ul>
+<li><p>NEW is accepted only for an order created with deferredSplit =
+true that has no advice yet. Repeating a NEW with the same content
+returns the original advice ID, so a retry after a timeout is
+safe.</p></li>
+<li><p>UPDATE is accepted for any flagged order (split sent at order
+creation or through NEW) and must carry the latest advice ID, so an
+older retried request cannot undo a newer correction. APEX accepts it
+only while the advice is CREATED, REJECTED or PENDING_MATCH; it is
+refused once PROCESSED or RELEASED. An UPDATE is how a partner corrects
+a rejected advice.</p></li>
+<li><p>An advice for an order that is not flagged is rejected: the
+transaction may already have settled to the partner.</p></li>
+<li><p>The order must be a successful sale under the calling partner’s
+MID.</p></li>
+<li><p>PGW forwards every accepted NEW or UPDATE to the APEX Split
+Advice API in real time (action A or U). The response returns the advice
+ID with status accepted, or rejected with a reason code from PGW’s
+checks or from APEX’s synchronous checks. The final outcome reaches the
+partner through the split payout report.</p></li>
+<li><p>If APEX cannot be reached, PGW retries; the day-end file carries
+the advice in any case, and the transaction stays held because it is
+flagged.</p></li>
+</ul>
+<h2 id="split-flag-in-federation">7.4 Split flag in federation</h2>
+<ul>
+<li><p>PGW sets the split flag on the transaction it federates to APEX
+when the order has splitPayout = true or deferredSplit = true.</p></li>
+<li><p>The flag is carried in the real-time Create Transaction API and
+in the day-end transaction record, on the record APEX settles from,
+keyed by interSystemID.</p></li>
+<li><p>Field name and position to be agreed with APEX.</p></li>
+</ul>
+<h2 id="forwarding-advices-to-apex">7.5 Forwarding advices to APEX</h2>
+<ul>
+<li><p><strong>Real time.</strong> For a split sent with the order
+(including Fixed and Profile, resolved into legs), PGW sends action A to
+the APEX Split Advice API once the payment succeeds. For the Payout
+Advice API, PGW sends A or U on each accepted call.</p></li>
+<li><p><strong>Day-end file.</strong> After the Ecomm cut-off
+(midnight), PGW sends APEX the split advice file with every advice of
+the day, including updates, in the latest state held by PGW. The file
+has a trailer with the record count and is sent every day, with a zero
+count when there are no advices. Format defined by APEX.</p></li>
+<li><p>PGW keeps each advice’s status: pending, sent to APEX, APEX
+response (accepted or rejected with reason), included in day-end
+file.</p></li>
+</ul>
+<h2 id="validations">7.6 Validations</h2>
+<p>PGW validates at order creation, before any payment is taken, and on
+every Payout Advice API call. Any failure rejects the request with a
+specific error code (codes to be defined by PGW).</p>
+<table>
+<colgroup>
+<col style="width: 58%" />
+<col style="width: 17%" />
+<col style="width: 23%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Check</strong></th>
+<th><strong>Order creation</strong></th>
+<th><strong>Payout Advice API</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Split payout is enabled for the MID.</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>The request matches the configured mode: legs for Dynamic, a valid
+profile ID for Profile, no split fields for Fixed.</td>
+<td>Yes</td>
+<td>Yes (Fixed MIDs rejected)</td>
+</tr>
+<tr class="odd">
+<td>Split detail and deferredSplit are not sent together.</td>
+<td>Yes</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Every beneficiary ID is one of the partner’s configured beneficiary
+IDs.</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>All legs use one split type.</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>Amount splits add up to no more than the order amount; percentage
+splits to no more than 100%.</td>
+<td>Yes</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>The order exists, is a successful sale and belongs to the calling
+MID.</td>
+<td>—</td>
+<td>Yes</td>
+</tr>
+<tr class="even">
+<td>The order is flagged for split.</td>
+<td>—</td>
+<td>Yes</td>
+</tr>
+<tr class="odd">
+<td>NEW: order created with deferredSplit and no advice exists. UPDATE:
+advice ID is the latest for the order.</td>
+<td>—</td>
+<td>Yes</td>
+</tr>
+</tbody>
+</table>
+<h2 id="transaction-flow">7.7 Transaction flow</h2>
+<ol type="1">
+<li><p>The partner creates the order with split detail (Dynamic), a
+profile ID (Profile), deferredSplit (split to follow), or no split
+(Fixed, where PGW applies the template).</p></li>
+<li><p>PGW validates the request (section 7.6). If invalid, the order is
+rejected before any payment is taken.</p></li>
+<li><p>The customer pays. PGW authorizes through the existing route
+(MPGS or CyberSource), confirms the payment to the partner and federates
+the transaction to APEX in real time with the split flag where
+applicable.</p></li>
+<li><p>PGW stores the resolved split against the order and sends it to
+the APEX Split Advice API in real time.</p></li>
+<li><p>For a deferred split, or to correct an advice, the partner calls
+the Payout Advice API; PGW validates and forwards it to APEX in real
+time.</p></li>
+<li><p>After the Ecomm cut-off (midnight), PGW sends the day-end split
+advice file.</p></li>
+<li><p>APEX holds the flagged transaction, validates the advice, and
+pays out or releases after N days (section 6).</p></li>
+</ol>
+<h2 id="pgw-work-items">7.8 PGW work items</h2>
+<table>
+<colgroup>
+<col style="width: 10%" />
+<col style="width: 77%" />
+<col style="width: 12%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Work item</strong></th>
+<th><strong>Section</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PGW-01</td>
+<td>Split payout configuration per partner MID: enabled, mode, Fixed
+template, Profile catalog, beneficiary IDs.</td>
+<td>7.1</td>
+</tr>
+<tr class="even">
+<td>PGW-02</td>
+<td>Order creation: accept split fields and deferredSplit; derived
+splitPayout attribute; mode and combination checks.</td>
+<td>7.2</td>
+</tr>
+<tr class="odd">
+<td>PGW-03</td>
+<td>Resolve and store the split against the order (Fixed and Profile
+into legs) with advice ID and status.</td>
+<td>7.2, 7.5</td>
+</tr>
+<tr class="even">
+<td>PGW-04</td>
+<td>Split flag in transaction federation to APEX (real-time API and
+day-end transaction record).</td>
+<td>7.4</td>
+</tr>
+<tr class="odd">
+<td>PGW-05</td>
+<td>Payout Advice API (NEW / UPDATE) with the rules in section 7.3.</td>
+<td>7.3</td>
+</tr>
+<tr class="even">
+<td>PGW-06</td>
+<td>Real-time forwarding of advices to the APEX Split Advice API (A /
+U), retries, mapping of APEX responses and reason codes.</td>
+<td>7.3, 7.5</td>
+</tr>
+<tr class="odd">
+<td>PGW-07</td>
+<td>Day-end split advice file after the midnight cut-off, with trailer,
+sent every day including empty days.</td>
+<td>7.5</td>
+</tr>
+<tr class="even">
+<td>PGW-08</td>
+<td>Validations in section 7.6 with error codes.</td>
+<td>7.6</td>
+</tr>
+<tr class="odd">
+<td>PGW-09</td>
+<td>Merchant API documentation: split fields, deferredSplit, Payout
+Advice API, error and reason codes.</td>
+<td>7.2, 7.3</td>
+</tr>
+</tbody>
+</table>
+<h1 id="refunds-and-chargebacks">8. Refunds and Chargebacks</h1>
+<p>Refunds and chargebacks are debited from the partner’s MID through
+the normal process. Vendors and their payouts are not involved, and
+Geidea does not recover amounts from vendors. A chargeback on a
+transaction whose split has already been paid out is handled the same
+way as a chargeback on any settled transaction today.</p>
+<p>Because a partner’s residual can be small, a refund or chargeback may
+exceed the partner’s settlement on the day. How the shortfall is
+recovered (for example, from the partner’s later settlements) is to be
+covered in the partner agreement and confirmed by Finance. New splits
+should not be held back to recover a partner’s negative balance, as that
+would stop vendor payments for an amount the partner owes.</p>
+<h1 id="out-of-scope-and-later-phases">9. Out of Scope and Later
+Phases</h1>
+<table>
+<colgroup>
+<col style="width: 77%" />
+<col style="width: 22%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Status</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>POS (TMS and MW): split advice for POS transactions. Expected
+design: MW exposes a split API to the partner, forwards advices to the
+APEX Split Advice API in real time and generates its own day-end file,
+as PGW does. Open: how a POS transaction is flagged for hold, as there
+is no order-creation step.</td>
+<td>Later phase</td>
+</tr>
+<tr class="even">
+<td>Merchant Portal: SPLIT tag and filter on Transactions, Payout Split
+table on transaction detail, split payout view. A split advice inquiry
+API from APEX is taken up with this view.</td>
+<td>Later phase</td>
+</tr>
+<tr class="odd">
+<td>MA: APIs on top of APEX for vendor creation and split payout
+enablement.</td>
+<td>Later phase</td>
+</tr>
+<tr class="even">
+<td>Individuals as vendors</td>
+<td>Out of scope</td>
+</tr>
+<tr class="odd">
+<td>Cross-border payouts</td>
+<td>Out of scope</td>
+</tr>
+<tr class="even">
+<td>Vendor portal access or self-service</td>
+<td>Out of scope</td>
+</tr>
+<tr class="odd">
+<td>Real-time payouts; partial processing of an advice</td>
+<td>Out of scope</td>
+</tr>
+</tbody>
+</table>
+<h1 id="open-items">10. Open Items</h1>
+<table>
+<colgroup>
+<col style="width: 6%" />
+<col style="width: 62%" />
+<col style="width: 31%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Item</strong></th>
+<th><strong>Owner</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Split Advice API specification, day-end advice file format and
+trailer, field name and position of the split flag in federation.</td>
+<td>APEX (Arul, Talha) with Emcrey; PGW</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Whether amount validation can run in the API call or only as a
+scheduled process.</td>
+<td>APEX with Emcrey</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Reason code list for APEX rejections, shared with PGW for the API
+response and report.</td>
+<td>APEX, PGW</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>APEX delivery date for the split scope.</td>
+<td>APEX (Talha, Arul, Marina)</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Account mechanics (staging account or direct posting) and accounting
+entries.</td>
+<td>Finance (Rahmatullah, Sherly)</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>VAT on vendor commission and remittance fees; remittance fee amount;
+whether funds move to a separate account for the remittance fee.</td>
+<td>Finance</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Default value of N.</td>
+<td>Finance, Business</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td>Recovery of a refund or chargeback shortfall when the partner’s
+balance goes negative.</td>
+<td>Finance, Legal, Business</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td>Partner and vendor report content; Finance and reconciliation
+reports.</td>
+<td>Business (Dheeraj), Finance</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td>PGW error codes and Payout Advice API contract review.</td>
+<td>PGW (Muhammad ElTabbakh)</td>
+</tr>
+</tbody>
+</table>
+
+</article>
+</main>
+</div>
+<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+</body>
+</html>
