@@ -3,15 +3,15 @@
     "money-flow": "../money-flow.html",
     "worked-example": "../money-flow.html",
     "outcomes": "../money-flow.html#outcomes",
-    "order-creation-request": "../simulator.html#dynamic-amount",
-    "payout-advice-api": "../simulator.html#deferred",
-    "transaction-flow": "../simulator.html#dynamic-amount",
-    "amount-validation": "../simulator.html#rule1"
+    "order-creation-request": "../simulator.html",
+    "payout-advice-api": "../simulator.html",
+    "transaction-flow": "../simulator.html",
+    "amount-validation": "../simulator.html"
   },
   "split-payout/docs/stories.html": {
-    "sp-6-be-create-session-with-split-payout": "../simulator.html#dynamic-amount",
-    "checks-before-payment": "../simulator.html#total-over",
-    "sp-8-be-pgw-split-payout-api": "../simulator.html#deferred",
-    "sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3": "../simulator.html#apex-down"
+    "sp-6-be-create-session-with-split-payout": "../simulator.html",
+    "checks-before-payment": "../simulator.html",
+    "sp-8-be-pgw-split-payout-api": "../simulator.html",
+    "sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3": "../simulator.html"
   }
 }
