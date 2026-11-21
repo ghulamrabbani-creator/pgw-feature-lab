@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Payment simulator · Split Payout · PGW Feature Lab</title>
+<title>Split Payout Config &amp; Payment Simulator · PGW Feature Lab</title>
 <link rel="stylesheet" href="../assets/lab.css">
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
 <style>
@@ -162,12 +162,12 @@ textarea.code:focus { outline: 2px solid var(--link); }
 <body>
 <header class="lab-header"><div class="inner">
 <a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
-<nav class="lab-crumbs"><a href="./">Split Payout</a> / Payment simulator</nav>
+<nav class="lab-crumbs"><a href="./">Split Payout</a> / Config &amp; Payment Simulator</nav>
 </div></header>
 <main class="wrap" style="max-width:1180px">
 <p class="eyebrow">simulator · split payout</p>
-<h1 class="page">Payment simulator</h1>
-<p class="lead">Set up a merchant's split payout in the PGW configuration, send a Create Session, and follow the order to APEX: real-time federation and advice, then the day-end file.</p>
+<h1 class="page">Split Payout Config &amp; Payment Simulator</h1>
+<p class="lead">One section per PGW work item: configure split payout on a MID, create a session, follow the transaction to APEX, send or correct a split with the Payout Advice API, and generate the day-end file.</p>
 <div class="vp-meta">
 <span class="tag warn">Illustrative</span>
 <span class="tag grey">Reflects PGW stories v0.5 and product doc v1.6</span>
@@ -177,14 +177,14 @@ textarea.code:focus { outline: 2px solid var(--link); }
 <div class="terms"><b>Terms follow the PGW stories.</b> Merchant = the MID with split payout on (the "partner" in the product doc). Partner = a payee of the split, with a Partner ID from APEX (a "vendor" in the product doc). Field names are the stories' proposals. APEX advice fields and the day-end file layout are drafts until the Emcrey spec (P3). Nothing here calls a real system.</div>
 
 <section class="sec" id="s1">
-<header><span class="num">1</span><h2>Merchant configuration</h2><span class="who">PGW configuration · Split Payout tab · SP-1 to SP-5</span><span class="sp"></span>
+<header><span class="num">1</span><h2>Split Payout PGW Configuration</h2><span class="who">PGW configuration · Split Payout tab · SP-1 to SP-5</span><span class="sp"></span>
 <label class="hsel"><span>load example</span><select id="preset"><option value="">—</option><option value="off">Split off</option><option value="dynamic">Dynamic</option><option value="fixed">Fixed</option><option value="profile">Profile</option></select></label>
 <button class="btn ink" id="openCfg" type="button">Open PGW configuration</button></header>
 <div class="in" id="cfgView"></div>
 </section>
 
 <section class="sec" id="s2">
-<header><span class="num">2</span><h2>Create Session</h2><span class="who">Merchant → PGW · POST /payment-intent/api/v2/direct/session</span></header>
+<header><span class="num">2</span><h2>Update Create Session API</h2><span class="who">Merchant → PGW · POST /payment-intent/api/v2/direct/session · SP-6</span></header>
 <div class="in">
 <div class="grid2">
 <div>
@@ -210,19 +210,25 @@ textarea.code:focus { outline: 2px solid var(--link); }
 </section>
 
 <section class="sec locked" id="s3">
-<header><span class="num">3</span><h2>PGW checks and order</h2><span class="who">PGW · SP-6 sections 1 to 5</span><span class="sp"></span>
+<header><span class="num">2</span><h2>Create Session result: checks and order</h2><span class="who">PGW · SP-6 sections 1 to 5</span><span class="sp"></span>
 <label class="hsel"><span>order</span><select id="orderSel"></select></label></header>
 <div class="in" id="resView"><p class="empty">Send a Create Session to see the checks.</p></div>
 </section>
 
 <section class="sec locked" id="s4">
-<header><span class="num">4</span><h2>Payment and real-time federation</h2><span class="who">Customer → PGW → APEX · SP-6 section 6, SP-7, SP-8</span><span class="sp"></span>
-<label class="hsel"><span>APEX response</span><select id="apexMode"><option value="accept">Accepts (checks pass)</option><option value="reject">Rejects: Partner ID inactive at APEX</option><option value="down">Not reachable (timeout)</option></select></label></header>
+<header><span class="num">3</span><h2>Update APEX Create Transaction Federation</h2><span class="who">Customer → PGW → APEX · SP-6 section 6, SP-7</span><span class="sp"></span>
+<label class="hsel"><span>APEX response</span><select class="apexSel" aria-label="APEX response"><option value="accept">Accepts (checks pass)</option><option value="reject">Rejects: Partner ID inactive at APEX</option><option value="down">Not reachable (timeout)</option></select></label></header>
 <div class="in" id="rtView"><p class="empty">Create a session first.</p></div>
 </section>
 
+<section class="sec locked" id="s4b">
+<header><span class="num">4</span><h2>Payout Advice Create/Update API</h2><span class="who">Merchant → PGW → APEX · independent API · SP-8, SP-7</span><span class="sp"></span>
+<label class="hsel"><span>APEX response</span><select class="apexSel" aria-label="APEX response"><option value="accept">Accepts (checks pass)</option><option value="reject">Rejects: Partner ID inactive at APEX</option><option value="down">Not reachable (timeout)</option></select></label></header>
+<div class="in" id="apiView"><p class="empty">Create a session first.</p></div>
+</section>
+
 <section class="sec" id="s5">
-<header><span class="num">5</span><h2>Day-end split advice file</h2><span class="who">PGW → APEX · SP-9 · after the Ecomm cut-off (midnight, UAE)</span><span class="sp"></span>
+<header><span class="num">5</span><h2>Day-End Split Advice File Generation</h2><span class="who">PGW → APEX · SP-9 · after the Ecomm cut-off (midnight, UAE)</span><span class="sp"></span>
 <span class="st grey" id="dayLbl">Day 1</span><button class="btn ink" id="runEod" type="button">Run day-end</button></header>
 <div class="in" id="eodView"></div>
 </section>
@@ -275,6 +281,7 @@ const ICON_DEL = '<svg viewBox="0 0 24 24"><path d="M4 7h16M9 7V4h6v3M6 7l1 13h1
 const BEN_RE = /^[A-Za-z0-9-]{3,20}$/;
 const total = l => l.reduce((a, x) => a + (parseFloat(x.v) || 0), 0);
 
+let APEXMODE = 'accept';
 const S = { cfg: clone(PRESETS.dynamic), savedAt: null, orders: [], cur: -1, day: 1, files: [], advSeq: 0, ordSeq: 0, isSeq: 416 };
 let s = null, errors = {}, editing = null, editIdx = null, modalKind = null;
 
@@ -469,7 +476,7 @@ function renderSplitForm() {
     h += `<div class="seg" role="group" aria-label="Split choice">${opts.map(([k, t]) => `<button type="button" data-choice="${k}" aria-pressed="${R.choice === k}">${t}</button>`).join('')}</div>`;
     if (R.choice === 'now') h += legsEditor();
     if (R.choice === 'profile') h += `<div class="form"><div class="f"><label for="rProf">splitPayoutProfileId</label><input id="rProf" class="mono" list="profs" value="${esc(R.profileId)}"><datalist id="profs">${c.profiles.map(p => `<option value="${esc(p.id)}">`).join('')}</datalist></div></div><div class="empty" style="font-size:12px">Pick a configured profile, or type an unknown one.</div>`;
-    if (R.choice === 'deferred') h += '<p style="font-size:14px;margin:0">The order is created with no legs. The merchant sends the split after payment with the Split Payout API (section 4).</p>';
+    if (R.choice === 'deferred') h += '<p style="font-size:14px;margin:0">The order is created with no legs. The merchant sends the split after payment with the Payout Advice API (section 4).</p>';
     if (R.choice === 'none') h += `<p style="font-size:14px;margin:0">${mode === 'PROFILE' ? 'A Profile MID with no profile ID and no deferredSplit. SP-6 section 2 has no row for this case.' : 'A normal session. APEX pays the merchant as today.'}</p>`;
   }
   h += '<div class="empty" style="font-size:12px;margin-top:10px">For other combinations (for example a profile ID on a Dynamic MID), use Edit JSON.</div>';
@@ -586,7 +593,7 @@ $('fire').onclick = () => {
   const r = createSession(S.cfg, req);
   S.ordSeq++;
   S.orders.push({ n: S.ordSeq, day: S.day, ref: req.merchantReferenceId || '', res: r, cfgSnap: clone(S.cfg),
-    orderId: r.rejected ? null : 'a1b2c3d4-' + String(S.ordSeq).padStart(4, '0'), pay: null, advices: [], events: [], lastAdviceDay: null, apexStatus: null });
+    orderId: r.rejected ? null : 'a1b2c3d4-' + String(S.ordSeq).padStart(4, '0'), pay: null, advices: [], events: [], apiEvents: [], lastAdviceDay: null, apexStatus: null });
   S.cur = S.orders.length - 1;
   $('rRef').value = 'ORD-DEMO-' + String(S.ordSeq + 1).padStart(4, '0');
   if (R.raw !== null) { try { const j = JSON.parse(R.raw); j.merchantReferenceId = $('rRef').value; R.raw = JSON.stringify(j, null, 2); $('reqRaw').value = R.raw; } catch (e) { /* keep */ } }
@@ -622,19 +629,19 @@ function renderResult() {
     <div><p class="sub">What PGW stored, and why</p><ul style="font-size:14px;margin:0;padding-left:18px;display:grid;gap:4px">
       <li>splitPayout = <b>${r.order.splitPayout}</b>${r.order.splitPayout ? ': APEX will hold this transaction until it gets the split.' : ': APEX pays the merchant as today.'}</li>
       ${r.row === '2.6' ? '<li>Legs copied from the Fixed template as it is today.</li>' : ''}${r.row === '2.8' ? '<li>Legs copied from the profile as it is today.</li>' : ''}
-      ${r.order.deferredSplit ? '<li>No legs yet. The merchant sends them after payment with the Split Payout API.</li>' : ''}
+      ${r.order.deferredSplit ? '<li>No legs yet. The merchant sends them after payment with the Payout Advice API (section 4).</li>' : ''}
       ${r.sType === 'PERCENTAGE' ? '<li>Percentages stored as sent. APEX converts them on the gross amount.</li>' : ''}
       <li>A later change to the MID settings does not change this order.</li></ul>${src([['SP-6 section 4', 'store-on-the-order'], ['section 5', 'return-to-the-merchant']])}</div></div>`;
   $('resView').innerHTML = h;
 }
-$('orderSel').onchange = e => { S.cur = +e.target.value; renderResult(); renderRT(); };
+$('orderSel').onchange = e => { S.cur = +e.target.value; renderResult(); renderRT(); renderAPI(); };
 
 // ===================== 4. payment, federation, advice, SP-8 =====================
 function apexStructural(o, action) {
   const prev = o.apexStatus;
   return [
     { n: 'a', label: 'Split enabled on the MID.', ok: o.cfgSnap.enabled },
-    { n: 'b', label: 'Every beneficiary found, active and linked to the MID.', ok: $('apexMode').value !== 'reject', msg: 'A Partner ID is inactive at APEX (reason code from APEX).' },
+    { n: 'b', label: 'Every beneficiary found, active and linked to the MID.', ok: APEXMODE !== 'reject', msg: 'A Partner ID is inactive at APEX (reason code from APEX).' },
     { n: 'c', label: 'MID matches the transaction; transaction carries the split flag.', ok: true },
     { n: 'd', label: 'One of percentage or amount per rule.', ok: true },
     { n: 'e', label: action === 'A' ? 'A only when no advice exists for the transaction.' : 'U only when the advice is CREATED, REJECTED or PENDING_MATCH.',
@@ -646,11 +653,11 @@ function adviceBody(o, action) {
   return { Action: action, Merchant: MID, TransactionReference: o.isId,
     SplitRules: ord.splitPayoutTransaction.map(l => ({ PartnerID: l.partnerId, Percentage: pct ? l.value : '', Amount: pct ? '' : l.value })) };
 }
-function sendAdvice(o, action, trigger, reuseId) {
+function sendAdvice(o, action, trigger, reuseId, list, srcTag) {
   const body = adviceBody(o, action);
   const id = reuseId || ('ADV-' + (++S.advSeq));
   const ev = { kind: 'advice', action, trigger, body, id };
-  if ($('apexMode').value === 'down') ev.status = 'PENDING';
+  if (APEXMODE === 'down') ev.status = 'PENDING';
   else {
     ev.checks = apexStructural(o, action);
     const ok = ev.checks.every(c => c.ok);
@@ -660,9 +667,9 @@ function sendAdvice(o, action, trigger, reuseId) {
   }
   const existing = o.advices.find(a => a.id === id);
   if (existing) Object.assign(existing, { status: ev.status, reason: ev.reason, body });
-  else o.advices.push({ id, action, status: ev.status, reason: ev.reason, body });
+  else o.advices.push({ id, action, status: ev.status, reason: ev.reason, body, src: srcTag || 'fed' });
   o.lastAdviceDay = S.day;
-  o.events.push(ev);
+  (list || o.events).push(ev);
   return ev;
 }
 function pay(ok) {
@@ -711,18 +718,19 @@ function callApi() {
   const fail = rows.find(r => !r.na && !r.ok);
   const ev = { kind: 'api', req: q, rows, fail };
   const first = o.advices[0];
-  if (!fail && q.action === 'NEW' && first && first.reqKey === JSON.stringify(q)) { ev.idem = first.id; o.events.push(ev); renderAll(); return; }
-  o.events.push(ev);
+  if (!fail && q.action === 'NEW' && first && first.reqKey === JSON.stringify(q)) { ev.idem = first.id; o.apiEvents.push(ev); renderAll(); return; }
+  o.apiEvents.push(ev);
   if (!fail) {
     o.res.order.splitPayoutType = type;
     if (q.splitPayoutProfileId !== undefined) o.res.order.splitPayoutProfileId = q.splitPayoutProfileId;
     o.res.order.splitPayoutTransaction = legs.map(l => ({ partnerId: l.partnerId, value: l.value }));
-    const a = sendAdvice(o, q.action === 'NEW' ? 'A' : 'U', 'Split Payout API ' + q.action + ' (SP-7 1.' + (q.action === 'NEW' ? '2' : '3') + ')');
+    const a = sendAdvice(o, q.action === 'NEW' ? 'A' : 'U', 'Payout Advice API ' + q.action + ' (SP-7 1.' + (q.action === 'NEW' ? '2' : '3') + ')', null, o.apiEvents, 'api');
     ev.result = a;
     if (q.action === 'NEW') o.advices.find(x => x.id === a.id).reqKey = JSON.stringify(q);
   }
   API.for = null;
   renderAll();
+  $('s4b').scrollIntoView({ behavior: smooth(), block: 'start' });
 }
 function evHtml(o, ev) {
   if (ev.kind === 'pay') return `<div class="ev"><h3><span class="st ${ev.ok ? 'ok' : 'bad'}">${ev.ok ? 'Pay succeeded' : 'Pay declined'}</span> Customer pays</h3>
@@ -731,7 +739,7 @@ function evHtml(o, ev) {
     <p>${ev.declined ? 'Not a successful Pay: if PGW federates this transaction, it sends splitPayout = N.' : ev.flag === 'Y' ? 'Successful Pay on a split order. APEX holds the transaction until it receives a valid split, or releases it to the merchant after N days.' : 'Not a split order. APEX pays the merchant the next day, as today.'}</p>
     <pre class="code">${json({ '...': '... existing createTransaction fields, unchanged', splitPayout: ev.flag })}</pre>
     <div class="src">New field at the end of the payload. PTLF: same value in field 49 (waits on P4). Source: <a href="docs/stories.html#split-flag-to-apex">SP-6 section 6</a></div></div>`;
-  if (ev.kind === 'wait') return `<div class="ev"><h3><span class="st hold">no advice yet</span> Waiting for the split</h3><p>deferredSplit = true and no legs: PGW sends nothing to APEX until the merchant calls the Split Payout API (below). APEX holds the transaction.</p>${src([['SP-7 section 1', 'when-pgw-sends-an-advice']])}</div>`;
+  if (ev.kind === 'wait') return `<div class="ev"><h3><span class="st hold">no advice yet</span> Waiting for the split</h3><p>deferredSplit = true and no legs: PGW sends nothing to APEX until the merchant calls the Payout Advice API (section 4). APEX holds the transaction.</p>${src([['SP-7 section 1', 'when-pgw-sends-an-advice']])}</div>`;
   if (ev.kind === 'advice') {
     const cls = ev.status === 'ACCEPTED' ? 'ok' : ev.status === 'PENDING' ? 'hold' : 'bad';
     return `<div class="ev"><h3><span class="st ${cls}">${ev.status}</span> Payout advice to APEX · action ${ev.action} · ${ev.id}</h3>
@@ -739,13 +747,13 @@ function evHtml(o, ev) {
         : 'APEX runs its structural checks in the call. Amount validation runs later (product doc 6.5).'}</p>
       <div class="grid2"><div><pre class="code">${json(ev.body)}</pre><div class="src">APEX draft fields (P3). Percentage or amount, never both.</div></div>
       <div>${ev.checks ? '<p class="sub">APEX structural checks</p>' + checksTable(ev.checks) : ''}<dl class="kv" style="margin-top:10px"><dt>splitAdviceId</dt><dd>${ev.id}</dd><dt>splitAdviceStatus</dt><dd>${ev.status}</dd>${ev.reason ? `<dt>splitAdviceReason</dt><dd>${esc(ev.reason)}</dd>` : ''}</dl>
-      ${ev.status === 'REJECTED' ? '<p style="font-size:13px;margin-top:8px">The merchant can correct it with an UPDATE (below). Nothing is paid to partners meanwhile.</p>' : ''}</div></div>
+      ${ev.status === 'REJECTED' ? '<p style="font-size:13px;margin-top:8px">The merchant can correct it with an UPDATE through the Payout Advice API (section 4). Nothing is paid to partners meanwhile.</p>' : ''}</div></div>
       ${src([['SP-7', 'sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3'], ['SP-7 section 4', 'errors-and-retry'], ['Product doc 6.4', 'split-advice-intake', 'p']])}</div>`;
   }
   if (ev.kind === 'api') {
     const resp = ev.fail ? { httpStatus: 400, message: ev.fail.msg } : ev.idem ? { splitAdviceId: ev.idem, '...': '... same NEW sent again: first advice ID returned, no second advice' }
       : Object.assign({ splitAdviceId: ev.result.id, splitAdviceStatus: ev.result.status }, ev.result.reason ? { reasonCode: '... from APEX', reasonMessage: ev.result.reason } : {});
-    return `<div class="ev"><h3><span class="st ${ev.fail ? 'bad' : 'info'}">${ev.fail ? 'HTTP 400' : 'HTTP 200'}</span> Split Payout API · ${ev.req.action}</h3>
+    return `<div class="ev"><h3><span class="st ${ev.fail ? 'bad' : 'info'}">${ev.fail ? 'HTTP 400' : 'HTTP 200'}</span> Payout Advice API · ${ev.req.action}</h3>
       <p>Merchant → PGW. <span style="font-family:var(--mono);font-size:13px">POST /pgw/api/v1/direct/splitPayout</span> (name and path: PGW engineering). Checked against the MID settings as they are now.</p>
       <div class="grid2"><div><pre class="code">${json(ev.req)}</pre><p class="sub" style="margin-top:10px">Response</p><pre class="code">${json(resp)}</pre></div><div>${checksTable(ev.rows)}</div></div>
       ${src([['SP-8 section 1', 'request'], ['section 2', 'checks'], ['section 3', 'processing'], ['section 4', 'response']])}</div>`;
@@ -755,7 +763,7 @@ function evHtml(o, ev) {
 function apiForm(o) {
   if (API.for !== o.n) apiDefaults(o);
   const prof = apiIsProfile();
-  let h = `<div class="ev" style="background:#F8FAFC"><h3>Send a split later: Split Payout API <span class="st grey">SP-8</span></h3>
+  let h = `<div class="ev" style="background:#F8FAFC"><h3>Request for order #${o.n} <span class="st grey">${o.pay === 'success' ? 'paid' : o.pay ? 'pay declined' : 'not paid yet'}</span></h3>
     <p style="font-size:13px">NEW sends the split of a paid order created with deferredSplit. UPDATE replaces the whole split, for example after APEX rejected it. Try NEW on an order that already has a split, or UPDATE with an older advice ID, to see the checks.</p>
     <div class="seg" role="group" aria-label="action">${['NEW', 'UPDATE'].map(a => `<button type="button" data-api="${a}" aria-pressed="${API.action === a}">${a}</button>`).join('')}</div>
     <div class="form">${API.action === 'UPDATE' ? `<div class="f"><label for="aAdv">splitAdviceId</label><input id="aAdv" class="mono" value="${esc(API.adviceId)}"></div>` : ''}
@@ -777,12 +785,31 @@ function renderRT() {
   if (!o.pay) h += `<div class="btns" style="margin-bottom:14px"><span style="font-size:14px">Order #${o.n} is created. The customer pays:</span><button type="button" class="btn pri" id="paySucc">Pay succeeds</button><button type="button" class="btn bad" id="payDecl">Pay declined</button></div>`;
   h += o.events.map(ev => evHtml(o, ev)).join('');
   const last = o.advices[o.advices.length - 1];
-  if (last && last.status === 'PENDING') h += `<div class="btns" style="margin-bottom:14px"><button type="button" class="btn" id="retry">Retry advice ${last.id}</button><span class="empty" style="font-size:13px">Change "APEX response" above first. Or run day-end: the file carries the advice.</span></div>`;
-  if (o.pay === 'success') h += apiForm(o);
-  $('rtView').innerHTML = h;
+  if (last && last.status === 'PENDING' && last.src === 'fed') h += retryBtn(last);
+  if (o.pay === 'success' && o.apiEvents.length) h += '<div class="info">The Payout Advice API was used on this order: see section 4.</div>';
+  $('rtView').innerHTML = h || '<p class="empty">—</p>';
   if ($('paySucc')) $('paySucc').onclick = () => pay(true);
   if ($('payDecl')) $('payDecl').onclick = () => pay(false);
-  if ($('retry')) $('retry').onclick = () => { sendAdvice(o, last.action, 'Retry of ' + last.id, last.id); renderAll(); };
+  bindRetry(o);
+}
+function retryBtn(a) { return `<div class="btns" style="margin-bottom:14px"><button type="button" class="btn" data-retry="${a.id}">Retry advice ${a.id}</button><span class="empty" style="font-size:13px">Change "APEX response" first. Or run day-end: the file carries the advice.</span></div>`; }
+function bindRetry(o) {
+  document.querySelectorAll('[data-retry]').forEach(b => b.onclick = () => { const a = o.advices.find(x => x.id === b.dataset.retry);
+    sendAdvice(o, a.action, 'Retry of ' + a.id, a.id, a.src === 'api' ? o.apiEvents : o.events, a.src); renderAll(); });
+}
+function renderAPI() {
+  const o = S.cur >= 0 ? S.orders[S.cur] : null;
+  const ok = o && !o.res.rejected;
+  $('s4b').classList.toggle('locked', !ok);
+  if (!o) return;
+  if (!ok) { $('apiView').innerHTML = '<p class="empty">This session was rejected, so there is no order to send a split for.</p>'; return; }
+  let h = `<p style="font-size:14px;margin:0 0 12px">A separate merchant API. NEW sends the split of a paid order created with deferredSplit. UPDATE replaces the whole split, for example after APEX rejected it. PGW checks the request and forwards it to APEX as advice A or U. Try NEW on an order that already has a split, UPDATE with an older advice ID, or a call before payment, to see the checks.</p>${src([['SP-8', 'sp-8-be-pgw-split-payout-api'], ['SP-7 section 1', 'when-pgw-sends-an-advice']])}<div style="height:12px"></div>`;
+  h += apiForm(o);
+  h += o.apiEvents.map(ev => evHtml(o, ev)).join('');
+  const last = o.advices[o.advices.length - 1];
+  if (last && last.status === 'PENDING' && last.src === 'api') h += retryBtn(last);
+  $('apiView').innerHTML = h;
+  bindRetry(o);
   document.querySelectorAll('[data-api]').forEach(b => b.onclick = () => { API.action = b.dataset.api; renderRT(); });
   document.querySelectorAll('[data-atype]').forEach(b => b.onclick = () => { API.type = b.dataset.atype; renderRT(); });
   document.querySelectorAll('[data-aleg]').forEach(i => i.oninput = () => API.legs[+i.dataset.aleg][i.dataset.k] = i.value);
@@ -817,7 +844,7 @@ $('runEod').onclick = () => {
   const inFile = S.orders.filter(o => o.lastAdviceDay === S.day);
   const recs = inFile.map(o => o.advices[o.advices.length - 1].body);
   const pend = inFile.filter(o => o.advices[o.advices.length - 1].status === 'PENDING');
-  pend.forEach(o => { const a = o.advices[o.advices.length - 1]; a.status = 'SENT'; a.reason = 'Delivered in the Day ' + S.day + ' file'; o.apexStatus = 'CREATED'; o.events.push({ kind: 'note', text: `Advice ${a.id} reached APEX in the Day ${S.day} day-end file. APEX processes it as new.` }); });
+  pend.forEach(o => { const a = o.advices[o.advices.length - 1]; a.status = 'SENT'; a.reason = 'Delivered in the Day ' + S.day + ' file'; o.apexStatus = 'CREATED'; (a.src === 'api' ? o.apiEvents : o.events).push({ kind: 'note', text: `Advice ${a.id} reached APEX in the Day ${S.day} day-end file. APEX processes it as new.` }); });
   S.files.push({ day: S.day, recs, fromPending: pend.map(o => o.advices[o.advices.length - 1].id).join(', ') });
   S.day++;
   toast('Day-end file sent. Now Day ' + S.day);
@@ -828,7 +855,8 @@ evHtml = function (o, ev) { return ev.kind === 'note' ? `<div class="ev"><h3><sp
 
 // ===================== init =====================
 function onCfgChange() { resetForm(); renderSplitForm(); renderAll(); }
-function renderAll() { renderCfgView(); renderResult(); renderRT(); renderEod(); }
+function renderAll() { renderCfgView(); renderResult(); renderRT(); renderAPI(); renderEod(); }
+document.querySelectorAll('.apexSel').forEach(sel => sel.onchange = () => { APEXMODE = sel.value; document.querySelectorAll('.apexSel').forEach(x => x.value = APEXMODE); });
 $('rRef').value = 'ORD-DEMO-0001';
 const h0 = (location.hash.match(/cfg=(\w+)/) || [])[1];
 if (h0 && PRESETS[h0]) S.cfg = clone(PRESETS[h0]);
