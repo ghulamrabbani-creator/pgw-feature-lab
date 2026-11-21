@@ -6,7 +6,8 @@
     "order-creation-request": "../simulator.html",
     "payout-advice-api": "../simulator.html",
     "transaction-flow": "../simulator.html",
-    "amount-validation": "../simulator.html"
+    "amount-validation": "../money-flow.html#amount-validation",
+    "calculation-and-payout": "../money-flow.html"
   },
   "split-payout/docs/stories.html": {
     "sp-6-be-create-session-with-split-payout": "../simulator.html",

@@ -851,7 +851,7 @@ file with a zero count on days with no advices, so APEX can tell “no
 advices today” from “file not received”. File format to be defined by
 APEX.</p>
 <h2 id="amount-validation">6.5 Amount validation</h2>
-<a class="visual-link" data-auto href="../simulator.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
+<a class="visual-link" data-auto href="../money-flow.html#amount-validation"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <p>Run by APEX as a scheduled process once pricing is available (in-call
 validation if the platform vendor can support it). Any failure rejects
 the whole advice with a reason code.</p>
@@ -992,6 +992,7 @@ MDR. No further updates.</td>
 <p>Reason codes are shared with PGW and appear in the split payout
 report so the partner knows what to fix.</p>
 <h2 id="calculation-and-payout">6.6 Calculation and payout</h2>
+<a class="visual-link" data-auto href="../money-flow.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
 <ul>
 <li><p>Convert percentage splits to amounts against the gross
 transaction amount; round each to 2 decimals.</p></li>

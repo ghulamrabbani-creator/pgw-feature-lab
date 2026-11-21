@@ -62,6 +62,40 @@
 .steps li::before { content: counter(s); position: absolute; left: 0; top: 0; width: 26px; height: 26px; border-radius: 50%; background: var(--money); color: #fff; font: 500 13px/26px var(--mono); text-align: center; }
 @media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
 @media (prefers-reduced-motion: no-preference) { #flow .band, #flow .node { transition: d .4s ease, y .4s ease, height .4s ease, fill-opacity .2s; } }
+.nums-head { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; }
+.nums-note { font-size: 13px; color: var(--muted); flex: 1; margin: 0; }
+.btn-s { font: 500 13px var(--sans); border: 1px solid var(--border-2); background: var(--card); color: var(--ink); border-radius: 7px; padding: 6px 12px; cursor: pointer; }
+.btn-s:hover { background: #F1F5F9; }
+.ngrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 14px; }
+.nf span { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 4px; }
+.nf input, .vt input { width: 100%; font: 14px var(--mono); padding: 7px 9px; border: 1px solid var(--border-2); border-radius: 7px; background: #fff; color: var(--ink); }
+.nf input.bad, .vt input.bad { border-color: #DC2626; background: #FEF2F2; }
+.seg.sm { margin: 0; } .seg.sm button { padding: 5px 10px; font-size: 13px; }
+.vtw { overflow-x: auto; }
+.vt { border-collapse: collapse; width: 100%; max-width: 620px; }
+.vt th { text-align: left; font: 500 11px var(--mono); color: var(--muted); padding: 0 8px 4px 0; }
+.vt td { padding: 3px 8px 3px 0; }
+.vt td:first-child input { font-family: var(--sans); }
+.vt .x { background: none; border: 0; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px 6px; }
+.vt .x:hover { color: #B91C1C; }
+.lnk { background: none; border: 0; color: var(--link); font: 500 13px var(--sans); cursor: pointer; padding: 6px 0; }
+.verdict { font-size: 14px; border-radius: 8px; padding: 10px 14px; margin: 0 0 12px; }
+.verdict:empty { display: none; }
+.verdict.ok { background: var(--money-bg); color: #065F46; }
+.verdict.bad { background: #FEF2F2; color: #991B1B; }
+.verdict b { font-weight: 600; }
+#flow .band.held { fill: #B45309; fill-opacity: .25; }
+#flow .node.held { fill: #B45309; }
+.rule { border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; margin-bottom: 12px; }
+.rule h4 { margin: 0 0 4px; font-size: 15px; color: var(--ink); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.rule .f { font: 12.5px var(--mono); color: var(--text-2); margin: 0 0 8px; }
+.rcalc { font: 13px var(--mono); background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
+.rcalc div { display: flex; justify-content: space-between; gap: 16px; }
+.rcalc div.t { border-top: 1px solid var(--border-2); margin-top: 4px; padding-top: 4px; font-weight: 500; }
+.rcalc div.t.ok { color: var(--money); } .rcalc div.t.bad { color: #B91C1C; }
+.pass { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; background: var(--money-bg); color: var(--money); }
+.fail { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; background: #FEE2E2; color: #991B1B; }
+.na { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; background: #F1F5F9; color: var(--muted); }
 </style>
 </head>
 <body>
@@ -72,14 +106,29 @@
 <main class="wrap">
 <p class="eyebrow">visual · split payout</p>
 <h1 class="page">Money flow</h1>
-<p class="lead">Who is paid, and from where, for one AED 1,000 order. Band widths are to scale.</p>
+<p class="lead">Who is paid, and from where, for one order. Starts on the product doc's worked example; change any number to see the effect. Band widths are to scale.</p>
 <div class="vp-meta">
 <span class="tag warn">Illustrative</span>
 <span class="tag grey">Reflects product doc v1.6 · 10-Nov-2026</span>
 <a class="back" href="docs/product.html#money-flow">Read the requirement →</a>
 </div>
 
-<h2 class="section-title" style="margin-top:0">One order, end to end</h2>
+<h2 class="section-title" style="margin-top:0">The numbers</h2>
+<div class="panel nums">
+<div class="nums-head"><span class="tag" id="srcBadge">Doc worked example (4.2)</span><span class="nums-note">Fictional numbers. What matters is how each component works, not the values.</span><button type="button" class="btn-s" id="reset">Reset to the doc example</button></div>
+<div class="ngrid">
+<label class="nf"><span>Order amount (AED)</span><input id="nTxn" inputmode="decimal"></label>
+<label class="nf"><span>Geidea MDR (%)</span><input id="nMdr" inputmode="decimal"></label>
+<label class="nf"><span>VAT on MDR (%)</span><input id="nVat" inputmode="decimal"></label>
+<label class="nf"><span>Fee per payout (AED)</span><input id="nFee" inputmode="decimal"></label>
+<div class="nf"><span>Split type</span><div class="seg sm" role="group" aria-label="Split type"><button type="button" data-stype="AMOUNT" aria-pressed="true">Amount</button><button type="button" data-stype="PERCENTAGE" aria-pressed="false">Percentage</button></div></div>
+</div>
+<div class="vtw"><table class="vt"><thead><tr><th>Vendor</th><th id="splitHd">Split (AED)</th><th>Commission (%)</th><th></th></tr></thead><tbody id="vRows"></tbody></table></div>
+<button type="button" class="lnk" id="addV">+ Add vendor</button>
+<p class="nums-note" id="numsErr" style="color:#B91C1C"></p>
+</div>
+
+<h2 class="section-title">One order, end to end</h2>
 <div class="panel">
 <div class="seg" role="group" aria-label="Scenario">
 <button type="button" data-mode="none" aria-pressed="false">No split</button>
@@ -87,18 +136,20 @@
 <button type="button" data-mode="opt2" aria-pressed="false">Split · vendors bear transfer fees</button>
 </div>
 <p class="seg-note" id="note" aria-live="polite"></p>
+<div class="verdict" id="verdict" aria-live="polite"></div>
 <div class="flow-wrap"><svg id="flow" viewBox="0 0 960 500" role="img" aria-labelledby="flowTitle"><title id="flowTitle">Money flow for one order</title></svg></div>
 <div class="legend">
 <span><i style="background:var(--money)"></i>Money paid out</span>
-<span><i style="background:#64748B"></i>Kept by Geidea (MDR, remittance fees)</span>
-<span>Bands under AED 5 are drawn at a minimum width so they stay visible.</span>
+<span><i style="background:#64748B"></i>Kept by Geidea (MDR, VAT, remittance fees)</span>
+<span><i style="background:#B45309"></i>Held at APEX</span>
+<span>Bands under 0.5% of the order are drawn at a minimum width so they stay visible.</span>
 </div>
 </div>
 
 <div class="grid2">
 <div class="panel calc">
 <h3>How each payout is calculated</h3>
-<p class="sub">Calculated by APEX, not PGW. Split values here are amounts; a percentage split is first converted against the gross transaction amount.</p>
+<p class="sub">Calculated by APEX, not PGW. A percentage split is first converted against the gross order amount. Each amount is rounded to 2 decimals; the partner's residual absorbs the rounding.</p>
 <div id="legs"></div>
 </div>
 <div class="panel residual">
@@ -107,7 +158,14 @@
 <table class="wf" id="wf"></table>
 </div>
 </div>
-<p class="src">Source: product doc v1.6, 4.1 How funds move and 4.2 Worked example. MDR 1%, remittance fee AED 1.00 per payout (illustrative); VAT on MDR left out, as in the doc.</p>
+
+<h2 class="section-title" id="amount-validation">APEX amount validation</h2>
+<div class="panel">
+<p style="margin:0 0 12px;font-size:14px;color:var(--text-2)">A scheduled APEX process, once pricing is available. Any failure rejects the whole advice with a reason code. "Split ≤ net" is not enough: it passes advices that leave the partner negative once fees are taken, and rejects valid ones where commission covers the gap.</p>
+<div id="rules"></div>
+<p class="src" style="margin-top:12px">Source: product doc v1.6, <a href="docs/product.html#amount-validation">6.5 Amount validation</a>.</p>
+</div>
+<p class="src">Source: product doc v1.6, 4.1 How funds move and 4.2 Worked example. The doc example uses MDR 1%, remittance fee AED 1.00 per payout (illustrative), VAT on MDR left out.</p>
 
 <h2 class="section-title">The sequence in APEX</h2>
 <div class="panel">
@@ -143,144 +201,200 @@
 
 <script>
 (function () {
-  const TXN = 1000, MDR = 10, FEE = 1;
-  const VENDORS = [
-    { id: 'A', name: 'Vendor A', split: 500, pct: 2.0 },
-    { id: 'B', name: 'Vendor B', split: 300, pct: 1.5 },
-    { id: 'C', name: 'Vendor C', split: 100, pct: 0 }
-  ];
-  const f = n => n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const DOC = { txn: '1000.00', mdr: '1', vat: '0', fee: '1.00', type: 'AMOUNT',
+    vendors: [{ name: 'Vendor A', split: '500.00', pct: '2.00' }, { name: 'Vendor B', split: '300.00', pct: '1.50' }, { name: 'Vendor C', split: '100.00', pct: '0' }] };
+  const MAXV = 10;
+  let P = JSON.parse(JSON.stringify(DOC));
+  let mode = 'opt1';
+  const $ = id => document.getElementById(id);
+  const f = n => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
   const r2 = n => Math.round(n * 100) / 100;
+  const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const NUM = /^\d+(\.\d+)?$/;
   const NOTES = {
     none: 'Transaction not flagged for split: the partner is settled through the normal process, after Geidea’s MDR.',
-    opt1: 'Option 1 – the partner bears the transfer cost of all four payouts (three vendors and its own).',
-    opt2: 'Option 2 – each vendor bears its own transfer cost; the fee on the partner’s own payout is still the partner’s.'
+    opt1: 'The partner bears the transfer cost of every payout (each vendor’s and its own).',
+    opt2: 'Each vendor bears its own transfer cost; the fee on the partner’s own payout is still the partner’s.'
   };
 
-  function compute(mode) {
-    const net = TXN - MDR;
-    if (mode === 'none') return { net, legs: [], fees: 0, residual: net, comm: 0 };
-    const legs = VENDORS.map(v => {
-      const comm = r2(v.split * v.pct / 100);
-      const fee = mode === 'opt2' ? FEE : 0;
-      return { ...v, comm, fee, payout: r2(v.split - comm - fee) };
-    });
-    const paid = r2(legs.reduce((s, l) => s + l.payout, 0));
-    const comm = r2(legs.reduce((s, l) => s + l.comm, 0));
-    const fees = (VENDORS.length + 1) * FEE;
-    return { net, legs, fees, comm, paid, residual: r2(net - paid - fees) };
+  // ---------------- numbers panel ----------------
+  function isDoc() { return JSON.stringify(P) === JSON.stringify(DOC); }
+  function renderInputs() {
+    $('nTxn').value = P.txn; $('nMdr').value = P.mdr; $('nVat').value = P.vat; $('nFee').value = P.fee;
+    document.querySelectorAll('[data-stype]').forEach(b => b.setAttribute('aria-pressed', b.dataset.stype === P.type));
+    $('splitHd').textContent = P.type === 'PERCENTAGE' ? 'Split (% of gross)' : 'Split (AED)';
+    $('vRows').innerHTML = P.vendors.map((v, i) => `<tr>
+      <td><input data-v="${i}" data-k="name" value="${esc(v.name)}" aria-label="Vendor ${i + 1} name"></td>
+      <td><input data-v="${i}" data-k="split" value="${esc(v.split)}" inputmode="decimal" aria-label="Vendor ${i + 1} split"></td>
+      <td><input data-v="${i}" data-k="pct" value="${esc(v.pct)}" inputmode="decimal" aria-label="Vendor ${i + 1} commission"></td>
+      <td>${P.vendors.length > 1 ? `<button type="button" class="x" data-rm="${i}" aria-label="Remove vendor ${i + 1}">×</button>` : ''}</td></tr>`).join('');
+    $('addV').style.display = P.vendors.length >= MAXV ? 'none' : '';
+    document.querySelectorAll('[data-v]').forEach(inp => inp.oninput = () => { P.vendors[+inp.dataset.v][inp.dataset.k] = inp.value; update(); });
+    document.querySelectorAll('[data-rm]').forEach(b => b.onclick = () => { P.vendors.splice(+b.dataset.rm, 1); renderInputs(); update(); });
+  }
+  [['nTxn', 'txn'], ['nMdr', 'mdr'], ['nVat', 'vat'], ['nFee', 'fee']].forEach(([id, k]) => $(id).oninput = e => { P[k] = e.target.value; update(); });
+  document.querySelectorAll('[data-stype]').forEach(b => b.onclick = () => {
+    if (P.type === b.dataset.stype) return;
+    const txn = parseFloat(P.txn) || 0;
+    P.vendors.forEach(v => { const x = parseFloat(v.split); if (!isNaN(x) && txn > 0) v.split = b.dataset.stype === 'PERCENTAGE' ? (x / txn * 100).toFixed(2) : (txn * x / 100).toFixed(2); });
+    P.type = b.dataset.stype; renderInputs(); update();
+  });
+  $('addV').onclick = () => { P.vendors.push({ name: 'Vendor ' + String.fromCharCode(65 + P.vendors.length), split: '50.00', pct: '0' }); renderInputs(); update(); };
+  $('reset').onclick = () => { P = JSON.parse(JSON.stringify(DOC)); renderInputs(); update(); };
+
+  function read() {
+    const bad = [];
+    const num = (id, v, pos) => { const ok = NUM.test(String(v).trim()) && (!pos || parseFloat(v) > 0); if (!ok) bad.push(id); return ok ? parseFloat(v) : 0; };
+    const txn = num('nTxn', P.txn, true), mdrPct = num('nMdr', P.mdr), vatPct = num('nVat', P.vat), fee = num('nFee', P.fee);
+    const vendors = P.vendors.map((v, i) => ({ name: v.name || 'Vendor ' + (i + 1), raw: num('v' + i + 's', v.split, true), pct: num('v' + i + 'c', v.pct) }));
+    document.querySelectorAll('.nums input').forEach(i => i.classList.remove('bad'));
+    bad.forEach(id => { const m = id.match(/^v(\d+)([sc])$/); const el = m ? document.querySelector(`[data-v="${m[1]}"][data-k="${m[2] === 's' ? 'split' : 'pct'}"]`) : $(id); if (el) el.classList.add('bad'); });
+    const pctTot = P.type === 'PERCENTAGE' ? vendors.reduce((s, v) => s + v.raw, 0) : 0;
+    let err = bad.length ? 'Enter positive numbers in the highlighted fields.' : '';
+    if (!err && P.type === 'PERCENTAGE' && pctTot > 100) err = 'Percentages add up to more than 100%. PGW rejects this order at Create Session (SP-6 check 3.6), so it never reaches APEX.';
+    if (!err && P.type === 'AMOUNT' && vendors.reduce((s, v) => s + v.raw, 0) > txn + 1e-9) err = 'Splits add up to more than the order amount. PGW rejects this order at Create Session (SP-6 check 3.6), so it never reaches APEX.';
+    $('numsErr').textContent = err;
+    return err ? null : { txn, mdrPct, vatPct, fee, vendors };
   }
 
-  // ---------- Sankey ----------
-  const svg = document.getElementById('flow');
-  const NS = 'http://www.w3.org/2000/svg';
-  const X = [40, 330, 620], W = 16, TOP = 40, H = 400, GAP = 16, MIN = 4;
-  const el = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
-  const px = v => Math.max(MIN, v * (H - 5 * GAP) / TXN);
+  // ---------------- maths (product doc 4.1, 4.2, 6.5) ----------------
+  function compute(N, m) {
+    const mdr = r2(N.txn * N.mdrPct / 100), vat = r2(mdr * N.vatPct / 100), net = r2(N.txn - mdr - vat);
+    const base = { mdr, vat, net, geidea: r2(mdr + vat) };
+    if (m === 'none') return { ...base, legs: [], fees: 0, residual: net, comm: 0, valid: true };
+    const legs = N.vendors.map(v => {
+      const a = P.type === 'PERCENTAGE' ? r2(N.txn * v.raw / 100) : r2(v.raw);
+      const comm = r2(a * v.pct / 100);
+      const fee = m === 'opt2' ? N.fee : 0;
+      return { ...v, a, comm, fee, payout: r2(a - comm - fee) };
+    });
+    const sa = r2(legs.reduce((s, l) => s + l.a, 0)), comm = r2(legs.reduce((s, l) => s + l.comm, 0)), paid = r2(legs.reduce((s, l) => s + l.payout, 0));
+    const fees = r2((legs.length + 1) * N.fee);
+    const feesPartner = m === 'opt1' ? fees : N.fee;
+    const rule1 = r2(net - sa + comm - feesPartner);
+    const rule2Bad = legs.filter(l => !(l.payout > 0));
+    const valid = rule1 >= 0 && rule2Bad.length === 0;
+    return { ...base, legs, sa, comm, paid, fees, feesPartner, rule1, rule2Bad, valid, residual: valid ? r2(net - paid - (m === 'opt1' ? fees : r2(legs.length * N.fee) + N.fee)) : null };
+  }
 
-  function draw(mode) {
-    const c = compute(mode);
+  // ---------------- Sankey ----------------
+  const svg = $('flow');
+  const NS = 'http://www.w3.org/2000/svg';
+  const X = [40, 330, 620], W = 16, TOP = 40, H = 400, GAP = 16;
+  const el = (t, a) => { const e = document.createElementNS(NS, t); for (const k in a) e.setAttribute(k, a[k]); return e; };
+  function draw(N, c, m) {
+    const MIN = 4;
+    const px = v => Math.max(MIN, v * (H - 5 * GAP) / N.txn);
     svg.querySelectorAll(':not(title)').forEach(n => n.remove());
     ['CUSTOMER PAYS', 'ACQUIRING (GEIDEA / APEX)', 'PAID TO'].forEach((t, i) =>
-      svg.appendChild(el('text', { x: i === 2 ? X[2] : X[i], y: 20, class: 'col' })).textContent = t);
-
-    // column 2 nodes
-    const mdrH = px(MDR), netH = px(c.net);
-    const cust = { y: TOP, h: mdrH + netH };
-    const mdr = { y: TOP, h: mdrH };
-    const net = { y: TOP + mdrH + GAP, h: netH };
-    // column 3 nodes
+      svg.appendChild(el('text', { x: X[i], y: 20, class: 'col' })).textContent = t);
+    const gH = px(c.geidea), netH = px(c.net);
+    const cust = { y: TOP, h: gH + netH }, gd = { y: TOP, h: gH }, net = { y: TOP + gH + GAP, h: netH };
     const outs = [];
-    if (mode === 'none') {
-      outs.push({ key: 'p', label: 'Partner', sub: 'single settlement', v: c.net });
-    } else {
-      c.legs.forEach(l => outs.push({ key: l.id, label: l.name, sub: 'to vendor IBAN', v: l.payout }));
-      outs.push({ key: 'fee', label: 'Remittance fees', sub: (mode === 'opt1' ? '4 × 1.00, from partner' : '3 from vendors + 1 from partner'), v: c.fees, fee: true });
+    if (m === 'none') outs.push({ key: 'p', label: 'Partner', sub: 'single settlement', v: c.net });
+    else if (!c.valid) outs.push({ key: 'held', label: 'Held at APEX', sub: 'advice rejected · nothing paid to vendors', v: c.net, held: true });
+    else {
+      c.legs.forEach((l, i) => outs.push({ key: 'v' + i, label: l.name, sub: 'to vendor IBAN', v: l.payout }));
+      outs.push({ key: 'fee', label: 'Remittance fees', sub: m === 'opt1' ? `${c.legs.length + 1} × ${f(N.fee)}, from partner` : `${c.legs.length} from vendors + 1 from partner`, v: c.fees, fee: true });
       outs.push({ key: 'p', label: 'Partner residual', sub: 'incl. ' + f(c.comm) + ' commission', v: c.residual });
     }
-    let y = net.y - (mode === 'none' ? 0 : 30);
-    const gap3 = mode === 'none' ? 0 : 24;
+    const gap3 = outs.length > 1 ? 26 : 0;
+    let y = net.y - (outs.length > 1 ? 30 : 0);
     outs.forEach(o => { o.h = px(o.v); o.y = Math.max(y, TOP); y = o.y + o.h + gap3; });
-
-    // bands
-    const band = (x0, y0, x1, y1, h, cls, tip) => {
-      const m = (x0 + x1) / 2;
-      const d = `M${x0},${y0} C${m},${y0} ${m},${y1} ${x1},${y1} L${x1},${y1 + h} C${m},${y1 + h} ${m},${y0 + h} ${x0},${y0 + h} Z`;
+    const bottom = Math.max(cust.y + cust.h + 50, y + 10, 500);
+    svg.setAttribute('viewBox', `0 0 960 ${Math.ceil(bottom)}`);
+    const band = (x0, y0, x1, y1, h, cls, tip, key) => {
+      const mx = (x0 + x1) / 2;
+      const d = `M${x0},${y0} C${mx},${y0} ${mx},${y1} ${x1},${y1} L${x1},${y1 + h} C${mx},${y1 + h} ${mx},${y0 + h} ${x0},${y0 + h} Z`;
       const p = el('path', { d, class: 'band ' + cls });
-      p.appendChild(el('title', {})).textContent = tip;
-      svg.appendChild(p); return p;
+      if (key) p.dataset.key = key;
+      p.appendChild(el('title', {})).textContent = tip; svg.appendChild(p);
     };
-    band(X[0] + W, cust.y, X[1], mdr.y, mdrH, 'fee', 'Geidea MDR 1%: AED ' + f(MDR));
-    band(X[0] + W, cust.y + mdrH, X[1], net.y, netH, '', 'Partner net after MDR: AED ' + f(c.net));
+    band(X[0] + W, cust.y, X[1], gd.y, gH, 'fee', `Geidea MDR ${f(c.mdr)} + VAT ${f(c.vat)}`);
+    band(X[0] + W, cust.y + gH, X[1], net.y, netH, '', 'Partner net: AED ' + f(c.net));
     let off = net.y;
-    outs.forEach(o => {
-      o.path = band(X[1] + W, off, X[2], o.y, o.h, o.fee ? 'fee' : '', o.label + ': AED ' + f(o.v));
-      o.path.dataset.key = o.key;
-      off += o.h;
-    });
-
-    // nodes + labels
+    outs.forEach(o => { band(X[1] + W, off, X[2], o.y, o.h, o.fee ? 'fee' : o.held ? 'held' : '', o.label + ': AED ' + f(o.v), o.key); off += o.h; });
     const node = (x, n, cls) => svg.appendChild(el('rect', { x, y: n.y, width: W, height: n.h, rx: 2, class: 'node ' + cls }));
     const label = (x, yMid, a, b, anchor) => {
       const t1 = el('text', { x, y: yMid - 2, class: 'lbl', 'text-anchor': anchor || 'start' }); t1.textContent = a; svg.appendChild(t1);
       const t2 = el('text', { x, y: yMid + 14, class: 'amt', 'text-anchor': anchor || 'start' }); t2.textContent = b; svg.appendChild(t2);
     };
-    node(X[0], cust, 'cust');
-    label(X[0], cust.y + cust.h + 26, 'Customer', 'AED ' + f(TXN));
-    node(X[1], mdr, 'geidea');
-    label(X[1] + W + 10, mdr.y + 4, 'Geidea MDR', 'AED ' + f(MDR) + ' (1%)');
-    node(X[1], net, '');
-    label(X[1] - 10, net.y + net.h / 2, 'Partner net', 'AED ' + f(c.net) + (mode === 'none' ? '' : ' · held for split'), 'end');
-    outs.forEach(o => {
-      node(X[2], o, o.fee ? 'geidea' : '');
-      label(X[2] + W + 10, o.y + o.h / 2, o.label, 'AED ' + f(o.v) + ' · ' + o.sub);
-    });
+    node(X[0], cust, 'cust'); label(X[0], cust.y + cust.h + 26, 'Customer', 'AED ' + f(N.txn));
+    node(X[1], gd, 'geidea'); label(X[1] + W + 10, gd.y + 4, 'Geidea MDR' + (c.vat ? ' + VAT' : ''), `AED ${f(c.geidea)} (${N.mdrPct}%${c.vat ? ' + ' + f(c.vat) + ' VAT' : ''})`);
+    node(X[1], net, ''); label(X[1] - 10, net.y + net.h / 2, 'Partner net', 'AED ' + f(c.net) + (m === 'none' ? '' : ' · held for split'), 'end');
+    outs.forEach(o => { node(X[2], o, o.fee ? 'geidea' : o.held ? 'held' : ''); label(X[2] + W + 10, o.y + o.h / 2, o.label, 'AED ' + f(o.v) + ' · ' + o.sub); });
   }
 
-  // ---------- breakdown ----------
-  function breakdown(mode) {
-    const c = compute(mode);
-    const legs = document.getElementById('legs');
-    if (mode === 'none') {
-      legs.innerHTML = '<p style="margin:0;font-size:14px;color:var(--text-2)">No split advice: no vendor payouts are calculated. The partner’s net is settled as one payout.</p>';
+  // ---------------- breakdown, residual, rules ----------------
+  function breakdown(N, c, m) {
+    if (m === 'none') {
+      $('legs').innerHTML = '<p style="margin:0;font-size:14px;color:var(--text-2)">No split advice: no vendor payouts are calculated. The partner’s net is settled as one payout.</p>';
     } else {
-      legs.innerHTML = c.legs.map(l => `
-        <div class="leg" data-key="${l.id}"><div class="who">${l.name}</div><div class="eq">
-          <span class="chip"><small>split</small>${f(l.split)}</span><span class="op">−</span>
-          <span class="chip${l.comm ? '' : ' off'}"><small>commission ${l.pct ? l.pct.toFixed(2) + '%' : 'none'}</small>${f(l.comm)}</span><span class="op">−</span>
+      $('legs').innerHTML = c.legs.map((l, i) => `
+        <div class="leg" data-key="v${i}"><div class="who">${esc(l.name)}${P.type === 'PERCENTAGE' ? ` <span style="font:12px var(--mono);color:var(--muted)">${l.raw}% of ${f(N.txn)}</span>` : ''}</div><div class="eq">
+          <span class="chip"><small>split</small>${f(l.a)}</span><span class="op">−</span>
+          <span class="chip${l.comm ? '' : ' off'}"><small>commission ${l.pct ? l.pct + '%' : 'none'}</small>${f(l.comm)}</span><span class="op">−</span>
           <span class="chip${l.fee ? '' : ' off'}"><small>remittance fee</small>${f(l.fee)}</span><span class="op">=</span>
-          <span class="res">${f(l.payout)}</span></div></div>`).join('');
+          <span class="res"${l.payout > 0 ? '' : ' style="background:#FEE2E2;color:#991B1B"'}>${f(l.payout)}</span></div></div>`).join('');
     }
-    const rows = mode === 'none'
-      ? [['Transaction amount', f(TXN)], ['Less: Geidea MDR (1%)', '−' + f(MDR)]]
-      : [
-          ['Transaction amount less Geidea MDR', f(c.net), '1,000.00 − 10.00'],
-          ['Less: net payouts to vendors', '−' + f(c.paid), 'payouts 1 to 3'],
-          mode === 'opt1'
-            ? ['Less: remittance fees', '−' + f(c.fees), '4 payouts × 1.00, all charged to the partner']
-            : ['Less: remittance fees deducted from vendor payouts, to Geidea', '−' + f(3 * FEE), '3 × 1.00'],
-          ...(mode === 'opt2' ? [['Less: remittance fee on the partner’s payout', '−' + f(FEE), '1 × 1.00']] : [])
-        ];
-    const totWhy = mode === 'none' ? 'one payout, normal settlement'
-      : `payout 4: ${f(TXN - MDR - 900)} unallocated after MDR + ${f(c.comm)} commission − ${f(mode === 'opt1' ? c.fees : FEE)} remittance fee${mode === 'opt1' ? 's' : ''}`;
-    document.getElementById('wf').innerHTML = rows.map(r =>
-      `<tr><td>${r[0]}${r[2] ? `<span class="why">${r[2]}</span>` : ''}</td><td class="n">${r[1]}</td></tr>`).join('') +
-      `<tr class="tot"><td>Paid to the partner<span class="why">${totWhy}</span></td><td class="n">${f(c.residual)}</td></tr>`;
+    const lessMdr = `Transaction amount less Geidea MDR${c.vat ? ' and VAT' : ''}`;
+    const how = `${f(N.txn)} − ${f(c.mdr)}${c.vat ? ' − ' + f(c.vat) : ''}`;
+    let rows, tot, why;
+    if (m === 'none') { rows = [[lessMdr, f(c.net), how]]; tot = c.net; why = 'one payout, normal settlement'; }
+    else if (!c.valid) { rows = [[lessMdr, f(c.net), how]]; tot = null; why = 'advice rejected: the whole amount stays held at APEX until a valid UPDATE, or is released to the partner after N days'; }
+    else {
+      const n = c.legs.length;
+      rows = [[lessMdr, f(c.net), how], ['Less: net payouts to vendors', '−' + f(c.paid), `payouts 1 to ${n}`]];
+      if (m === 'opt1') rows.push(['Less: remittance fees', '−' + f(c.fees), `${n + 1} payouts × ${f(N.fee)}, all charged to the partner`]);
+      else rows.push(['Less: remittance fees deducted from vendor payouts, to Geidea', '−' + f(r2(n * N.fee)), `${n} × ${f(N.fee)}`], ['Less: remittance fee on the partner’s payout', '−' + f(N.fee), `1 × ${f(N.fee)}`]);
+      tot = c.residual;
+      why = `payout ${n + 1}: ${f(r2(c.net - c.sa))} unallocated after MDR + ${f(c.comm)} commission − ${f(c.feesPartner)} remittance fee${m === 'opt1' && n ? 's' : ''}`;
+    }
+    $('wf').innerHTML = rows.map(r => `<tr><td>${r[0]}${r[2] ? `<span class="why">${r[2]}</span>` : ''}</td><td class="n">${r[1]}</td></tr>`).join('') +
+      `<tr class="tot"${tot === null ? ' style="--money:#B45309"' : ''}><td>${tot === null ? 'Paid now' : 'Paid to the partner'}<span class="why">${why}</span></td><td class="n">${tot === null ? '0.00' : f(tot)}</td></tr>`;
+  }
+  function rules(N, c, m) {
+    if (m === 'none') { $('rules').innerHTML = '<p class="empty" style="font-size:14px;color:var(--muted);margin:0">No split advice, so APEX runs no amount validation. Pick a split scenario above.</p>'; return; }
+    const r1 = c.rule1 >= 0;
+    const r1h = `<div class="rule"><h4><span class="${r1 ? 'pass' : 'fail'}">${r1 ? 'pass' : 'FAIL'}</span> Rule 1 – partner residual not negative</h4>
+      <p class="f">net − Σ advised amounts + Σ commissions − remittance fees borne by the partner ≥ 0</p>
+      <div class="rcalc"><div><span>net (${f(N.txn)} − MDR ${f(c.mdr)} − VAT ${f(c.vat)})</span><span>${f(c.net)}</span></div>
+      <div><span>− Σ advised amounts</span><span>−${f(c.sa)}</span></div>
+      <div><span>+ Σ commissions</span><span>+${f(c.comm)}</span></div>
+      <div><span>− remittance fees borne by the partner (${m === 'opt1' ? (c.legs.length + 1) + ' payouts' : 'its own payout'})</span><span>−${f(c.feesPartner)}</span></div>
+      <div class="t ${r1 ? 'ok' : 'bad'}"><span>result</span><span>${f(c.rule1)}</span></div></div>
+      ${r1 && c.sa > c.net ? '<p style="font-size:13px;margin:8px 0 0">The splits are above the partner’s net, but commission covers the gap: valid. A plain "split ≤ net" check would wrongly reject this.</p>' : ''}</div>`;
+    const r2h = `<div class="rule"><h4><span class="${c.rule2Bad.length ? 'fail' : 'pass'}">${c.rule2Bad.length ? 'FAIL' : 'pass'}</span> Rule 2 – every leg above zero</h4>
+      <p class="f">advised amount − commission − remittance fee (only when the vendor bears it) &gt; 0, for every vendor</p>
+      <div class="rcalc">${c.legs.map(l => `<div><span>${esc(l.name)}: ${f(l.a)} − ${f(l.comm)}${m === 'opt2' ? ' − ' + f(l.fee) : ''}</span><span${l.payout > 0 ? '' : ' style="color:#B91C1C"'}>${f(l.payout)}</span></div>`).join('')}</div></div>`;
+    const r3 = `<div class="rule"><h4><span class="na">rule</span> Single payout</h4><p class="f" style="margin:0">A transaction is never paid out twice.</p></div>`;
+    $('rules').innerHTML = r1h + r2h + r3;
   }
 
-  // ---------- controls ----------
-  const btns = document.querySelectorAll('.seg button');
-  function set(mode) {
-    btns.forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
-    document.getElementById('note').textContent = NOTES[mode];
-    draw(mode); breakdown(mode);
+  // ---------------- update ----------------
+  let last = null;
+  function update() {
+    $('srcBadge').textContent = isDoc() ? 'Doc worked example (4.2)' : 'Your numbers · fictional';
+    $('srcBadge').className = isDoc() ? 'tag' : 'tag warn';
+    const N = read();
+    if (!N) return;
+    last = N;
+    const c = compute(N, mode);
+    document.querySelectorAll('.seg [data-mode]').forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === mode));
+    $('note').textContent = NOTES[mode];
+    const v = $('verdict');
+    if (mode === 'none') { v.className = 'verdict'; v.innerHTML = ''; }
+    else if (c.valid) { v.className = 'verdict ok'; v.innerHTML = '<b>APEX accepts the advice.</b> Rule 1 and Rule 2 pass: vendors are paid and the partner receives the residual (advice PROCESSED).'; }
+    else { v.className = 'verdict bad'; v.innerHTML = `<b>APEX rejects the whole advice (${c.rule1 < 0 ? 'Rule 1' : 'Rule 2'}).</b> Nothing is paid to vendors; the transaction stays held. The partner can send a corrected advice with UPDATE within N days; after that, APEX releases it to the partner after MDR.`; }
+    draw(N, c, mode); breakdown(N, c, mode); rules(N, c, mode);
     document.querySelectorAll('.leg').forEach(l => {
-      l.addEventListener('mouseenter', () => svg.querySelectorAll(`.band[data-key="${l.dataset.key}"]`).forEach(p => p.classList.add('hl')));
-      l.addEventListener('mouseleave', () => svg.querySelectorAll('.band.hl').forEach(p => p.classList.remove('hl')));
+      l.onmouseenter = () => svg.querySelectorAll(`.band[data-key="${l.dataset.key}"]`).forEach(p => p.classList.add('hl'));
+      l.onmouseleave = () => svg.querySelectorAll('.band.hl').forEach(p => p.classList.remove('hl'));
     });
   }
-  btns.forEach(b => b.addEventListener('click', () => set(b.dataset.mode)));
-  set('opt1');
+  document.querySelectorAll('.seg [data-mode]').forEach(b => b.addEventListener('click', () => { mode = b.dataset.mode; update(); }));
+  renderInputs(); update();
+  window.__mf = { compute: (m) => compute(read(), m), set: p => { P = p; renderInputs(); update(); } };
 })();
 </script>
 </body>
