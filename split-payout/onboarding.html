@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Onboarding · Split Payout · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+.legend { display: flex; flex-wrap: wrap; gap: 18px; font-size: 13px; color: var(--text-2); margin: 0 0 14px; }
+.legend span { display: inline-flex; align-items: center; gap: 8px; }
+.sw { width: 22px; height: 14px; border-radius: 4px; background: #fff; display: inline-block; }
+.sw.ops { border: 1.5px dashed var(--border-2); }
+.sw.sys { border: 1.5px solid var(--money); background: var(--money-bg); }
+.sw.branch { border: 1.5px dashed var(--border-2); background: #F1F5F9; }
+.sw.tbd { border: 1.5px dashed #D97706; background: var(--warn-bg); }
+
+/* swimlane */
+.lane-wrap { position: relative; overflow-x: auto; }
+.lanes { position: relative; display: grid; grid-template-columns: 104px repeat(8, minmax(98px, 1fr)); min-width: 890px; }
+.lane-label { grid-column: 1; display: flex; align-items: center; font: 500 12px var(--mono); color: var(--muted); padding: 0 10px 0 0; border-top: 1px solid var(--border); text-transform: uppercase; letter-spacing: .03em; }
+.lane-bg { grid-column: 2 / -1; border-top: 1px solid var(--border); }
+.lane-bg.alt, .lane-label.alt { background: #F8FAFC; }
+.colhead { font: 500 11px var(--mono); color: var(--muted); text-align: center; padding: 0 0 8px; }
+.phase { grid-row: 1; font: 500 11px var(--mono); color: var(--ink); text-align: center; padding: 6px 4px; border-bottom: 2px solid var(--ink); margin: 0 4px 6px; text-transform: uppercase; letter-spacing: .04em; }
+.card { position: relative; z-index: 2; margin: 8px 6px; padding: 9px 10px; border-radius: 9px; background: #fff; border: 1.5px dashed var(--border-2); font: 13px/1.35 var(--sans); color: var(--text); text-align: left; cursor: pointer; transition: box-shadow .2s, border-color .2s, transform .2s; }
+.card .n { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 2px; }
+.card.sys { border: 1.5px solid var(--money); background: var(--money-bg); }
+.card.sys .n { color: var(--money); }
+.card.branch { background: #F1F5F9; cursor: default; font-size: 12px; color: var(--text-2); }
+.card.tbd { border-color: #D97706; background: var(--warn-bg); color: var(--warn-fg); font-size: 12px; }
+.card:hover { box-shadow: 0 2px 8px rgba(15,23,42,.10); }
+.card[aria-current="step"] { border-color: var(--ink); border-style: solid; box-shadow: 0 0 0 3px rgba(15,23,42,.12); }
+.card.dim { opacity: .45; }
+svg.links { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: visible; }
+svg.links path { fill: none; stroke: #94A3B8; stroke-width: 1.5; }
+svg.links path.on { stroke: var(--ink); stroke-width: 2; }
+svg.links path.dash { stroke-dasharray: 4 4; }
+
+/* step detail */
+.stepper { display: grid; grid-template-columns: minmax(0, 1fr); gap: 16px; margin-top: 18px; }
+.nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.btn { font: 500 14px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--ink); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+.pos { font: 12px var(--mono); color: var(--muted); margin-left: 6px; }
+.detail { border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: 22px; }
+.detail h3 { margin: 0 0 6px; font-size: 18px; color: var(--ink); font-weight: 600; }
+.detail .by { font: 500 12px var(--mono); color: var(--muted); margin: 0 0 10px; }
+.detail p { margin: 0 0 10px; font-size: 15px; }
+.detail ul { margin: 0 0 10px; padding-left: 20px; font-size: 14px; }
+.hand h4 { margin: 0 0 8px; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
+.chip { font: 12px var(--mono); padding: 4px 9px; border-radius: 6px; background: #F1F5F9; color: var(--text); border: 1px solid var(--border); }
+.chip.out { background: var(--money-bg); border-color: #A7D7CC; color: #065F46; }
+.kind { display: inline-block; font: 500 11px var(--mono); padding: 2px 8px; border-radius: 5px; margin-left: 6px; vertical-align: 2px; }
+.kind.ops { background: #F1F5F9; color: var(--text-2); }
+.kind.sys { background: var(--money-bg); color: var(--money); }
+.src { font: 12px var(--mono); color: var(--muted); margin-top: 8px; }
+.src a { color: var(--muted); }
+
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.t th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 8px; border-bottom: 1px solid var(--border); }
+table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.t td:first-child { color: var(--ink); font-weight: 500; }
+.rules { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 15px; }
+.pending { border: 1.5px dashed #D97706; background: var(--warn-bg); color: var(--warn-fg); border-radius: 10px; padding: 12px 16px; font-size: 14px; }
+
+/* mobile: vertical list instead of the grid */
+.vlist { display: none; }
+@media (max-width: 860px) {
+  .lane-wrap { display: none; }
+  .vlist { display: grid; gap: 8px; }
+  .vlist .card { margin: 0; }
+  .vlist .card .lane { display: inline-block; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; margin-left: 6px; }
+  .vlist .ph { font: 500 11px var(--mono); color: var(--ink); text-transform: uppercase; letter-spacing: .04em; border-bottom: 2px solid var(--ink); padding: 10px 0 4px; }
+  .detail { grid-template-columns: minmax(0, 1fr); }
+  table.t tr:first-child { display: none; }
+  table.t, table.t tbody, table.t tr, table.t td { display: block; }
+  table.t tr { border-bottom: 1px solid var(--border); padding: 8px 0; }
+  table.t td { border: 0; padding: 3px 0; }
+  table.t td::before { content: attr(data-l); display: block; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; }
+}
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Split Payout</a> / Onboarding</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual · split payout</p>
+<h1 class="page">Onboarding</h1>
+<p class="lead">How a partner gets split payout, from request to go-live. Most steps are operational (emails and documents between teams). Two steps change system set-up: APEX creates the vendors, and PGW configures the partner MID.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects product doc v1.6, sections 5 and 7.1</span>
+<a href="docs/product.html#partner-and-vendor-enablement-operational">Read the requirement →</a>
+</div>
+<div class="terms"><b>Terms:</b> partner = the Geidea merchant (MID) that asks for split payout; vendor = a payee of the split. APEX gives each vendor a beneficiary ID; PGW uses that ID to check the partner's requests.</div>
+
+<h2 class="section-title">Who does what</h2>
+<section class="panel" aria-label="Onboarding swimlane">
+<div class="legend">
+<span><i class="sw ops"></i>Operational step (no system build in the MVP)</span>
+<span><i class="sw sys"></i>System set-up</span>
+<span><i class="sw branch"></i>Side path</span>
+<span><i class="sw tbd"></i>Timing not set in the doc</span>
+</div>
+<div class="lane-wrap"><div class="lanes" id="lanes"><svg class="links" id="links" aria-hidden="true"></svg></div></div>
+<div class="vlist" id="vlist"></div>
+
+<div class="stepper">
+<div class="nav">
+<button class="btn" id="prev">← Previous</button>
+<button class="btn primary" id="next">Next step →</button>
+<button class="btn" id="all">Show all</button>
+<span class="pos" id="pos"></span>
+</div>
+<div class="detail" id="detail" aria-live="polite"></div>
+</div>
+</section>
+
+<h2 class="section-title">Where each set-up item lives</h2>
+<section class="panel">
+<table class="t">
+<tr><th>Item</th><th>Set by</th><th>Kept in</th><th>Used for</th></tr>
+<tr><td data-l="Item">Vendor documents (business registration, IBAN in the business's name, agreement with the partner)</td><td data-l="Set by">Operations</td><td data-l="Kept in">Operations record</td><td data-l="Used for">Support for each payout, e.g. the Central Bank travel rule</td></tr>
+<tr><td data-l="Item">Vendor definition with IBAN and any commission</td><td data-l="Set by">APEX team</td><td data-l="Kept in">APEX, linked to the partner MID</td><td data-l="Used for">Paying the vendor legs</td></tr>
+<tr><td data-l="Item">Split payout on the partner MID: remittance fee, fee-bearer option, N</td><td data-l="Set by">APEX team</td><td data-l="Kept in">APEX</td><td data-l="Used for">Fees and the N-day hold. See <a href="money-flow.html">Money flow</a></td></tr>
+<tr><td data-l="Item">Beneficiary IDs</td><td data-l="Set by">APEX team creates; PGW integration team enters</td><td data-l="Kept in">APEX and PGW configuration</td><td data-l="Used for">PGW checks that each leg in a request uses a known ID</td></tr>
+<tr><td data-l="Item">Split payout enabled, split mode, fixed template or profile catalog</td><td data-l="Set by">PGW integration team</td><td data-l="Kept in">PGW configuration (the partner has no access)</td><td data-l="Used for">Building the split for each order. See <a href="split-modes.html">Split modes</a> and the <a href="simulator.html#cfg=dynamic">configuration modal</a></td></tr>
+</table>
+<p class="src">Source: <a href="docs/product.html#setup-steps">product doc 5.2</a>, <a href="docs/product.html#configuration">7.1</a></p>
+</section>
+
+<h2 class="section-title">Rules that apply</h2>
+<section class="panel">
+<ul class="rules">
+<li>Offered only to select large partners, case by case. Unlicensed aggregators are excluded.</li>
+<li>Risk approves the partner before any onboarding. The service is never on by default.</li>
+<li>Business revisits the partner agreement with Legal: dispute and chargeback liability, refunds and chargebacks deducted from the partner, recovery of any shortfall, and domestic fund transfer terms.</li>
+<li>Due diligence and screening happen once per vendor, when it is onboarded, not on every payout.</li>
+<li>New vendors, changes to a vendor's details or commission, and deactivation follow the same operational route.</li>
+<li>Vendors have no portal access. Geidea talks to the partner only.</li>
+<li>PGW holds no vendor bank details and does not check vendor status. APEX rejects a beneficiary ID that is wrong or no longer active.</li>
+</ul>
+<p class="src">Source: <a href="docs/product.html#partner-eligibility-and-agreement">product doc 5.1</a>, <a href="docs/product.html#setup-steps">5.2</a>, <a href="docs/product.html#configuration">7.1</a></p>
+</section>
+
+<h2 class="section-title">Still to add</h2>
+<div class="pending">Detail from the Vendor Payout Service Operations SOP v1.0 (03-Nov-2026): the route and form of each handover, checklists, and how the change and deactivation paths run. This page shows only what the product doc states.</div>
+</main>
+<footer class="lab-footer">Illustrative explanation of the product document. The document is the requirement; where they differ, the document wins.</footer>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const LANES = ['Partner', 'Business', 'Risk', 'Legal', 'Operations', 'APEX team', 'PGW integration'];
+  const PHASES = [['Request and approval', 1, 3], ['Vendors', 4, 5], ['PGW set-up', 6, 7], ['Live', 8, 8]];
+  // Steps: product doc 5.2 (wording kept close to the doc)
+  const STEPS = [
+    { n: 1, lane: 0, kind: 'ops', title: 'Request the service',
+      text: 'The partner asks for the service and shares the vendors’ details and documents, the split configuration and any vendor commission.',
+      list: ['Business registration', 'Relationship or contract with the partner', 'IBAN'],
+      in: [], out: ['Vendor details + documents', 'Split configuration', 'Vendor commission'], to: 'Business', res: 'Request with Business' },
+    { n: 2, lane: 1, kind: 'ops', title: 'Present to Risk',
+      text: 'Business presents the partner request and its business case to Risk.',
+      in: ['Partner request'], out: ['Business case'], to: 'Risk', res: 'Request with Risk' },
+    { n: 3, lane: 2, kind: 'ops', title: 'Approve the partner',
+      text: 'Risk reviews and approves the partner and its business case. Nothing is onboarded before this approval.',
+      in: ['Business case'], out: ['Partner approval'], to: 'Operations', res: 'Partner approved' },
+    { n: 4, lane: 4, kind: 'ops', title: 'Onboard each vendor',
+      text: 'Operations collects and checks the due diligence documents, keeps them on record, and screens the beneficiary. A screening hit goes to Risk under the existing process.',
+      list: ['Business registration', 'IBAN in the business’s name', 'Agreement or contract with the partner', 'Beneficiary screening'],
+      in: ['Partner approval', 'Vendor documents'], out: ['Verified vendors'], to: 'APEX team', res: 'Vendors verified' },
+    { n: 5, lane: 5, kind: 'sys', title: 'Create vendors in APEX',
+      text: 'The APEX team creates the vendor definitions, linked to the partner MID with IBAN and any commission, and enables split payout on the partner MID.',
+      list: ['Vendor definitions: IBAN, commission', 'On the partner MID: remittance fee, fee-bearer option, N'],
+      in: ['Verified vendors'], out: ['Beneficiary IDs'], to: 'PGW integration', res: 'Beneficiary IDs' },
+    { n: 6, lane: 6, kind: 'sys', title: 'Configure the partner MID in PGW',
+      text: 'The PGW integration team enables split payout on the partner MID and sets the split mode, the template or profiles, and the beneficiary IDs.',
+      list: ['Split payout enabled', 'Split mode: Dynamic, Fixed or Profile', 'Fixed template or profile catalog', 'Beneficiary IDs as received from APEX'],
+      in: ['Beneficiary IDs', 'Split configuration'], out: ['PGW configuration'], to: '', res: 'Partner configured',
+      link: ['Try the configuration modal', 'simulator.html#cfg=dynamic'], doc: 'configuration' },
+    { n: 7, lane: 6, kind: 'ops', title: 'Support the partner’s integration',
+      text: 'The PGW integration team shares the beneficiary IDs and the API specs with the partner and supports its integration.',
+      in: ['PGW configuration'], out: ['Beneficiary IDs', 'API specs'], to: 'Partner', res: 'Partner integrated',
+      link: ['See the Create Session request', 'simulator.html'] },
+    { n: 8, lane: 0, kind: 'ops', title: 'Go live',
+      text: 'The partner goes live and sends orders with split payout.',
+      in: ['API specs'], out: [], to: '', res: 'Live',
+      link: ['Follow one order’s money', 'money-flow.html'] }
+  ];
+  const SIDE = [
+    { id: 'hit', lane: 2, col: 4, cls: 'branch', html: 'Screening hit → Risk, existing process', from: 4 },
+    { id: 'legal', lane: 3, col: 3, cls: 'tbd', html: 'Business + Legal revisit the partner agreement (doc 5.1)', title: 'The doc does not say when this happens in the sequence.' }
+  ];
+
+  // build grid
+  const grid = $('lanes');
+  const add = (tag, cls, style, html) => { const e = document.createElement(tag); if (cls) e.className = cls; Object.assign(e.style, style); if (html != null) e.innerHTML = html; grid.appendChild(e); return e; };
+  add('div', '', { gridRow: 1, gridColumn: 1 });
+  PHASES.forEach(([t, a, b]) => add('div', 'phase', { gridColumn: `${a + 1} / ${b + 2}` }, t));
+  LANES.forEach((l, i) => {
+    const alt = i % 2 ? ' alt' : '';
+    add('div', 'lane-label' + alt, { gridRow: i + 2 }, l);
+    add('div', 'lane-bg' + alt, { gridRow: i + 2 });
+  });
+  const cards = {};
+  const mk = (s, inGrid) => {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'card' + (s.kind === 'sys' ? ' sys' : '');
+    b.dataset.n = s.n;
+    b.innerHTML = `<span class="n">${String(s.n).padStart(2, '0')} · ${s.kind === 'sys' ? 'system' : 'ops'}${inGrid ? '' : `<span class="lane">${LANES[s.lane]}</span>`}</span>${s.title}`;
+    b.onclick = () => go(STEPS.indexOf(s));
+    return b;
+  };
+  STEPS.forEach(s => { const c = mk(s, true); c.style.gridRow = s.lane + 2; c.style.gridColumn = s.n + 1; grid.appendChild(c); cards[s.n] = c; });
+  SIDE.forEach(s => { const c = add('div', 'card ' + s.cls, { gridRow: s.lane + 2, gridColumn: s.col + 1 }, s.html); if (s.title) c.title = s.title; cards[s.id] = c; });
+
+  // mobile list
+  const vl = $('vlist');
+  PHASES.forEach(([t, a, b]) => {
+    const h = document.createElement('div'); h.className = 'ph'; h.textContent = t; vl.appendChild(h);
+    STEPS.filter(s => s.n >= a && s.n <= b).forEach(s => {
+      const c = mk(s, false); vl.appendChild(c);
+      if (s.n === 4) { const d = document.createElement('div'); d.className = 'card branch'; d.textContent = 'Side path: screening hit → Risk, existing process'; vl.appendChild(d); }
+      if (s.n === 3) { const d = document.createElement('div'); d.className = 'card tbd'; d.textContent = 'Business + Legal revisit the partner agreement (doc 5.1). The doc does not set when.'; vl.appendChild(d); }
+    });
+  });
+
+  // links
+  const svg = $('links');
+  const EDGES = [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [4, 'hit', 'dash']];
+  function draw() {
+    if (!grid.offsetParent) return;
+    const g = grid.getBoundingClientRect();
+    svg.setAttribute('width', g.width); svg.setAttribute('height', g.height);
+    svg.innerHTML = EDGES.map(([a, b, d]) => {
+      const A = cards[a].getBoundingClientRect(), B = cards[b].getBoundingClientRect();
+      let x1, y1, x2, y2, p;
+      if (Math.abs(A.top - B.top) < 4) { // same lane
+        x1 = A.right - g.left; y1 = A.top + A.height / 2 - g.top; x2 = B.left - g.left; y2 = y1;
+        p = `M${x1},${y1} L${x2 - 2},${y2}`;
+      } else if (Math.abs(A.left - B.left) < 4) { // same column, vertical
+        x1 = A.left + A.width / 2 - g.left; x2 = x1;
+        const down = B.top > A.top;
+        y1 = (down ? A.bottom : A.top) - g.top; y2 = (down ? B.top : B.bottom) - g.top;
+        p = `M${x1},${y1} L${x2},${y2 + (down ? -2 : 2)}`;
+      } else { // elbow: out right, then vertical, then into left side
+        x1 = A.right - g.left; y1 = A.top + A.height / 2 - g.top;
+        x2 = B.left - g.left; y2 = B.top + B.height / 2 - g.top;
+        const mx = (x1 + x2) / 2;
+        p = `M${x1},${y1} L${mx},${y1} L${mx},${y2} L${x2 - 2},${y2}`;
+      }
+      return `<path data-e="${a}-${b}" class="${d || ''}" d="${p}" marker-end="url(#ah)"/>`;
+    }).join('') + '<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#94A3B8" stroke="none"/></marker></defs>';
+    mark();
+  }
+
+  let cur = 0, all = false;
+  function mark() {
+    const n = STEPS[cur].n;
+    document.querySelectorAll('.card[data-n]').forEach(c => {
+      const k = +c.dataset.n;
+      if (k === n && !all) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current');
+      c.classList.toggle('dim', !all && k > n);
+    });
+    svg.querySelectorAll('path[data-e]').forEach(p => p.classList.toggle('on', !all && p.dataset.e === `${STEPS[Math.max(cur - 1, 0)].n}-${n}` && cur > 0));
+  }
+  function go(i) {
+    all = false; cur = Math.max(0, Math.min(STEPS.length - 1, i));
+    const s = STEPS[cur];
+    $('detail').innerHTML = `<div>
+        <h3>${s.n}. ${s.title}<span class="kind ${s.kind}">${s.kind === 'sys' ? 'System set-up' : 'Operational'}</span></h3>
+        <p class="by">Done by: ${LANES[s.lane]}</p>
+        <p>${s.text}</p>
+        ${s.list ? `<ul>${s.list.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}
+        ${s.link ? `<p><a href="${s.link[1]}">${s.link[0]} →</a></p>` : ''}
+        <p class="src">Source: <a href="docs/product.html#${s.doc || 'setup-steps'}">product doc ${s.doc ? '7.1' : '5.2 step ' + s.n}</a></p>
+      </div>
+      <div class="hand">
+        <h4>Comes in</h4><div class="chips">${s.in.length ? s.in.map(x => `<span class="chip">${x}</span>`).join('') : '<span class="chip">Partner’s own request</span>'}</div>
+        <h4>Goes out${s.to ? ' to ' + s.to : ''}</h4><div class="chips">${s.out.length ? s.out.map(x => `<span class="chip out">${x}</span>`).join('') : '<span class="chip">—</span>'}</div>
+        <h4>Result</h4><div class="chips"><span class="chip out">${s.res}</span></div>
+      </div>`;
+    $('pos').textContent = `Step ${cur + 1} of ${STEPS.length}`;
+    $('prev').disabled = cur === 0; $('next').disabled = cur === STEPS.length - 1;
+    mark();
+  }
+  $('prev').onclick = () => go(cur - 1);
+  $('next').onclick = () => go(cur + 1);
+  $('all').onclick = () => { all = true; mark(); $('pos').textContent = 'All steps'; };
+  addEventListener('resize', draw);
+  document.fonts && document.fonts.ready.then(draw);
+  go(0); draw();
+  window.__ob = { go, STEPS, cur: () => cur };
+})();
+</script>
+</body>
+</html>
