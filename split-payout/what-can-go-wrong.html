@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What can go wrong · Split Payout · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.strip { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 0; margin: 8px 0 18px; position: sticky; top: 52px; z-index: 5; background: var(--bg); padding: 10px 0; }
+.stg { position: relative; text-align: left; background: var(--card); border: 1px solid var(--border); border-right-width: 0; padding: 10px 12px 10px 14px; cursor: pointer; font: 13px/1.3 var(--sans); color: var(--text); min-height: 64px; }
+.stg:first-child { border-radius: 10px 0 0 10px; }
+.stg:last-child { border-radius: 0 10px 10px 0; border-right-width: 1px; }
+.stg .k { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 2px; }
+.stg .c { font: 500 11px var(--mono); color: var(--muted); }
+.stg[aria-pressed="true"] { background: var(--ink); color: #fff; border-color: var(--ink); }
+.stg[aria-pressed="true"] .k, .stg[aria-pressed="true"] .c { color: #CBD5E1; }
+.tools { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 14px; }
+.tools input { font: 14px var(--sans); padding: 8px 12px; border: 1px solid var(--border-2); border-radius: 8px; width: 320px; max-width: 100%; }
+.tools .cnt { font: 12px var(--mono); color: var(--muted); }
+.lg { display: flex; flex-wrap: wrap; gap: 14px; font-size: 13px; color: var(--text-2); }
+.lg span { display: inline-flex; gap: 6px; align-items: center; }
+.dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; }
+.grp { margin: 26px 0 10px; display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+.grp h2 { margin: 0; font-size: 20px; color: var(--ink); font-weight: 600; }
+.grp p { margin: 0; font-size: 14px; color: var(--text-2); }
+.cards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.grp { scroll-margin-top: 150px; }
+.case { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--border-2); border-radius: 10px; padding: 14px 16px; scroll-margin-top: 150px; }
+.case:target { box-shadow: 0 0 0 3px rgba(29,78,216,.25); }
+.case.rej { border-left-color: #B91C1C; } .case.hold { border-left-color: #B45309; } .case.rel { border-left-color: #475569; } .case.tbd { border-left-color: #D97706; background: #FFFBEB; } .case.ok { border-left-color: var(--money); }
+.case h3 { margin: 0 0 6px; font-size: 15px; color: var(--ink); font-weight: 600; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
+.code { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 5px; background: #F1F5F9; color: var(--text-2); white-space: nowrap; }
+.out { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
+.out.rej { background: #FEE2E2; color: #991B1B; } .out.hold { background: #FEF3C7; color: #92400E; } .out.rel { background: #E2E8F0; color: #334155; } .out.tbd { background: var(--warn-bg); color: var(--warn-fg); } .out.ok { background: var(--money-bg); color: var(--money); }
+.case dl { margin: 0; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 4px 10px; font-size: 14px; }
+.case dt { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; padding-top: 3px; }
+.case dd { margin: 0; }
+.msg { font: 13px var(--mono); color: #991B1B; background: #FEF2F2; padding: 1px 6px; border-radius: 4px; }
+.links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
+.links a.try { font-weight: 500; color: #fff; background: var(--ink); padding: 3px 10px; border-radius: 6px; text-decoration: none; }
+.links a.try:hover { background: #1E293B; }
+.open { margin-top: 8px; font-size: 13px; color: var(--warn-fg); background: var(--warn-bg); padding: 6px 10px; border-radius: 6px; }
+.empty { color: var(--muted); font-size: 14px; }
+@media (max-width: 1100px) { .strip { grid-template-columns: repeat(4, minmax(0, 1fr)); } .stg { border-right-width: 1px; border-radius: 0 !important; } .cards { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .strip { grid-template-columns: repeat(2, minmax(0, 1fr)); position: static; } .case dl { grid-template-columns: minmax(0, 1fr); } .case dt { padding-top: 6px; } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Split Payout</a> / What can go wrong</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual · split payout</p>
+<h1 class="page">What can go wrong</h1>
+<p class="lead">Every rejection and exception in a split payout, in the order an order meets them: from the PGW configuration to after the payout. Each case shows the message, what happens to the money and how it is fixed. "Try it" opens the simulator in that exact state.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects PGW stories v0.5 and product doc v1.6</span>
+<a href="docs/product.html#validations">Read the requirement →</a>
+<a href="docs/stories.html#checks-before-payment">Stories: SP-6 checks →</a>
+<a href="docs/stories.html#checks">SP-8 checks →</a>
+</div>
+<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. The PGW stories call these merchant and partner, so the messages quoted from them say "partner ID" for a vendor's ID. Messages are verbatim from the stories; PGW engineering sets the error codes.</div>
+
+<div class="strip" id="strip" role="group" aria-label="Filter by stage"></div>
+<div class="tools">
+<input type="search" id="q" placeholder="Search a message, check or field" aria-label="Search cases">
+<span class="cnt" id="cnt"></span>
+<span class="lg"><span><i class="dot" style="background:#B91C1C"></i>Rejected</span><span><i class="dot" style="background:#B45309"></i>Held at APEX</span><span><i class="dot" style="background:#475569"></i>Released to the partner</span><span><i class="dot" style="background:var(--money)"></i>Handled, no loss</span><span><i class="dot" style="background:#D97706"></i>Not defined yet</span></span>
+</div>
+<div id="list"></div>
+</main>
+<footer class="lab-footer">Illustrative explanation of the product document and stories. The documents are the requirement; where they differ, the documents win.</footer>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const ST = 'docs/stories.html#', PD = 'docs/product.html#';
+  const STAGES = [
+    ['cfg', 'Configuration', 'PGW back office, before any order. Nothing is saved until the checks pass.'],
+    ['cs', 'Create Session', 'PGW checks the split before payment (SP-6). A failure rejects the session (HTTP 400): no payment is taken.'],
+    ['api', 'Payout Advice API', 'The partner sends or corrects a split after payment (SP-8). A failure rejects the call (HTTP 400). The transaction stays held.'],
+    ['send', 'Sending to APEX', 'PGW forwards the advice in real time (SP-7). A failure here never changes the payment result.'],
+    ['apex', 'APEX checks', 'APEX structural checks, in the call (product doc 6.4).'],
+    ['amt', 'Amount validation', 'APEX checks the amounts once pricing is known (product doc 6.5). Any failure rejects the whole advice.'],
+    ['file', 'Day-end file', 'APEX reconciles the day-end file against the real-time advices (product doc 6.4).'],
+    ['after', 'Payout and after', 'Hold timer, transfers, refunds and chargebacks (product doc 4.3, 6.3, 8).']
+  ];
+  // out: rej | hold | rel | ok | tbd
+  const C = [
+    // ---------- configuration ----------
+    { id: 'cfg-partner-id', s: 'cfg', code: 'SP-3 4.1–4.4', title: 'Partner ID entry is not valid', out: 'rej', outT: 'Not saved',
+      when: 'Adding or editing a Partner ID in the pop-up.',
+      msg: ['Use 3–20 letters, digits or hyphens.', 'This Partner ID is already in the list.', 'This Partner ID is configured on another MID (MID nnnnnnnnnnn). A partner belongs to one merchant MID only.', 'Use up to 100 characters.'],
+      money: 'None. Nothing is saved.', fix: 'Correct the entry. For 4.3, ask the APEX team which MID the vendor belongs to.',
+      note: 'Why 4.3: APEX links each vendor to one partner MID. A Partner ID on a second MID makes APEX reject every split from that MID after the customer has paid.',
+      story: ['SP-3 section 4', 'partner-ids'], doc: ['7.1', 'configuration'], tryHref: 'simulator.html#cfg=dynamic', tryT: 'Open the configuration' },
+    { id: 'cfg-delete-used', s: 'cfg', code: 'SP-3 4.5', title: 'Deleting a Partner ID that is still in use', out: 'rej', outT: 'Not deleted',
+      when: 'The Partner ID is used in the Fixed template or in a profile.', msg: ['P000301 is used in Fixed template. Remove it there first.'],
+      money: 'None.', fix: 'Remove the leg from the template or profile first.', story: ['SP-3 section 4', 'partner-ids'], tryHref: 'simulator.html#cfg=fixed', tryT: 'Open a Fixed configuration' },
+    { id: 'cfg-save', s: 'cfg', code: 'SP-3 5.1–5.2', title: 'Split on with no mode or no Partner ID', out: 'rej', outT: 'Not saved',
+      when: 'Save changes with split payout on.', msg: ['Select a split mode.', 'Add at least one Partner ID.'],
+      money: 'None.', fix: 'Select a mode and add at least one Partner ID.', story: ['SP-3 section 5', 'save'], doc: ['7.1', 'configuration'], tryHref: 'simulator.html#cfg=off', tryT: 'Open with split off' },
+    { id: 'cfg-fixed', s: 'cfg', code: 'SP-4 2.1–2.6', title: 'Fixed template is not valid', out: 'rej', outT: 'Not saved',
+      when: 'Save changes in Fixed mode.', msg: ['Add at least one leg.', 'Select a Partner ID.', 'Each partner can appear once.', 'Enter a value above 0, up to 2 decimals.', 'Maximum 10 legs.', 'Percentages cannot add up to more than 100%.'],
+      money: 'None.', fix: 'Correct the template.', note: 'An AMOUNT template is not checked against a total at set-up: the order amount is not known yet. Create Session checks it (see 3.6 below).',
+      story: ['SP-4 section 2', 'checks-on-save-changes'], tryHref: 'simulator.html#cfg=fixed', tryT: 'Open a Fixed configuration' },
+    { id: 'cfg-profile', s: 'cfg', code: 'SP-5 2.1–2.2', title: 'Profile mode with no profile, or too many', out: 'rej', outT: 'Not saved',
+      when: 'Save changes in Profile mode.', msg: ['Add at least one profile.', 'Maximum 10 profiles.'],
+      money: 'None.', fix: 'Add a profile, or remove one.', story: ['SP-5 section 2', 'checks-on-save-changes-bottom-of-the-tab'], tryHref: 'simulator.html#cfg=profile', tryT: 'Open a Profile configuration' },
+
+    // ---------- create session ----------
+    { id: 'cs-off', s: 'cs', code: 'SP-6 2.2 · 3.1', title: 'Split fields sent to a MID with split payout off', out: 'rej', outT: 'Session rejected',
+      when: 'Any split field or deferredSplit on a MID where split payout is off.', msg: ['Split payout is not enabled for this merchant.'],
+      money: 'No payment is taken.', fix: 'Remove the split fields, or ask Geidea to enable split payout (see Onboarding).', story: ['SP-6 section 3', 'checks-before-payment'], doc: ['7.6', 'validations'], tryable: 1 },
+    { id: 'cs-fixed-fields', s: 'cs', code: 'SP-6 2.7 · 3.1', title: 'Split fields sent to a Fixed MID', out: 'rej', outT: 'Session rejected',
+      when: 'A Fixed MID sends any split field or deferredSplit. PGW applies the template itself.', msg: ["Split fields do not match the merchant's split mode."],
+      money: 'No payment is taken.', fix: 'Send no split fields on a Fixed MID.', story: ['SP-6 section 2', 'what-pgw-does-with-each-request'], doc: ['7.6', 'validations'], tryable: 1 },
+    { id: 'cs-profile-legs', s: 'cs', code: 'SP-6 2.10 · 3.1', title: 'Legs sent to a Profile MID', out: 'rej', outT: 'Session rejected',
+      when: 'A Profile MID sends splitPayoutTransaction instead of a profile ID.', msg: ["Split fields do not match the merchant's split mode."],
+      money: 'No payment is taken.', fix: 'Send splitPayoutProfileId.', story: ['SP-6 section 2', 'what-pgw-does-with-each-request'], tryable: 1 },
+    { id: 'cs-profile-on-dynamic', s: 'cs', code: 'SP-6 3.1', title: 'Profile ID sent to a Dynamic MID', out: 'rej', outT: 'Session rejected',
+      when: 'A Dynamic MID sends splitPayoutProfileId.', msg: ["Split fields do not match the merchant's split mode."],
+      money: 'No payment is taken.', fix: 'Send the legs in splitPayoutTransaction.', note: 'SP-6 section 2 has no row for this combination; check 3.1 covers it.', story: ['SP-6 section 3', 'checks-before-payment'], tryable: 1 },
+    { id: 'cs-both', s: 'cs', code: 'SP-6 2.11 · 3.9', title: 'Split detail and deferredSplit together', out: 'rej', outT: 'Session rejected',
+      when: 'Legs or a profile ID, and deferredSplit = true, in one request.', msg: ['Send split detail or deferredSplit, not both.'],
+      money: 'No payment is taken.', fix: 'Send one or the other.', story: ['SP-6 section 3', 'checks-before-payment'], doc: ['7.6', 'validations'], tryable: 1 },
+    { id: 'cs-no-type', s: 'cs', code: 'SP-6 1', title: 'Legs without splitPayoutType', out: 'rej', outT: 'Session rejected',
+      when: 'splitPayoutTransaction is sent with no splitPayoutType, or a leg has no partnerId or value.', msg: ['Field rule: splitPayoutType is mandatory when splitPayoutTransaction is sent (AMOUNT or PERCENTAGE).'],
+      money: 'No payment is taken.', fix: 'Send splitPayoutType with the legs.', story: ['SP-6 section 1', 'new-request-fields-create-session'], tryable: 1 },
+    { id: 'cs-not-pay', s: 'cs', code: 'SP-6 3.2', title: 'Split on an operation other than Pay', out: 'rej', outT: 'Session rejected',
+      when: 'paymentOperation is not Pay.', msg: ['Split payout is supported for Pay only.'],
+      money: 'No payment is taken.', fix: 'Use Pay.', note: 'Why: in this release APEX handles split only on a sale. Authorize and capture are not included.', story: ['SP-6 section 3', 'checks-before-payment'], tryable: 1 },
+    { id: 'cs-not-aed', s: 'cs', code: 'SP-6 3.3', title: 'Split on a non-AED order', out: 'rej', outT: 'Session rejected',
+      when: 'Order currency is not AED.', msg: ['Split payout is supported in AED only.'], money: 'No payment is taken.', fix: 'Use AED.', story: ['SP-6 section 3', 'checks-before-payment'], tryable: 1 },
+    { id: 'cs-unknown-id', s: 'cs', code: 'SP-6 3.4', title: 'Vendor ID not configured on the MID', out: 'rej', outT: 'Session rejected',
+      when: 'A partnerId is not one of the MID’s configured IDs.', msg: ['Unknown partner ID: {id}.'],
+      money: 'No payment is taken.', fix: 'Use a configured ID, or ask Geidea to add the vendor (see Onboarding).', story: ['SP-6 section 3', 'checks-before-payment'], doc: ['7.6', 'validations'], tryable: 1 },
+    { id: 'cs-duplicate', s: 'cs', code: 'SP-6 3.4', title: 'Same vendor ID twice', out: 'rej', outT: 'Session rejected',
+      when: 'A partnerId occurs more than once.', msg: ['Duplicate partner ID: {id}.'], money: 'No payment is taken.', fix: 'Send one leg per vendor.', story: ['SP-6 section 3', 'checks-before-payment'], tryable: 1 },
+    { id: 'cs-too-many', s: 'cs', code: 'SP-6 3.5', title: 'More legs than the maximum', out: 'rej', outT: 'Session rejected',
+      when: 'More legs than the system maximum (default 10, SP-2).', msg: ['Maximum {n} legs.'], money: 'No payment is taken.', fix: 'Send 10 legs or fewer.', story: ['SP-6 section 3', 'checks-before-payment'], tryable: 1 },
+    { id: 'cs-over-total', s: 'cs', code: 'SP-6 3.6', title: 'Amount legs above the order amount', out: 'rej', outT: 'Session rejected',
+      when: 'AMOUNT: the legs add up to more than the order amount.', msg: ['Split total is more than the order amount.'],
+      money: 'No payment is taken.', fix: 'Reduce the legs.', note: 'Passing 3.6 does not guarantee APEX accepts the amounts: APEX Rule 1 also takes MDR, VAT, commission and fees into account (see Amount validation).', story: ['SP-6 section 3', 'checks-before-payment'], doc: ['7.6', 'validations'], tryable: 1, also: ['Money flow', 'money-flow.html#amount-validation'] },
+    { id: 'cs-pct-over', s: 'cs', code: 'SP-6 3.6', title: 'Percentage legs above 100%', out: 'rej', outT: 'Session rejected',
+      when: 'PERCENTAGE: the legs add up to more than 100.', msg: ['Split total is more than 100%.'], money: 'No payment is taken.', fix: 'Reduce the percentages.', story: ['SP-6 section 3', 'checks-before-payment'], tryable: 1 },
+    { id: 'cs-fixed-over', s: 'cs', code: 'SP-6 2.6 · 3.6', title: 'Fixed AMOUNT template above the order amount', out: 'rej', outT: 'Session rejected',
+      when: 'A Fixed MID with an AMOUNT template larger than this order.', msg: ['Split total is more than the order amount.'],
+      money: 'No payment is taken. The partner cannot fix this per order.', fix: 'Geidea changes the template, or the partner sends larger orders only.', story: ['SP-4 section 2', 'checks-on-save-changes'], tryable: 1 },
+    { id: 'cs-bad-value', s: 'cs', code: 'SP-6 3.7', title: 'Leg value of 0, negative or more than 2 decimals', out: 'rej', outT: 'Session rejected',
+      when: 'A value is not above 0 with up to 2 decimals.', msg: ['Invalid split value.'], money: 'No payment is taken.', fix: 'Correct the value.', story: ['SP-6 section 3', 'checks-before-payment'], tryable: 1 },
+    { id: 'cs-unknown-profile', s: 'cs', code: 'SP-6 3.8', title: 'Profile ID not configured', out: 'rej', outT: 'Session rejected',
+      when: 'splitPayoutProfileId is not a profile of the MID.', msg: ['Unknown split profile: {id}.'], money: 'No payment is taken.', fix: 'Use a configured profile ID.', story: ['SP-6 section 3', 'checks-before-payment'], tryable: 1 },
+    { id: 'cs-profile-none', s: 'cs', code: 'SP-6 section 2', title: 'Profile MID sends no profile ID and no deferredSplit', out: 'tbd', outT: 'Not defined',
+      when: 'A Profile MID sends a plain session with no split fields.', msg: null,
+      money: 'Not defined. The simulator treats it as a normal session (no split, paid to the partner as today).', fix: '—', open: 'Open point: SP-6 section 2 has no row for this case.', story: ['SP-6 section 2', 'what-pgw-does-with-each-request'] },
+
+    // ---------- payout advice api ----------
+    { id: 'api-fixed', s: 'api', code: 'SP-8 2.1', title: 'Called for a Fixed MID, or with split off', out: 'rej', outT: 'Call rejected',
+      when: 'The MID has split off, or is in Fixed mode.', msg: ['Split payout is not enabled for this merchant.', 'Not allowed for Fixed split.'],
+      money: 'Nothing changes on the order.', fix: 'A Fixed split comes from the template; ask Geidea to change it.', story: ['SP-8 section 2', 'checks'], doc: ['7.3', 'payout-advice-api'], tryable: 1 },
+    { id: 'api-not-paid', s: 'api', code: 'SP-8 2.2', title: 'Order not found, not this MID’s, or not paid', out: 'rej', outT: 'Call rejected',
+      when: 'The order does not exist, belongs to another MID, or has no successful Pay.', msg: ['Order not found.', 'Order is not paid.'],
+      money: 'Nothing changes.', fix: 'Send the split after the payment succeeds.', story: ['SP-8 section 2', 'checks'], doc: ['7.3', 'payout-advice-api'], tryable: 1 },
+    { id: 'api-not-split', s: 'api', code: 'SP-8 2.3', title: 'Order was created without split', out: 'rej', outT: 'Call rejected',
+      when: 'The order has splitPayout = false.', msg: ['Order is not a split order.'],
+      money: 'The transaction was not held. It settles to the partner as normal.', fix: 'None for this order. Create future orders with a split or deferredSplit.',
+      note: 'Why: an order without the flag was not held by APEX. Its money may already be paid to the partner.', story: ['SP-8 section 2', 'checks'], doc: ['7.3', 'payout-advice-api'], tryable: 1 },
+    { id: 'api-new-exists', s: 'api', code: 'SP-8 2.4', title: 'NEW for an order that already has a split', out: 'rej', outT: 'Call rejected',
+      when: 'NEW on an order not created with deferredSplit, or that already has an advice.', msg: ['A split already exists for this order. Use UPDATE.'],
+      money: 'Nothing changes. The existing advice stands.', fix: 'Use UPDATE with the latest advice ID.', note: 'Repeating a NEW with the same content returns the first advice ID, so a retry after a timeout is safe (product doc 7.3).',
+      story: ['SP-8 section 2', 'checks'], doc: ['7.3', 'payout-advice-api'], tryable: 1 },
+    { id: 'api-stale-id', s: 'api', code: 'SP-8 2.5', title: 'UPDATE with an older advice ID', out: 'rej', outT: 'Call rejected',
+      when: 'splitAdviceId is not the latest advice ID of the order.', msg: ['Advice ID is not the latest.'],
+      money: 'Nothing changes. The newer correction stands.', fix: 'Use the advice ID from the latest response.', note: 'Why: a late retry of an old request must not overwrite a newer correction.', story: ['SP-8 section 2', 'checks'], tryable: 1 },
+    { id: 'api-over-total', s: 'api', code: 'SP-8 2.6', title: 'The split fails the Create Session checks', out: 'rej', outT: 'Call rejected',
+      when: 'Unknown or duplicate vendor ID, too many legs, total too high, bad value or unknown profile (SP-6 3.4 to 3.8).', msg: ['As in SP-6, for example: Split total is more than the order amount.'],
+      money: 'Nothing changes. The transaction stays held.', fix: 'Correct the split and send again.', story: ['SP-8 section 2', 'checks'], tryable: 1 },
+    { id: 'api-after-change', s: 'api', code: 'Open point 6', title: 'UPDATE after the MID’s mode was changed', out: 'tbd', outT: 'Not defined',
+      when: 'An order created in the old mode is updated after Geidea changed the mode.', msg: null, money: 'Not defined.', fix: '—', open: 'Open point 6 in the stories: how an UPDATE is checked for an order created in the old mode.', story: ['Open points', 'open-points'] },
+
+    // ---------- sending ----------
+    { id: 'apex-down', s: 'send', code: 'SP-7 4', title: 'APEX not reachable or times out', out: 'ok', outT: 'Advice PENDING, retried',
+      when: 'The real-time Split Advice API call fails.', msg: null,
+      money: 'The transaction stays held (it is flagged). The payment result does not change.', fix: 'None by the partner. PGW retries (count and interval: PGW engineering). The day-end file carries the advice in any case.',
+      story: ['SP-7 section 4', 'errors-and-retry'], doc: ['7.5', 'forwarding-advices-to-apex'], tryable: 1, also: ['Advice lifecycle', 'advice-lifecycle.html#sc=down'] },
+
+    // ---------- apex structural ----------
+    { id: 'apex-reject', s: 'apex', code: 'APEX 6.4', title: 'Vendor not found, inactive or not linked to the MID', out: 'hold', outT: 'Advice REJECTED · held',
+      when: 'APEX does not find a beneficiary, it is deactivated, or it is linked to another MID.', msg: ['Reason code from APEX (APEX to define).'],
+      money: 'Nothing is paid to vendors. The transaction stays held.', fix: 'The partner sends a corrected, complete split with UPDATE, within N days. If the vendor was deactivated, contact Geidea.',
+      note: 'PGW holds no vendor bank details and does not check vendor status: only APEX catches an inactive vendor.', story: ['SP-7 section 4', 'errors-and-retry'], doc: ['6.4', 'real-time-split-advice-api'], tryable: 1, also: ['Advice lifecycle', 'advice-lifecycle.html#sc=corrected'] },
+    { id: 'apex-other', s: 'apex', code: 'APEX 6.4', title: 'Other structural checks fail', out: 'hold', outT: 'Advice REJECTED · held',
+      when: 'Split not enabled on the MID at APEX; MID does not match the transaction; transaction not flagged; both percentage and amount in a rule; A when an advice exists; U when the advice is not CREATED, REJECTED or PENDING_MATCH.', msg: ['Reason code from APEX.'],
+      money: 'The transaction stays held.', fix: 'Mostly set-up or sequence errors: Geidea investigates. U after PROCESSED or RELEASED is final: no further updates.', doc: ['6.4', 'real-time-split-advice-api'], also: ['Advice lifecycle', 'advice-lifecycle.html#statuses'] },
+    { id: 'apex-unmatched', s: 'apex', code: 'APEX 6.4', title: 'Advice arrives before its transaction, never matched', out: 'hold', outT: 'PENDING_MATCH → REJECTED',
+      when: 'The advice reaches APEX before the transaction. APEX parks it as PENDING_MATCH. If still unmatched at day end, APEX rejects it with a reason code.', msg: ['Reason code from APEX.'],
+      money: 'Held until a valid advice is processed, or released after N days.', fix: 'Usually none: the transaction arrives and APEX links the advice. If rejected, the partner sends an UPDATE.', doc: ['6.4', 'transaction-not-yet-on-apex'], also: ['Advice lifecycle', 'advice-lifecycle.html#sc=early'] },
+
+    // ---------- amount validation ----------
+    { id: 'amt-rule1', s: 'amt', code: 'APEX Rule 1', title: 'Partner residual would be negative', out: 'hold', outT: 'Advice REJECTED · held',
+      when: 'net − Σ advised amounts + Σ vendor commissions − transfer fees borne by the partner < 0 (net = amount − MDR − VAT on MDR).', msg: ['Reason code from APEX, shown in the split payout report.'],
+      money: 'Nothing is paid to vendors. The transaction stays held.', fix: 'The partner sends a smaller split with UPDATE, within N days.',
+      note: 'A split that passes PGW check 3.6 (total ≤ order amount) can still fail here, because MDR, VAT and fees come off first.',
+      open: 'Open point: the stories do not say whether PGW learns of this rejection. The real-time call already returned ACCEPTED.', doc: ['6.5', 'amount-validation'], also: ['Try it in Money flow', 'money-flow.html#amount-validation'] },
+    { id: 'amt-rule2', s: 'amt', code: 'APEX Rule 2', title: 'A vendor leg would be zero or negative', out: 'hold', outT: 'Advice REJECTED · held',
+      when: 'For any vendor: advised amount − commission − transfer fee (if the vendor bears it) ≤ 0. Example: a leg of 0.80, commission 0.02, fee 1.00 gives −0.22.', msg: ['Reason code from APEX.'],
+      money: 'The whole advice is rejected, not only that leg.', fix: 'Remove or raise the small leg and send an UPDATE.', doc: ['6.5', 'amount-validation'], also: ['Try it in Money flow', 'money-flow.html#amount-validation'] },
+    { id: 'amt-twice', s: 'amt', code: 'APEX single payout', title: 'A transaction would be paid out twice', out: 'ok', outT: 'Blocked by APEX',
+      when: 'Any path that would pay the same transaction again.', msg: null, money: 'Blocked: a transaction is never paid out twice.', fix: '—', doc: ['6.5', 'amount-validation'] },
+
+    // ---------- day-end file ----------
+    { id: 'file-diff', s: 'file', code: 'APEX 6.4', title: 'File split differs from the real-time advice', out: 'ok', outT: 'File wins',
+      when: 'The same advice is in the API and the file, with a different split.', msg: null, money: 'APEX overwrites with the file’s split and processes it.', fix: 'None.', doc: ['6.4', 'day-end-split-advice-file'], story: ['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'] },
+    { id: 'file-only', s: 'file', code: 'APEX 6.4', title: 'Advice only in the file', out: 'ok', outT: 'Processed as new',
+      when: 'The real-time call never reached APEX.', msg: null, money: 'APEX processes it as new. This is how an API failure is covered.', fix: 'None.', doc: ['6.4', 'day-end-split-advice-file'], story: ['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], tryHref: 'simulator.html#try=apex-down', tryT: 'Try it' },
+    { id: 'file-missing', s: 'file', code: 'APEX 6.4', title: 'Advice received over the API, missing in the file', out: 'hold', outT: 'Mismatched · held',
+      when: 'APEX has the advice from the real-time call, but the day-end file does not carry it.', msg: null,
+      money: 'APEX marks it mismatched and holds settlement until resolved.', fix: 'Geidea investigates (PGW and APEX).', doc: ['6.4', 'day-end-split-advice-file'], story: ['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'] },
+    { id: 'file-none', s: 'file', code: 'APEX 6.4', title: 'No day-end file received', out: 'ok', outT: 'API advices used',
+      when: 'The file does not arrive.', msg: null, money: 'APEX processes what it received over the API.', fix: 'Geidea investigates the file delivery.',
+      note: 'PGW sends an empty file with a zero record count on days with no advices, so APEX can tell "no advices today" from "file not received".', doc: ['6.4', 'day-end-split-advice-file'], story: ['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'] },
+
+    // ---------- after ----------
+    { id: 'after-released', s: 'after', code: 'APEX 6.3', title: 'No valid advice within N days', out: 'rel', outT: 'RELEASED',
+      when: 'N days after the scheduled payout date, the transaction still has no PROCESSED advice: never sent, or rejected and not corrected.', msg: null,
+      money: 'Released to the partner after Geidea’s MDR. Vendors are not paid through Geidea. Listed in the exception report for Operations and Finance.', fix: 'Final. No further updates to the advice.',
+      note: 'N is set per partner MID and can be zero. The timer runs on the transaction, not on an advice.', doc: ['6.3', 'hold-of-flagged-transactions'], also: ['Advice lifecycle', 'advice-lifecycle.html#sc=released'] },
+    { id: 'after-never', s: 'after', code: 'Doc 4.3', title: 'Deferred split never sent', out: 'hold', outT: 'Held, then released',
+      when: 'The order was created with deferredSplit = true and the partner never calls the Payout Advice API.', msg: null,
+      money: 'Held; released to the partner after N days as above.', fix: 'The partner sends NEW before N days pass.', doc: ['4.3', 'outcomes'], also: ['Advice lifecycle', 'advice-lifecycle.html#sc=deferred'] },
+    { id: 'after-transfer', s: 'after', code: 'Doc 4.3 · 6.6', title: 'Transfer to a vendor fails', out: 'hold', outT: 'Exception process',
+      when: 'The domestic transfer to the vendor’s IBAN fails.', msg: null,
+      money: 'Existing exception process: retry up to the configured limit, then an exception record. The case shows in the split payout report.', fix: 'Geidea contacts the partner only, never the vendor.', doc: ['6.6', 'calculation-and-payout'] },
+    { id: 'after-refund', s: 'after', code: 'Doc 8', title: 'Refund or chargeback after the payout', out: 'rel', outT: 'Debited from the partner',
+      when: 'A refund or chargeback on a split transaction.', msg: null,
+      money: 'Debited from the partner’s MID as normal. Vendors and their payouts are not involved; Geidea does not recover from vendors. A small residual can leave the partner short on the day.', fix: 'Shortfall recovery is set in the partner agreement and confirmed by Finance. New splits are not held back to recover it.',
+      doc: ['8', 'refunds-and-chargebacks'] }
+  ];
+  const tryable = new Set(C.filter(c => c.tryable).map(c => c.id));
+  let stage = null, q = '';
+  function card(c) {
+    const links = [];
+    if (c.tryable) links.push(`<a class="try" href="simulator.html#try=${c.id}">Try it</a>`);
+    else if (c.tryHref) links.push(`<a class="try" href="${c.tryHref}">${c.tryT}</a>`);
+    if (c.story) links.push(`<a href="${ST}${c.story[1]}">Story: ${c.story[0]}</a>`);
+    if (c.doc) links.push(`<a href="${PD}${c.doc[1]}">Product doc ${c.doc[0]}</a>`);
+    if (c.also) links.push(`<a href="${c.also[1]}">${c.also[0]}</a>`);
+    return `<article class="case ${c.out}" id="${c.id}">
+      <h3><span class="code">${c.code}</span>${c.title}<span class="out ${c.out}">${c.outT}</span></h3>
+      <dl><dt>When</dt><dd>${c.when}</dd>
+      ${c.msg ? `<dt>Message</dt><dd>${c.msg.map(m => `<span class="msg">${m}</span>`).join(' ')}</dd>` : ''}
+      <dt>Money</dt><dd>${c.money}</dd><dt>Fix</dt><dd>${c.fix}</dd>
+      ${c.note ? `<dt>Note</dt><dd>${c.note}</dd>` : ''}</dl>
+      ${c.open ? `<div class="open">${c.open}</div>` : ''}
+      <div class="links">${links.join('')}</div></article>`;
+  }
+  function render() {
+    const ql = q.toLowerCase();
+    const hit = c => (!stage || c.s === stage) && (!ql || JSON.stringify(c).toLowerCase().includes(ql));
+    let n = 0, h = '';
+    STAGES.forEach(([k, t, d], i) => {
+      const cs = C.filter(c => c.s === k && hit(c)); if (!cs.length) return; n += cs.length;
+      h += `<div class="grp" id="stage-${k}"><h2>${i + 1}. ${t}</h2><p>${d}</p></div><div class="cards">${cs.map(card).join('')}</div>`;
+    });
+    $('list').innerHTML = h || '<p class="empty">No case matches.</p>';
+    $('cnt').textContent = `${n} of ${C.length} cases`;
+    document.querySelectorAll('.stg').forEach(b => b.setAttribute('aria-pressed', b.dataset.k === stage));
+  }
+  $('strip').innerHTML = STAGES.map(([k, t], i) => `<button type="button" class="stg" data-k="${k}" aria-pressed="false"><span class="k">${i + 1}</span>${t}<br><span class="c">${C.filter(c => c.s === k).length} cases</span></button>`).join('');
+  document.querySelectorAll('.stg').forEach(b => b.onclick = () => { stage = stage === b.dataset.k ? null : b.dataset.k; render(); });
+  $('q').oninput = e => { q = e.target.value; render(); };
+  render();
+  if (location.hash) { const el = document.getElementById(location.hash.slice(1)); if (el) setTimeout(() => el.scrollIntoView({ block: 'start' }), 50); }
+  window.__wg = { C, STAGES, tryable };
+})();
+</script>
+</body>
+</html>

@@ -49,6 +49,8 @@ table.t td.m { font-family: var(--mono); font-size: 12.5px; }
 .empty { color: var(--muted); font-size: 14px; }
 .note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
 .note b { color: var(--warn-fg); }
+.tryb { margin: 16px 0 0; padding: 12px 16px; border: 1.5px solid #B91C1C; background: #FEF2F2; border-radius: 10px; font-size: 14px; color: var(--text); }
+.tryb b { color: #991B1B; } .tryb a { margin-left: 8px; }
 .info { font-size: 13px; background: #EFF6FF; border-left: 3px solid #1D4ED8; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
 .src { font: 11px var(--mono); color: var(--muted); margin-top: 10px; }
 .src a { color: var(--muted); }
@@ -176,6 +178,7 @@ textarea.code:focus { outline: 2px solid var(--link); }
 </div>
 <div class="terms"><b>Terms follow the PGW stories.</b> Merchant = the MID with split payout on (the "partner" in the product doc). Partner = a payee of the split, with a Partner ID from APEX (a "vendor" in the product doc). Field names are the stories' proposals. APEX advice fields and the day-end file layout are drafts until the Emcrey spec (P3). Nothing here calls a real system.</div>
 
+<div id="tryBanner" class="tryb" role="status" hidden></div>
 <section class="sec" id="s1">
 <header><span class="num">1</span><h2>Split Payout PGW Configuration</h2><span class="who">PGW configuration · Split Payout tab · SP-1 to SP-5</span><span class="sp"></span>
 <label class="hsel"><span>load example</span><select id="preset"><option value="">—</option><option value="off">Split off</option><option value="dynamic">Dynamic</option><option value="fixed">Fixed</option><option value="profile">Profile</option></select></label>
@@ -853,6 +856,59 @@ $('runEod').onclick = () => {
 const _ev = evHtml;
 evHtml = function (o, ev) { return ev.kind === 'note' ? `<div class="ev"><h3><span class="st info">day-end</span> ${esc(ev.text)}</h3></div>` : _ev(o, ev); };
 
+
+// ===================== TRY presets (opened from "What can go wrong") =====================
+const BASE = { amount: 1000, currency: 'AED', merchantReferenceId: 'ORD-DEMO-0001', paymentOperation: 'Pay' };
+const L2 = [{ partnerId: 'P000301', value: 500 }, { partnerId: 'P000302', value: 300 }];
+const amt = legs => Object.assign({}, BASE, { splitPayoutType: 'AMOUNT', splitPayoutTransaction: legs });
+const many = Object.assign(clone(PRESETS.dynamic), { beneficiaries: Array.from({ length: 11 }, (_, i) => ({ id: 'P0003' + String(i + 1).padStart(2, '0'), label: 'Seller ' + (i + 1) })) });
+const fixedAmt = Object.assign(clone(PRESETS.fixed), { fixed: { type: 'AMOUNT', legs: [{ b: 'P000301', v: '600.00' }, { b: 'P000302', v: '500.00' }] } });
+const TRY = {
+  'cs-off': { cfg: 'off', req: amt(L2), at: 's2', t: 'Split fields sent to a MID with split payout off (SP-6 row 2.2, check 3.1).' },
+  'cs-fixed-fields': { cfg: 'fixed', req: amt(L2), at: 's2', t: 'Split fields sent to a Fixed MID (SP-6 row 2.7, check 3.1).' },
+  'cs-profile-legs': { cfg: 'profile', req: amt([{ partnerId: 'P000401', value: 500 }]), at: 's2', t: 'Legs sent to a Profile MID (SP-6 row 2.10, check 3.1).' },
+  'cs-profile-on-dynamic': { cfg: 'dynamic', req: Object.assign({}, BASE, { splitPayoutProfileId: 'PRF-INSURER-A' }), at: 's2', t: 'A profile ID sent to a Dynamic MID (check 3.1).' },
+  'cs-both': { cfg: 'dynamic', req: Object.assign(amt(L2), { deferredSplit: true }), at: 's2', t: 'Split detail and deferredSplit sent together (SP-6 row 2.11, check 3.9).' },
+  'cs-no-type': { cfg: 'dynamic', req: Object.assign({}, BASE, { splitPayoutTransaction: L2 }), at: 's2', t: 'Legs sent without splitPayoutType (SP-6 section 1 field rules).' },
+  'cs-not-pay': { cfg: 'dynamic', req: Object.assign(amt(L2), { paymentOperation: 'Authorize' }), at: 's2', t: 'Split on an Authorize instead of Pay (check 3.2).' },
+  'cs-not-aed': { cfg: 'dynamic', req: Object.assign(amt(L2), { currency: 'SAR' }), at: 's2', t: 'Split on a non-AED order (check 3.3).' },
+  'cs-unknown-id': { cfg: 'dynamic', req: amt([{ partnerId: 'P000301', value: 500 }, { partnerId: 'P000999', value: 300 }]), at: 's2', t: 'A Partner ID that is not configured on the MID (check 3.4).' },
+  'cs-duplicate': { cfg: 'dynamic', req: amt([{ partnerId: 'P000301', value: 500 }, { partnerId: 'P000301', value: 300 }]), at: 's2', t: 'The same Partner ID twice (check 3.4).' },
+  'cs-too-many': { cfg: many, req: amt(many.beneficiaries.map(b => ({ partnerId: b.id, value: 10 }))), at: 's2', t: 'Eleven legs against a maximum of 10 (check 3.5).' },
+  'cs-over-total': { cfg: 'dynamic', req: amt([{ partnerId: 'P000301', value: 600 }, { partnerId: 'P000302', value: 300 }, { partnerId: 'P000303', value: 200 }]), at: 's2', t: 'Amount legs add up to 1,100 on a 1,000 order (check 3.6).' },
+  'cs-pct-over': { cfg: 'dynamic', req: Object.assign({}, BASE, { splitPayoutType: 'PERCENTAGE', splitPayoutTransaction: [{ partnerId: 'P000301', value: 60 }, { partnerId: 'P000302', value: 50 }] }), at: 's2', t: 'Percentage legs add up to 110% (check 3.6).' },
+  'cs-bad-value': { cfg: 'dynamic', req: amt([{ partnerId: 'P000301', value: 500 }, { partnerId: 'P000302', value: 0 }]), at: 's2', t: 'A leg with value 0 (check 3.7).' },
+  'cs-unknown-profile': { cfg: 'profile', req: Object.assign({}, BASE, { splitPayoutProfileId: 'PRF-UNKNOWN' }), at: 's2', t: 'A profile ID that is not configured (check 3.8).' },
+  'cs-fixed-over': { cfg: fixedAmt, req: Object.assign({}, BASE), at: 's2', t: 'Fixed AMOUNT template of 1,100 on a 1,000 order (SP-6 row 2.6, check 3.6).' },
+  'api-fixed': { cfg: 'fixed', req: Object.assign({}, BASE), pay: true, api: [{ action: 'UPDATE', adviceId: 'LATEST', legs: L2 }], at: 's4b', t: 'Payout Advice API called for a Fixed MID (SP-8 check 2.1).' },
+  'api-not-paid': { cfg: 'dynamic', req: Object.assign({}, BASE, { deferredSplit: true }), api: [{ action: 'NEW', legs: L2 }], at: 's4b', t: 'NEW sent before the order is paid (SP-8 check 2.2).' },
+  'api-not-split': { cfg: 'dynamic', req: Object.assign({}, BASE), pay: true, api: [{ action: 'NEW', legs: L2 }], at: 's4b', t: 'NEW for an order created without split (SP-8 check 2.3).' },
+  'api-new-exists': { cfg: 'dynamic', req: amt(L2), pay: true, api: [{ action: 'NEW', legs: L2 }], at: 's4b', t: 'NEW for an order that already has a split (SP-8 check 2.4).' },
+  'api-stale-id': { cfg: 'dynamic', req: amt(L2), pay: true, api: [{ action: 'UPDATE', adviceId: 'LATEST', legs: [{ partnerId: 'P000301', value: 450 }, { partnerId: 'P000302', value: 300 }] }, { action: 'UPDATE', adviceId: 'FIRST', legs: L2 }], at: 's4b', t: 'A late retry of an old UPDATE with an older advice ID (SP-8 check 2.5).' },
+  'api-over-total': { cfg: 'dynamic', req: Object.assign({}, BASE, { deferredSplit: true }), pay: true, api: [{ action: 'NEW', legs: [{ partnerId: 'P000301', value: 700 }, { partnerId: 'P000302', value: 400 }] }], at: 's4b', t: 'NEW with legs above the order amount (SP-8 check 2.6, as SP-6 3.6).' },
+  'apex-reject': { cfg: 'dynamic', req: amt(L2), apex: 'reject', pay: true, at: 's4', t: 'APEX rejects the advice: a Partner ID is inactive at APEX (SP-7 section 4). Correct it with an UPDATE in section 4 after setting APEX response back to Accepts.' },
+  'apex-down': { cfg: 'dynamic', req: amt(L2), apex: 'down', pay: true, at: 's4', t: 'APEX not reachable: the advice stays PENDING and PGW retries (SP-7 section 4). Run day-end in section 5 to see the file carry it.' }
+};
+function runTry(k) {
+  const t = TRY[k]; if (!t) return;
+  APEXMODE = t.apex || 'accept'; document.querySelectorAll('.apexSel').forEach(x => x.value = APEXMODE);
+  S.cfg = clone(typeof t.cfg === 'string' ? PRESETS[t.cfg] : t.cfg); S.savedAt = null;
+  resetForm(); renderSplitForm(); renderAll();
+  R.raw = JSON.stringify(t.req, null, 2); $('reqRaw').value = R.raw; $('reqRaw').style.display = 'block'; $('reqPreview').style.display = 'none'; $('editRaw').style.display = 'none'; $('resetRaw').style.display = 'inline';
+  $('fire').click();
+  const o = S.orders[S.cur];
+  if (t.pay && !o.res.rejected) pay(true);
+  (t.api || []).forEach(st => {
+    const id = st.adviceId === 'LATEST' ? (o.advices.length ? o.advices[o.advices.length - 1].id : '') : st.adviceId === 'FIRST' ? (o.advices[0] ? o.advices[0].id : '') : '';
+    Object.assign(API, { for: o.n, action: st.action, type: 'AMOUNT', adviceId: id, profileId: '', legs: st.legs.map(l => ({ partnerId: l.partnerId, value: String(l.value) })) });
+    callApi();
+  });
+  const b = $('tryBanner'); b.hidden = false;
+  b.innerHTML = `<b>Scenario loaded:</b> ${esc(t.t)}<a href="what-can-go-wrong.html#${k}">Back to What can go wrong</a>`;
+  setTimeout(() => $(t.at).scrollIntoView({ behavior: 'auto', block: 'start' }), 60);
+}
+window.addEventListener('hashchange', () => { const k = (location.hash.match(/try=([\w-]+)/) || [])[1]; if (k) runTry(k); });
+
 // ===================== init =====================
 function onCfgChange() { resetForm(); renderSplitForm(); renderAll(); }
 function renderAll() { renderCfgView(); renderResult(); renderRT(); renderAPI(); renderEod(); }
@@ -861,7 +917,9 @@ $('rRef').value = 'ORD-DEMO-0001';
 const h0 = (location.hash.match(/cfg=(\w+)/) || [])[1];
 if (h0 && PRESETS[h0]) S.cfg = clone(PRESETS[h0]);
 resetForm(); renderSplitForm(); renderAll();
-window.__sim = { S, createSession, PRESETS };
+const t0 = (location.hash.match(/try=([\w-]+)/) || [])[1];
+if (t0) runTry(t0);
+window.__sim = { S, createSession, PRESETS, TRY, runTry };
 })();
 </script>
 </body>

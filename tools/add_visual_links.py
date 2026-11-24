@@ -1,7 +1,8 @@
 """Insert "View it visually" buttons after doc headings (idempotent).
 
 Usage (run from the repo root):  python3 tools/add_visual_links.py
-Reads tools/visual_links.json: {page: {heading_id: href}}.
+Reads tools/visual_links.json: {page: {heading_id: href | [[label, href], ...]}}.
+A plain href gives one "View it visually" button; a list gives one labelled button each, in a row.
 Safe to re-run: existing buttons are removed and re-added. Warns when a heading id no longer exists.
 """
 import json, os, re, sys
@@ -14,14 +15,19 @@ ICON = ('<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="cur
 def apply(page, links):
     path = os.path.join(ROOT, page)
     s = open(path, encoding="utf-8").read()
+    s = re.sub(r'\n?<div class="visual-links" data-auto>.*?</div>', "", s, flags=re.S)
     s = re.sub(r'\n?<a class="visual-link"[^>]*data-auto[^>]*>.*?</a>', "", s, flags=re.S)
     missing = []
     for hid, href in links.items():
-        m = re.search(rf'<h([1-6]) id="{re.escape(hid)}"[^>]*>.*?</h\1>', s, re.S)
+        m = re.search(rf'<h([1-6])\s+id="{re.escape(hid)}"[^>]*>.*?</h\1>', s, re.S)
         if not m:
             missing.append(hid)
             continue
-        btn = f'\n<a class="visual-link" data-auto href="{href}">{ICON}View it visually</a>'
+        if isinstance(href, str):
+            btn = f'\n<a class="visual-link" data-auto href="{href}">{ICON}View it visually</a>'
+        else:
+            btn = '\n<div class="visual-links" data-auto>' + "".join(
+                f'<a class="visual-link" href="{h}">{ICON}{label}</a>' for label, h in href) + '</div>'
         s = s[:m.end()] + btn + s[m.end():]
     open(path, "w", encoding="utf-8").write(s)
     print(f"{page}: {len(links) - len(missing)} buttons" + (f"; MISSING anchors: {missing}" if missing else ""))

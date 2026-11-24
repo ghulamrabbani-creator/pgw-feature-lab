@@ -89,6 +89,8 @@ a.row:hover { background: #F1F5F9; }
 .doc blockquote { margin: 16px 0; padding: 8px 16px; border-left: 3px solid var(--money); background: var(--money-bg); }
 .visual-link { display: inline-flex; gap: 6px; align-items: center; margin: 4px 0 12px; padding: 6px 12px; border-radius: 6px; background: var(--money); color: #fff; font-size: 14px; text-decoration: none; }
 .visual-link:hover { background: #0B6655; }
+.visual-links { display: flex; flex-wrap: wrap; gap: 8px; margin: 4px 0 12px; }
+.visual-links .visual-link { margin: 0; }
 
 .lab-footer { max-width: var(--page); margin: 0 auto; padding: 0 24px 40px; font-size: 13px; color: var(--muted); }
 

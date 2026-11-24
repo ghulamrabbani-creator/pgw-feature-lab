@@ -2,21 +2,304 @@
   "split-payout/docs/product.html": {
     "money-flow": "../money-flow.html",
     "worked-example": "../money-flow.html",
-    "outcomes": "../money-flow.html#outcomes",
+    "outcomes": [
+      [
+        "Money flow: outcomes",
+        "../money-flow.html#outcomes"
+      ],
+      [
+        "What can go wrong: after payout",
+        "../what-can-go-wrong.html#stage-after"
+      ]
+    ],
     "order-creation-request": "../simulator.html",
-    "payout-advice-api": "../simulator.html",
+    "payout-advice-api": [
+      [
+        "Simulator: Payout Advice API",
+        "../simulator.html#s4b"
+      ],
+      [
+        "What can go wrong: Payout Advice API",
+        "../what-can-go-wrong.html#stage-api"
+      ]
+    ],
     "transaction-flow": "../simulator.html",
-    "amount-validation": "../money-flow.html#amount-validation",
+    "amount-validation": [
+      [
+        "Money flow: amount validation",
+        "../money-flow.html#amount-validation"
+      ],
+      [
+        "What can go wrong: amount validation",
+        "../what-can-go-wrong.html#stage-amt"
+      ]
+    ],
     "calculation-and-payout": "../money-flow.html",
     "split-modes": "../split-modes.html",
     "use-cases": "../split-modes.html",
     "partner-and-vendor-enablement-operational": "../onboarding.html",
-    "setup-steps": "../onboarding.html"
+    "setup-steps": "../onboarding.html",
+    "hold-of-flagged-transactions": [
+      [
+        "Advice lifecycle: released after N days",
+        "../advice-lifecycle.html#sc=released"
+      ]
+    ],
+    "split-advice-intake": [
+      [
+        "Advice lifecycle",
+        "../advice-lifecycle.html"
+      ]
+    ],
+    "transaction-not-yet-on-apex": [
+      [
+        "Advice lifecycle: advice before the transaction",
+        "../advice-lifecycle.html#sc=early"
+      ]
+    ],
+    "day-end-split-advice-file": [
+      [
+        "Advice lifecycle: APEX not reachable",
+        "../advice-lifecycle.html#sc=down"
+      ],
+      [
+        "What can go wrong: day-end file",
+        "../what-can-go-wrong.html#stage-file"
+      ]
+    ],
+    "advice-statuses": [
+      [
+        "Advice lifecycle: statuses",
+        "../advice-lifecycle.html#statuses"
+      ]
+    ],
+    "validations": [
+      [
+        "What can go wrong",
+        "../what-can-go-wrong.html"
+      ]
+    ],
+    "refunds-and-chargebacks": [
+      [
+        "What can go wrong: refunds and chargebacks",
+        "../what-can-go-wrong.html#after-refund"
+      ]
+    ]
   },
   "split-payout/docs/stories.html": {
-    "sp-6-be-create-session-with-split-payout": "../simulator.html",
-    "checks-before-payment": "../simulator.html",
-    "sp-8-be-pgw-split-payout-api": "../simulator.html",
-    "sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3": "../simulator.html"
+    "story-map": [
+      [
+        "Onboarding",
+        "../onboarding.html"
+      ],
+      [
+        "Split modes",
+        "../split-modes.html"
+      ],
+      [
+        "Simulator",
+        "../simulator.html"
+      ],
+      [
+        "Money flow",
+        "../money-flow.html"
+      ],
+      [
+        "Advice lifecycle",
+        "../advice-lifecycle.html"
+      ],
+      [
+        "What can go wrong",
+        "../what-can-go-wrong.html"
+      ]
+    ],
+    "prerequisites-not-pgw-work": [
+      [
+        "Onboarding: P1 and P2",
+        "../onboarding.html"
+      ]
+    ],
+    "sp-1-fe-split-payout-configuration-screen": [
+      [
+        "Simulator: configuration",
+        "../simulator.html#cfg=dynamic"
+      ]
+    ],
+    "sp-2-be-split-payout-configuration-setup": [
+      [
+        "Simulator: configuration",
+        "../simulator.html#cfg=dynamic"
+      ],
+      [
+        "Onboarding: Partner IDs from APEX",
+        "../onboarding.html"
+      ]
+    ],
+    "sp-3-febe-enable-split-partner-ids-and-dynamic-mode": [
+      [
+        "Simulator: Dynamic configuration",
+        "../simulator.html#cfg=dynamic"
+      ],
+      [
+        "Split modes",
+        "../split-modes.html"
+      ],
+      [
+        "What can go wrong: configuration",
+        "../what-can-go-wrong.html#stage-cfg"
+      ]
+    ],
+    "partner-ids": [
+      [
+        "What can go wrong: Partner ID entry",
+        "../what-can-go-wrong.html#cfg-partner-id"
+      ]
+    ],
+    "save": [
+      [
+        "What can go wrong: save checks",
+        "../what-can-go-wrong.html#cfg-save"
+      ]
+    ],
+    "sp-4-febe-fixed-mode": [
+      [
+        "Simulator: Fixed configuration",
+        "../simulator.html#cfg=fixed"
+      ],
+      [
+        "Split modes",
+        "../split-modes.html"
+      ],
+      [
+        "What can go wrong: Fixed template",
+        "../what-can-go-wrong.html#cfg-fixed"
+      ]
+    ],
+    "sp-5-febe-profile-mode": [
+      [
+        "Simulator: Profile configuration",
+        "../simulator.html#cfg=profile"
+      ],
+      [
+        "Split modes",
+        "../split-modes.html"
+      ],
+      [
+        "What can go wrong: profiles",
+        "../what-can-go-wrong.html#cfg-profile"
+      ]
+    ],
+    "sp-6-be-create-session-with-split-payout": [
+      [
+        "Simulator: Create Session",
+        "../simulator.html#s2"
+      ],
+      [
+        "Split modes",
+        "../split-modes.html"
+      ],
+      [
+        "Money flow",
+        "../money-flow.html"
+      ],
+      [
+        "What can go wrong: Create Session",
+        "../what-can-go-wrong.html#stage-cs"
+      ]
+    ],
+    "what-pgw-does-with-each-request": [
+      [
+        "Split modes: one order, three modes",
+        "../split-modes.html"
+      ]
+    ],
+    "checks-before-payment": [
+      [
+        "Simulator: Create Session",
+        "../simulator.html#s2"
+      ],
+      [
+        "What can go wrong: checks 3.1\u20133.9",
+        "../what-can-go-wrong.html#stage-cs"
+      ]
+    ],
+    "split-flag-to-apex": [
+      [
+        "Simulator: APEX federation",
+        "../simulator.html#s4"
+      ],
+      [
+        "Advice lifecycle",
+        "../advice-lifecycle.html"
+      ]
+    ],
+    "sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3": [
+      [
+        "Simulator: advice to APEX",
+        "../simulator.html#s4"
+      ],
+      [
+        "Advice lifecycle",
+        "../advice-lifecycle.html"
+      ],
+      [
+        "What can go wrong: sending to APEX",
+        "../what-can-go-wrong.html#stage-send"
+      ]
+    ],
+    "errors-and-retry": [
+      [
+        "Advice lifecycle: APEX not reachable",
+        "../advice-lifecycle.html#sc=down"
+      ],
+      [
+        "Advice lifecycle: rejected, then corrected",
+        "../advice-lifecycle.html#sc=corrected"
+      ],
+      [
+        "Try it: APEX not reachable",
+        "../simulator.html#try=apex-down"
+      ]
+    ],
+    "sp-8-be-pgw-split-payout-api": [
+      [
+        "Simulator: Payout Advice API",
+        "../simulator.html#s4b"
+      ],
+      [
+        "Advice lifecycle: deferred split",
+        "../advice-lifecycle.html#sc=deferred"
+      ],
+      [
+        "What can go wrong: Payout Advice API",
+        "../what-can-go-wrong.html#stage-api"
+      ]
+    ],
+    "checks": [
+      [
+        "What can go wrong: checks 2.1\u20132.6",
+        "../what-can-go-wrong.html#stage-api"
+      ]
+    ],
+    "sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3": [
+      [
+        "Simulator: day-end file",
+        "../simulator.html#s5"
+      ],
+      [
+        "Advice lifecycle",
+        "../advice-lifecycle.html"
+      ],
+      [
+        "What can go wrong: day-end file",
+        "../what-can-go-wrong.html#stage-file"
+      ]
+    ],
+    "open-points": [
+      [
+        "What can go wrong: cases not defined yet",
+        "../what-can-go-wrong.html#cs-profile-none"
+      ]
+    ]
   }
 }

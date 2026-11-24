@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Advice lifecycle · Split Payout · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+.src { font: 12px var(--mono); color: var(--muted); margin-top: 12px; }
+.src a { color: var(--muted); }
+/* state map */
+.map { display: grid; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr); gap: 22px; align-items: start; }
+.map svg { width: 100%; height: auto; display: block; }
+.map svg .node rect { fill: #fff; stroke: #94A3B8; stroke-width: 1.5; rx: 10; cursor: pointer; transition: stroke .2s, fill .2s; }
+.map svg .node text { font: 600 14px var(--mono); fill: var(--ink); pointer-events: none; }
+.map svg .node text.s { font: 400 11px var(--sans); fill: var(--muted); }
+.map svg .node.fin rect { stroke-width: 2; }
+.map svg .node.proc rect { fill: var(--money-bg); stroke: var(--money); }
+.map svg .node.rel rect { fill: #F1F5F9; stroke: #475569; }
+.map svg .node.rej rect { fill: #FEF2F2; stroke: #B91C1C; }
+.map svg .node.start rect { stroke-dasharray: 5 4; }
+.map svg .node.on rect { stroke: var(--ink); stroke-width: 3; }
+.map svg .node:focus { outline: none; }
+.map svg .node:focus-visible rect { stroke: var(--link); stroke-width: 3; }
+.map svg path.e { fill: none; stroke: #64748B; stroke-width: 1.5; }
+.map svg path.e.hi { stroke: var(--ink); stroke-width: 2.5; }
+.map svg text.lbl { font: 11px var(--sans); fill: var(--text-2); }
+.map svg rect.grp { fill: none; stroke: #CBD5E1; stroke-dasharray: 6 5; rx: 14; }
+.map svg text.gl { font: 500 11px var(--mono); fill: var(--muted); letter-spacing: .03em; }
+.sd h3 { margin: 0 0 6px; font: 600 18px var(--mono); color: var(--ink); }
+.sd p { margin: 0 0 10px; font-size: 15px; }
+.sd dl { margin: 0; display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 6px 12px; font-size: 14px; }
+.sd dt { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; padding-top: 3px; }
+.sd dd { margin: 0; }
+/* chips */
+.chip { display: inline-block; font: 500 11px var(--mono); padding: 2px 8px; border-radius: 5px; white-space: nowrap; }
+.m-held { background: #FEF3C7; color: #92400E; } .m-paid { background: var(--money-bg); color: var(--money); } .m-rel { background: #E2E8F0; color: #334155; } .m-none { background: #F1F5F9; color: var(--muted); }
+.a-CREATED { background: #DBEAFE; color: #1E40AF; } .a-PENDING_MATCH { background: #EDE9FE; color: #5B21B6; } .a-REJECTED { background: #FEE2E2; color: #991B1B; } .a-PROCESSED { background: var(--money-bg); color: var(--money); } .a-RELEASED { background: #E2E8F0; color: #334155; } .a-none { background: #F1F5F9; color: var(--muted); }
+/* player */
+.seg { display: inline-flex; flex-wrap: wrap; background: #F1F5F9; border: 1px solid var(--border); border-radius: 10px; padding: 4px; gap: 4px; }
+.seg button { font: 500 14px var(--sans); color: var(--text-2); background: transparent; border: 0; border-radius: 7px; padding: 8px 14px; cursor: pointer; }
+.seg button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(15,23,42,.12); }
+.scdesc { font-size: 15px; color: var(--text-2); margin: 14px 0; }
+.opts { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin: 0 0 14px; font-size: 14px; }
+.opts label { display: inline-flex; gap: 8px; align-items: center; }
+.opts input[type=number] { width: 70px; font: 14px var(--mono); padding: 6px 8px; border: 1px solid var(--border-2); border-radius: 7px; }
+.tl { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 14px; }
+.tl th { text-align: left; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; padding: 8px 10px; border-bottom: 1px solid var(--border); background: #fff; }
+.tl td { padding: 12px 10px; border-bottom: 1px solid var(--border); vertical-align: top; transition: opacity .2s, background .2s; }
+.tl td.day { font: 500 12px var(--mono); color: var(--ink); white-space: nowrap; }
+.tl tr.cur td { background: #F8FAFC; }
+.tl tr.cur td:first-child { box-shadow: inset 3px 0 0 var(--ink); }
+.tl tr.fut td { opacity: .28; }
+.tl .who { font-size: 13px; color: var(--text-2); }
+.tl .flag { display: block; margin-top: 6px; font-size: 12px; color: var(--warn-fg); background: var(--warn-bg); padding: 4px 8px; border-radius: 5px; }
+.nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 14px 0 0; }
+.btn { font: 500 14px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--ink); border-radius: 8px; padding: 8px 14px; cursor: pointer; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+.pos { font: 12px var(--mono); color: var(--muted); }
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.t th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 8px; border-bottom: 1px solid var(--border); }
+table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.yes { color: var(--money); font-weight: 500; } .no { color: #B91C1C; font-weight: 500; }
+.tw { overflow-x: auto; }
+@media (max-width: 960px) {
+  .map { grid-template-columns: minmax(0, 1fr); }
+  .tl thead { display: none; }
+  .tl, .tl tbody, .tl tr, .tl td { display: block; }
+  .tl tr { border-bottom: 1px solid var(--border); padding: 8px 0; }
+  .tl td { border: 0; padding: 4px 6px; }
+  .tl td[data-l]::before { content: attr(data-l); display: block; font: 500 10px var(--mono); color: var(--muted); text-transform: uppercase; }
+}
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Split Payout</a> / Advice lifecycle</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual · split payout</p>
+<h1 class="page">Advice lifecycle</h1>
+<p class="lead">A split advice tells APEX how to pay one flagged transaction. This page follows an advice from the moment it is sent to the moment the money moves: its statuses at APEX, what PGW records, and what happens to the money each day.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects product doc v1.6 (6.3–6.5, 7.3, 7.5) and PGW stories v0.5 (SP-7 to SP-9)</span>
+<a href="docs/product.html#advice-statuses">Read the requirement →</a>
+<a href="docs/stories.html#sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3">Stories: SP-7 →</a>
+<a href="docs/stories.html#sp-8-be-pgw-split-payout-api">SP-8 →</a>
+<a href="docs/stories.html#sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3">SP-9 →</a>
+</div>
+<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Action <b>A</b> creates an advice at APEX, <b>U</b> replaces it. PGW sends A for a split sent with the order or a Payout Advice API NEW, and U for an UPDATE. APEX advice fields and statuses are drafts until the Emcrey spec (P3).</div>
+
+<h2 class="section-title" id="statuses">The statuses at APEX</h2>
+<section class="panel">
+<div class="map">
+<svg viewBox="0 0 1000 420" role="img" aria-label="Advice status map" id="svg">
+<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#64748B"/></marker>
+<marker id="ahk" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0F172A"/></marker></defs>
+<rect class="grp" x="12" y="14" width="660" height="392"/>
+<text class="gl" x="28" y="36">NOT FINAL · TRANSACTION HELD · U ALLOWED (EXCEPT NO ADVICE)</text>
+<rect class="grp" x="712" y="14" width="276" height="392"/>
+<text class="gl" x="728" y="36">FINAL · NO FURTHER UPDATES</text>
+<g id="edges"></g>
+<g id="nodes"></g>
+</svg>
+<div class="sd" id="sd" aria-live="polite"></div>
+</div>
+<p class="src">Source: <a href="docs/product.html#advice-statuses">product doc 6.5 Advice statuses</a> · <a href="docs/product.html#real-time-split-advice-api">6.4</a> · <a href="docs/product.html#hold-of-flagged-transactions">6.3</a></p>
+</section>
+
+<h2 class="section-title" id="days">Day by day</h2>
+<section class="panel">
+<div class="seg" role="group" aria-label="Scenario" id="scs"></div>
+<p class="scdesc" id="scdesc"></p>
+<div class="opts" id="opts"></div>
+<div class="tw"><table class="tl" id="tl"></table></div>
+<div class="nav"><button class="btn" id="prev">← Previous</button><button class="btn primary" id="next">Next →</button><button class="btn" id="all">Show all</button><span class="pos" id="pos"></span></div>
+<p class="src">Days are illustrative. Day 0 = payment day. P = the transaction's scheduled payout date under the MID's payout schedule. N = days set on the partner MID (can be 0).</p>
+</section>
+
+<h2 class="section-title">What the partner can still do</h2>
+<section class="panel"><div class="tw">
+<table class="t">
+<tr><th>APEX status</th><th>Payout Advice API NEW</th><th>Payout Advice API UPDATE</th><th>APEX accepts U</th><th>Money</th></tr>
+<tr><td><span class="chip a-none">no advice</span></td><td><span class="yes">Yes</span>, if the order was created with deferredSplit</td><td>—</td><td>—</td><td><span class="chip m-held">held</span></td></tr>
+<tr><td><span class="chip a-PENDING_MATCH">PENDING_MATCH</span></td><td><span class="no">No</span>: a split exists</td><td><span class="yes">Yes</span>, with the latest advice ID</td><td><span class="yes">Yes</span></td><td><span class="chip m-held">held</span></td></tr>
+<tr><td><span class="chip a-CREATED">CREATED</span></td><td><span class="no">No</span></td><td><span class="yes">Yes</span>, with the latest advice ID</td><td><span class="yes">Yes</span></td><td><span class="chip m-held">held</span> until payout</td></tr>
+<tr><td><span class="chip a-REJECTED">REJECTED</span></td><td><span class="no">No</span></td><td><span class="yes">Yes</span>: this is how a rejection is corrected, within N days</td><td><span class="yes">Yes</span></td><td><span class="chip m-held">held</span></td></tr>
+<tr><td><span class="chip a-PROCESSED">PROCESSED</span></td><td><span class="no">No</span></td><td>PGW forwards it; APEX refuses it</td><td><span class="no">No</span></td><td><span class="chip m-paid">paid out</span></td></tr>
+<tr><td><span class="chip a-RELEASED">RELEASED</span></td><td><span class="no">No</span></td><td>PGW forwards it; APEX refuses it</td><td><span class="no">No</span></td><td><span class="chip m-rel">released to the partner</span></td></tr>
+</table></div>
+<p class="src">Source: <a href="docs/product.html#payout-advice-api">product doc 7.3</a> · <a href="docs/product.html#real-time-split-advice-api">6.4</a> · <a href="docs/stories.html#checks">SP-8 section 2</a>. Rejections at each step: <a href="what-can-go-wrong.html">What can go wrong</a>.</p>
+</section>
+</main>
+<footer class="lab-footer">Illustrative explanation of the product document and stories. The documents are the requirement; where they differ, the documents win.</footer>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const PD = 'docs/product.html#', ST = 'docs/stories.html#';
+  // ---------- state map ----------
+  const W = 170, H = 58;
+  const N = {
+    none: { x: 40, y: 190, t: 'no advice', s: 'transaction held', cls: 'start',
+      p: 'The transaction is flagged (splitPayout = Y) but APEX has no advice for it yet: a deferred split not yet sent, or an advice still in transit.',
+      money: 'Held from payout.', can: 'Send NEW through the Payout Advice API (deferred split only).', pgw: 'No advice record, or PENDING if the call to APEX failed.', src: ['6.3', 'hold-of-flagged-transactions'] },
+    PENDING_MATCH: { x: 290, y: 70, t: 'PENDING_MATCH', s: 'before the transaction',
+      p: 'Received before the transaction reached APEX.', money: 'Held.', can: 'UPDATE with the latest advice ID.', pgw: 'Not defined in the stories which status PGW shows.', src: ['6.4', 'transaction-not-yet-on-apex'] },
+    CREATED: { x: 470, y: 190, t: 'CREATED', s: 'awaiting validation',
+      p: 'Received and passed structural checks; awaiting amount validation and payout.', money: 'Held until the payout.', can: 'UPDATE with the latest advice ID.', pgw: 'ACCEPTED (from the real-time response).', src: ['6.5', 'advice-statuses'] },
+    REJECTED: { x: 470, y: 320, t: 'REJECTED', s: 'reason code recorded', cls: 'rej',
+      p: 'Failed a check; reason code recorded. Can be corrected with U within N days.', money: 'Held. Nothing is paid to vendors.', can: 'UPDATE with a corrected, complete split.',
+      pgw: 'REJECTED with reason if APEX rejected in the call. After a later amount-validation rejection PGW still shows ACCEPTED (open point).', src: ['6.5', 'advice-statuses'] },
+    PROCESSED: { x: 770, y: 120, t: 'PROCESSED', s: 'paid out', cls: 'proc fin',
+      p: 'Paid out to vendors and residual settled. No further updates.', money: 'Vendors paid; residual to the partner.', can: 'Nothing. Final.', pgw: 'No change. The outcome reaches the partner in the split payout report.', src: ['6.5', 'advice-statuses'] },
+    RELEASED: { x: 770, y: 290, t: 'RELEASED', s: 'after N days', cls: 'rel fin',
+      p: 'N days passed without a valid advice; settled to the partner after MDR. No further updates.', money: 'Released to the partner after Geidea’s MDR. Listed in the exception report.', can: 'Nothing. Final.', pgw: 'No change.', src: ['6.3', 'hold-of-flagged-transactions'] }
+  };
+  const c = (k, side) => { const n = N[k]; return { l: [n.x, n.y + H / 2], r: [n.x + W, n.y + H / 2], t: [n.x + W / 2, n.y], b: [n.x + W / 2, n.y + H] }[side]; };
+  const E = [
+    { id: 'none-CREATED', a: 'none', b: 'CREATED', d: () => { const p = c('none', 'r'), q = c('CREATED', 'l'); return `M${p} L${q[0] - 2},${q[1]}`; }, l: 'A, checks pass', lx: 300, ly: 212 },
+    { id: 'none-PENDING_MATCH', a: 'none', b: 'PENDING_MATCH', d: () => { const p = c('none', 't'), q = c('PENDING_MATCH', 'l'); return `M${p} L${p[0]},${q[1]} L${q[0] - 2},${q[1]}`; }, l: 'A before the transaction', lx: 132, ly: 92 },
+    { id: 'none-REJECTED', a: 'none', b: 'REJECTED', d: () => { const p = c('none', 'b'), q = c('REJECTED', 'l'); return `M${p} L${p[0]},${q[1]} L${q[0] - 2},${q[1]}`; }, l: 'A, a structural check fails', lx: 132, ly: 341 },
+    { id: 'PENDING_MATCH-CREATED', a: 'PENDING_MATCH', b: 'CREATED', d: () => { const p = c('PENDING_MATCH', 'r'), q = c('CREATED', 't'); return `M${p} L${q[0]},${p[1]} L${q[0]},${q[1] - 2}`; }, l: 'transaction arrives', lx: 470, ly: 92 },
+    { id: 'PENDING_MATCH-REJECTED', a: 'PENDING_MATCH', b: 'REJECTED', d: () => { const p = c('PENDING_MATCH', 'b'); return `M${p} L${p[0]},${N.REJECTED.y + 18} L${N.REJECTED.x - 2},${N.REJECTED.y + 18}`; }, l: 'unmatched at', l2: 'day end', lx: 300, ly: 296 },
+    { id: 'CREATED-REJECTED', a: 'CREATED', b: 'REJECTED', d: () => `M${N.CREATED.x + 60},${N.CREATED.y + H} L${N.CREATED.x + 60},${N.REJECTED.y - 2}`, l: 'amount', l2: 'check fails', lx: 476, ly: 262 },
+    { id: 'REJECTED-CREATED', a: 'REJECTED', b: 'CREATED', d: () => `M${N.CREATED.x + 112},${N.REJECTED.y} L${N.CREATED.x + 112},${N.CREATED.y + H + 2}`, l: 'U, corrected', lx: 590, ly: 284 },
+    { id: 'CREATED-PROCESSED', a: 'CREATED', b: 'PROCESSED', d: () => { const p = c('CREATED', 'r'), q = c('PROCESSED', 'l'); return `M${p} L${p[0] + 40},${p[1]} L${p[0] + 40},${q[1]} L${q[0] - 2},${q[1]}`; }, l: 'valid, paid on P', lx: 660, ly: 140 },
+    { id: 'held-RELEASED', a: 'held', b: 'RELEASED', d: () => `M672,${N.RELEASED.y + H / 2} L${N.RELEASED.x - 2},${N.RELEASED.y + H / 2}`, l: 'P + N days,', l2: 'no valid advice', lx: 680, ly: 338 }
+  ];
+  const svg = $('svg');
+  $('edges').innerHTML = E.map(e => `<path class="e" data-e="${e.id}" d="${e.d()}" marker-end="url(#ah)"/><text class="lbl" x="${e.lx}" y="${e.ly}">${e.l}</text>${e.l2 ? `<text class="lbl" x="${e.lx}" y="${e.ly + 14}">${e.l2}</text>` : ''}`).join('');
+  $('nodes').innerHTML = Object.entries(N).map(([k, n]) => `<g class="node ${n.cls || ''}" data-k="${k}" tabindex="0" role="button" aria-label="${n.t}"><rect x="${n.x}" y="${n.y}" width="${W}" height="${H}"/><text x="${n.x + 14}" y="${n.y + 25}">${n.t}</text><text class="s" x="${n.x + 14}" y="${n.y + 44}">${n.s}</text></g>`).join('');
+  function pick(k) {
+    const n = N[k];
+    document.querySelectorAll('.node').forEach(g => g.classList.toggle('on', g.dataset.k === k));
+    document.querySelectorAll('path.e').forEach(p => { const e = E.find(x => x.id === p.dataset.e); const hi = e.a === k || e.b === k || (e.a === 'held' && ['none', 'PENDING_MATCH', 'CREATED', 'REJECTED', 'RELEASED'].includes(k)); p.classList.toggle('hi', hi); p.setAttribute('marker-end', hi ? 'url(#ahk)' : 'url(#ah)'); });
+    $('sd').innerHTML = `<h3>${n.t}</h3><p>${n.p}</p><dl><dt>Money</dt><dd>${n.money}</dd><dt>Partner can</dt><dd>${n.can}</dd><dt>PGW shows</dt><dd>${n.pgw}</dd></dl><p class="src">Source: <a href="${PD}${n.src[1]}">product doc ${n.src[0]}</a></p>`;
+  }
+  document.querySelectorAll('.node').forEach(g => { g.onclick = () => pick(g.dataset.k); g.onkeydown = e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(g.dataset.k); } }; });
+  pick('CREATED');
+
+  // ---------- day by day ----------
+  const A = s => `<span class="chip a-${s || 'none'}">${s || 'no advice'}</span>`;
+  const M = m => `<span class="chip m-${m}">${{ held: 'held', paid: 'paid out', rel: 'released to partner', none: '—' }[m]}</span>`;
+  const OP2 = 'Open point: the stories do not say whether PGW learns of this. Its record still shows ACCEPTED.';
+  const SC = {
+    with: { t: 'Split with the order', d: 'The partner sends the legs in Create Session. PGW sends the advice the moment the payment succeeds.',
+      rows: () => [
+        ['Day 0', 'Creates a session with the legs; the customer pays.', 'Checks the split (SP-6). Federates the transaction with splitPayout = Y. Sends advice A in real time (SP-7).', 'Holds the transaction. Structural checks pass.', 'CREATED', 'ACCEPTED', 'held'],
+        ['Day 0, after midnight', '—', 'Day-end file carries advice A (SP-9).', 'File matches the real-time advice: no action.', 'CREATED', 'included in file', 'held'],
+        ['Before P', '—', '—', 'Amount validation: Rule 1, Rule 2 and single payout pass.', 'CREATED', '—', 'held'],
+        ['P', 'Sees the result in the split payout report.', '—', 'Pays each vendor, settles the residual.', 'PROCESSED', '—', 'paid']] },
+    deferred: { t: 'Deferred split', d: 'The partner does not know the split at checkout. It creates the order with deferredSplit = true and sends the split later.',
+      rows: () => [
+        ['Day 0', 'Creates a session with deferredSplit = true; the customer pays.', 'Stores deferredSplit, no legs. Federates splitPayout = Y. Sends no advice yet.', 'Holds the transaction.', null, '—', 'held'],
+        ['Day 0, after midnight', '—', 'Day-end file: no record for this order.', '—', null, '—', 'held'],
+        ['Day 1', 'Calls the Payout Advice API with NEW and the full split.', 'Checks 2.1 to 2.6 (SP-8) pass. Forwards advice A.', 'Structural checks pass.', 'CREATED', 'ACCEPTED', 'held'],
+        ['Day 1, after midnight', '—', 'Day-end file carries advice A.', 'No action.', 'CREATED', 'included in file', 'held'],
+        ['P', '—', '—', 'Amount validation passes. Pays vendors and the residual.', 'PROCESSED', '—', 'paid']],
+      flag: 'NEW must reach APEX before P + N, or the transaction is released to the partner.' },
+    corrected: { t: 'Rejected, then corrected', d: 'APEX rejects the amounts. The partner reads the reason in the split payout report and sends a corrected split with UPDATE.',
+      rows: () => [
+        ['Day 0', 'Creates a session with the legs; the customer pays.', 'Federates splitPayout = Y. Sends advice A.', 'Structural checks pass.', 'CREATED', 'ACCEPTED', 'held'],
+        ['Day 0, after midnight', '—', 'Day-end file carries advice A.', 'No action.', 'CREATED', 'included in file', 'held'],
+        ['Day 1', 'Sees the rejection and reason code in the split payout report.', '—', 'Amount validation: Rule 1 fails (partner residual negative). Rejects the whole advice.', 'REJECTED', 'ACCEPTED', 'held', OP2],
+        ['Day 1', 'Calls the Payout Advice API with UPDATE, the latest advice ID and a smaller split.', 'Check 2.5: the advice ID is the latest. Forwards advice U.', 'U is allowed on a REJECTED advice. Structural checks pass.', 'CREATED', 'ACCEPTED', 'held'],
+        ['Day 1, after midnight', '—', 'Day-end file carries advice U.', 'No action.', 'CREATED', 'included in file', 'held'],
+        ['P', '—', '—', 'Amount validation passes. Pays vendors and the residual.', 'PROCESSED', '—', 'paid']],
+      flag: 'The UPDATE must reach APEX before P + N. A REJECTED advice is never paid on its own.' },
+    early: { t: 'Advice before the transaction', d: 'The advice reaches APEX before the transaction itself, for example while the transaction federation is being retried.',
+      opt: 'arrive', rows: o => {
+        const r = [['Day 0', 'Creates a session with the legs; the customer pays.', 'Sends advice A. The transaction federation has not reached APEX yet.', 'No transaction to match: parks the advice.', 'PENDING_MATCH', 'not defined', 'held', 'The stories do not say which status PGW shows for PENDING_MATCH.']];
+        if (o.arrive) r.push(['Day 0, later', '—', 'Transaction federation succeeds.', 'Transaction arrives. Links the advice.', 'CREATED', '—', 'held'],
+          ['P', '—', '—', 'Amount validation passes. Pays vendors and the residual.', 'PROCESSED', '—', 'paid']);
+        else r.push(['Day 0, day end', 'Sees the rejection and reason code in the split payout report.', '—', 'Still unmatched at day end: rejects with a reason code.', 'REJECTED', '—', 'held'],
+          ['Day 1', 'Sends UPDATE once the transaction is on APEX.', 'Forwards advice U.', 'U is allowed on a REJECTED advice.', 'CREATED', 'ACCEPTED', 'held'],
+          ['P', '—', '—', 'Amount validation passes. Pays vendors and the residual.', 'PROCESSED', '—', 'paid']);
+        return r; } },
+    released: { t: 'Released after N days', d: 'No valid advice is processed within N days of the scheduled payout date. The timer runs on the transaction, not on an advice.',
+      opt: 'nreleased', rows: o => {
+        const adv = o.withAdv;
+        const r = adv
+          ? [['Day 0', 'Creates a session with the legs; the customer pays.', 'Sends advice A.', 'Structural checks pass.', 'CREATED', 'ACCEPTED', 'held'],
+             ['Day 1', 'Sees the rejection in the split payout report. Does not correct it.', '—', 'Amount validation fails.', 'REJECTED', 'ACCEPTED', 'held', OP2]]
+          : [['Day 0', 'Creates a session with deferredSplit = true; the customer pays.', 'Federates splitPayout = Y. No advice.', 'Holds the transaction.', null, '—', 'held'],
+             ['Day 1 onwards', 'Never calls the Payout Advice API.', '—', '—', null, '—', 'held']];
+        r.push(['P', '—', '—', 'Scheduled payout date. No valid advice: the transaction stays held.', adv ? 'REJECTED' : null, '—', 'held']);
+        r.push([o.n === 0 ? 'P (N = 0)' : `P + ${o.n}`, 'Receives the full settlement after MDR. Vendors are not paid through Geidea.', '—', `Releases the transaction to the partner after Geidea’s MDR. Lists it in the exception report for Operations and Finance.${adv ? ' Sets the advice to RELEASED.' : ''}`, adv ? 'RELEASED' : null, '—', 'rel']);
+        return r; } },
+    down: { t: 'APEX not reachable', d: 'The real-time call to APEX fails. PGW retries, and the day-end file is the backup channel.',
+      rows: () => [
+        ['Day 0', 'Creates a session with the legs; the customer pays. The payment result does not change.', 'Sends advice A: timeout. Keeps the advice PENDING and retries (count and interval: PGW engineering).', 'Holds the transaction (it is flagged). No advice yet.', null, 'PENDING', 'held'],
+        ['Day 0, after midnight', '—', 'Day-end file carries advice A in its latest state.', 'Advice only in the file: processes it as new.', 'CREATED', 'included in file', 'held'],
+        ['P', '—', '—', 'Amount validation passes. Pays vendors and the residual.', 'PROCESSED', '—', 'paid']] }
+  };
+  const O = { arrive: true, n: 2, withAdv: false };
+  let sc = 'with', cur = 0, all = false;
+  $('scs').innerHTML = Object.entries(SC).map(([k, v]) => `<button type="button" data-sc="${k}" aria-pressed="false">${v.t}</button>`).join('');
+  document.querySelectorAll('[data-sc]').forEach(b => b.onclick = () => setSc(b.dataset.sc));
+  function opts() {
+    const s = SC[sc]; let h = '';
+    if (s.opt === 'arrive') h = `<label><input type="radio" name="arr" value="1" ${O.arrive ? 'checked' : ''}> Transaction arrives the same day</label><label><input type="radio" name="arr" value="0" ${!O.arrive ? 'checked' : ''}> Transaction still missing at day end</label>`;
+    if (s.opt === 'nreleased') h = `<label>N (days) <input type="number" id="nIn" min="0" max="30" value="${O.n}"></label><label><input type="radio" name="adv" value="0" ${!O.withAdv ? 'checked' : ''}> No advice ever sent</label><label><input type="radio" name="adv" value="1" ${O.withAdv ? 'checked' : ''}> Advice rejected, not corrected</label>`;
+    $('opts').innerHTML = h; $('opts').style.display = h ? 'flex' : 'none';
+    document.querySelectorAll('[name=arr]').forEach(r => r.onchange = () => { O.arrive = r.value === '1'; draw(true); });
+    document.querySelectorAll('[name=adv]').forEach(r => r.onchange = () => { O.withAdv = r.value === '1'; draw(true); });
+    if ($('nIn')) $('nIn').oninput = e => { const v = Math.max(0, Math.min(30, parseInt(e.target.value, 10) || 0)); O.n = v; draw(false); };
+  }
+  let rows = [];
+  function draw(reset) {
+    const s = SC[sc]; rows = s.rows(O);
+    if (reset) { cur = 0; all = false; }
+    cur = Math.min(cur, rows.length - 1);
+    $('scdesc').innerHTML = s.d + (s.flag ? ` <b>${s.flag}</b>` : '');
+    $('tl').innerHTML = `<thead><tr><th>When</th><th>Partner</th><th>PGW</th><th>APEX</th><th>APEX status</th><th>PGW record</th><th>Money</th></tr></thead><tbody>` +
+      rows.map((r, i) => `<tr class="${all ? '' : i === cur ? 'cur' : i > cur ? 'fut' : ''}"><td class="day" data-l="When">${r[0]}</td><td class="who" data-l="Partner">${r[1]}</td><td class="who" data-l="PGW">${r[2]}</td><td class="who" data-l="APEX">${r[3]}${r[7] ? `<span class="flag">${r[7]}</span>` : ''}</td><td data-l="APEX status">${A(r[4])}</td><td data-l="PGW record"><span class="chip m-none">${r[5]}</span></td><td data-l="Money">${M(r[6])}</td></tr>`).join('') + '</tbody>';
+    $('pos').textContent = all ? 'All steps' : `Step ${cur + 1} of ${rows.length}`;
+    $('prev').disabled = all || cur === 0; $('next').disabled = all || cur === rows.length - 1;
+    const st = rows[all ? rows.length - 1 : cur][4];
+    pick(st || 'none');
+  }
+  function setSc(k) {
+    if (!SC[k]) return; sc = k;
+    document.querySelectorAll('[data-sc]').forEach(b => b.setAttribute('aria-pressed', b.dataset.sc === k));
+    opts(); draw(true);
+    history.replaceState(null, '', '#sc=' + k);
+  }
+  $('prev').onclick = () => { cur--; draw(false); };
+  $('next').onclick = () => { cur++; draw(false); };
+  $('all').onclick = () => { all = true; draw(false); };
+  const h0 = (location.hash.match(/sc=(\w+)/) || [])[1];
+  setSc(SC[h0] ? h0 : 'with');
+  if (h0 && SC[h0]) setTimeout(() => $('days').scrollIntoView({ block: 'start' }), 50);
+  window.__al = { SC, O, setSc, rows: () => rows };
+})();
+</script>
+</body>
+</html>

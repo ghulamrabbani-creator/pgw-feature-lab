@@ -60,10 +60,10 @@ def main():
     ).stdout
 
     toc = []
-    for level, hid, inner in re.findall(r'<h([1-3]) id="([^"]+)"[^>]*>(.*?)</h\1>', body, re.S):
+    for level, hid, inner in re.findall(r'<h([1-3])\s+id="([^"]+)"[^>]*>(.*?)</h\1>', body, re.S):
         if int(level) > a.toc_depth:
             continue
-        text = html.unescape(re.sub(r"<[^>]+>", "", inner)).strip()
+        text = re.sub(r"\s+", " ", html.unescape(re.sub(r"<[^>]+>", "", inner))).strip()
         toc.append(f'<li class="l{level}"><a href="#{hid}">{html.escape(text)}</a></li>')
 
     page = TEMPLATE.format(

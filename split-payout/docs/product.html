@@ -501,7 +501,7 @@ unallocated after MDR + 14.50 commission − 1.00 remittance fee)</td>
 </tbody>
 </table>
 <h2 id="outcomes">4.3 Outcomes</h2>
-<a class="visual-link" data-auto href="../money-flow.html#outcomes"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
+<div class="visual-links" data-auto><a class="visual-link" href="../money-flow.html#outcomes"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Money flow: outcomes</a><a class="visual-link" href="../what-can-go-wrong.html#stage-after"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>What can go wrong: after payout</a></div>
 <table>
 <colgroup>
 <col style="width: 31%" />
@@ -727,6 +727,7 @@ payout schedule (scheme schedule, matched status or advance payout, as
 configured on the MID) continues to apply.</p>
 <h2 id="hold-of-flagged-transactions">6.3 Hold of flagged
 transactions</h2>
+<div class="visual-links" data-auto><a class="visual-link" href="../advice-lifecycle.html#sc=released"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Advice lifecycle: released after N days</a></div>
 <ul>
 <li><p>APEX receives the split flag with the transaction in PGW’s
 federation (real-time Create Transaction API and the day-end transaction
@@ -744,6 +745,7 @@ report for Operations and Finance. The timer runs on the flagged
 transaction, not on an advice record.</p></li>
 </ul>
 <h2 id="split-advice-intake">6.4 Split advice intake</h2>
+<div class="visual-links" data-auto><a class="visual-link" href="../advice-lifecycle.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Advice lifecycle</a></div>
 <p>APEX receives split advices from PGW through two channels, following
 the same model as transaction federation today.</p>
 <h3 id="real-time-split-advice-api">Real-time Split Advice API</h3>
@@ -808,11 +810,13 @@ advice exists for the transaction; U only when the existing advice is
 CREATED, REJECTED or PENDING_MATCH. Amount validation runs later
 (section 6.5).</p>
 <h3 id="transaction-not-yet-on-apex">Transaction not yet on APEX</h3>
+<div class="visual-links" data-auto><a class="visual-link" href="../advice-lifecycle.html#sc=early"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Advice lifecycle: advice before the transaction</a></div>
 <p>An advice that arrives before its transaction is not rejected. APEX
 parks it as PENDING_MATCH and links it when the transaction arrives. If
 still unmatched at day end, it is rejected with a reason code so the
 partner sees it in the split payout report.</p>
 <h3 id="day-end-split-advice-file">Day-end split advice file</h3>
+<div class="visual-links" data-auto><a class="visual-link" href="../advice-lifecycle.html#sc=down"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Advice lifecycle: APEX not reachable</a><a class="visual-link" href="../what-can-go-wrong.html#stage-file"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>What can go wrong: day-end file</a></div>
 <p>PGW sends a day-end file after the Ecomm cut-off (midnight) with
 every advice of the day, including updates. It is the backup to the API
 and the channel for updates. APEX reconciles it against the API:</p>
@@ -855,7 +859,7 @@ file with a zero count on days with no advices, so APEX can tell “no
 advices today” from “file not received”. File format to be defined by
 APEX.</p>
 <h2 id="amount-validation">6.5 Amount validation</h2>
-<a class="visual-link" data-auto href="../money-flow.html#amount-validation"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
+<div class="visual-links" data-auto><a class="visual-link" href="../money-flow.html#amount-validation"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Money flow: amount validation</a><a class="visual-link" href="../what-can-go-wrong.html#stage-amt"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>What can go wrong: amount validation</a></div>
 <p>Run by APEX as a scheduled process once pricing is available (in-call
 validation if the platform vendor can support it). Any failure rejects
 the whole advice with a reason code.</p>
@@ -956,6 +960,7 @@ commission):</p>
 </tbody>
 </table>
 <h3 id="advice-statuses">Advice statuses</h3>
+<div class="visual-links" data-auto><a class="visual-link" href="../advice-lifecycle.html#statuses"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Advice lifecycle: statuses</a></div>
 <table>
 <colgroup>
 <col style="width: 24%" />
@@ -1344,7 +1349,7 @@ Profile)</h3>
 PGW applies the MID’s fixed template and stores the resulting split
 against the order.</p>
 <h2 id="payout-advice-api">7.3 Payout Advice API</h2>
-<a class="visual-link" data-auto href="../simulator.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>View it visually</a>
+<div class="visual-links" data-auto><a class="visual-link" href="../simulator.html#s4b"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: Payout Advice API</a><a class="visual-link" href="../what-can-go-wrong.html#stage-api"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>What can go wrong: Payout Advice API</a></div>
 <p>A PGW API through which a partner sends a split advice for an
 existing order, or updates one. Available to Dynamic and Profile MIDs; a
 Fixed MID gets its split from the template. Endpoint and field naming to
@@ -1438,6 +1443,7 @@ response (accepted or rejected with reason), included in day-end
 file.</p></li>
 </ul>
 <h2 id="validations">7.6 Validations</h2>
+<div class="visual-links" data-auto><a class="visual-link" href="../what-can-go-wrong.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>What can go wrong</a></div>
 <p>PGW validates at order creation, before any payment is taken, and on
 every Payout Advice API call. Any failure rejects the request with a
 specific error code (codes to be defined by PGW).</p>
@@ -1599,6 +1605,7 @@ Advice API, error and reason codes.</td>
 </tbody>
 </table>
 <h1 id="refunds-and-chargebacks">8. Refunds and Chargebacks</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../what-can-go-wrong.html#after-refund"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>What can go wrong: refunds and chargebacks</a></div>
 <p>Refunds and chargebacks are debited from the partner’s MID through
 the normal process. Vendors and their payouts are not involved, and
 Geidea does not recover amounts from vendors. A chargeback on a
