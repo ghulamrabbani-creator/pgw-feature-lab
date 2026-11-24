@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.cur3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.cur3 .c { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.cur3 .c .k { font: 500 12px var(--mono); color: var(--money); }
+.cur3 .c h3 { margin: 6px 0 4px; font-size: 17px; color: var(--ink); font-weight: 600; }
+.cur3 .c .ex { font: 500 22px var(--mono); color: var(--ink); margin: 6px 0; }
+.cur3 .c p { margin: 0; font-size: 14px; color: var(--text-2); }
+.row.plan { opacity: .7; }
+@media (max-width: 820px) { .cur3 { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs">MCP</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">feature</p>
+<h1 class="page">MCP: dynamic multi-currency pricing</h1>
+<p class="lead">A customer on Geidea HPP is offered the price in their own currency, based on where they are, and can pay in it. The merchant prices, sees and is settled in AED as today, and never sees the conversion. Rates come from Planet's daily file, markup included. Launch target Jan-2027.</p>
+
+<h2 class="section-title">One order, three currencies</h2>
+<div class="cur3">
+<div class="c"><span class="k">order currency</span><h3>What the merchant priced</h3><div class="ex">AED 100.00</div><p>Seen by the merchant, the Merchant Portal and APEX main fields. MVP: AED orders only.</p></div>
+<div class="c"><span class="k">transaction currency</span><h3>What the customer pays</h3><div class="ex">GBP 21.37</div><p>Chosen on HPP. Authorised and cleared with the scheme in this currency. APEX holds it as the cardholder currency. Never shown to the merchant.</p></div>
+<div class="c"><span class="k">settlement currency</span><h3>What the merchant is paid</h3><div class="ex">SAR</div><p>Unchanged by MCP. The order amount (AED) is converted to it for payout, as today.</p></div>
+</div>
+<p class="src" style="font:11px var(--mono);color:var(--muted);margin-top:10px">Worked example from PRD v2: rate AED → GBP 0.2137, markup included.</p>
+
+<h2 class="section-title">Documents</h2>
+<div class="rows">
+<div class="row plan"><div class="grow"><div class="t">Solution requirements</div><div class="d">v3 in preparation. Current reference: PRD v2 (Planet), 09-Nov-2026, not published here</div></div><span class="tag grey">in preparation</span></div>
+<div class="row plan"><div class="grow"><div class="t">PGW dev stories</div><div class="d">S1 to S9: configuration, rate file, geolocation, HPP offer, payment, refunds, merchant outputs, APEX federation, enrichment file</div></div><span class="tag grey">in preparation</span></div>
+<div class="row plan"><div class="grow"><div class="t">Interface notes</div><div class="d">APEX fields, enrichment record, Planet rate file and DTF</div></div><span class="tag grey">in preparation</span></div>
+</div>
+
+<h2 class="section-title">Visual pages</h2>
+<div class="rows">
+<a class="row" href="hpp-simulator.html"><div class="grow"><div class="t">HPP simulator</div><div class="d">Merchant set-up, customer location and rate-file state drive what the HPP offers; pay and see what PGW stores and what the merchant sees</div></div><span class="tag">open</span></a>
+<div class="row plan"><div class="grow"><div class="t">Order model</div><div class="d">One MCP order in the PGW order model, MCP fields highlighted: a purchase and two partial refunds that close it</div></div><span class="tag grey">planned</span></div>
+<div class="row plan"><div class="grow"><div class="t">Calculator</div><div class="d">Quote, rounding, partial refunds with the last-cent rule, minimum refund</div></div><span class="tag grey">planned</span></div>
+<div class="row plan"><div class="grow"><div class="t">End-to-end view</div><div class="d">Customer, HPP/PGW, MaxMind, Planet, MPGS/CYBS, Postilion, APEX and scheme in one swimlane</div></div><span class="tag grey">planned</span></div>
+<div class="row plan"><div class="grow"><div class="t">Rate file lifecycle</div><div class="d">Daily load, checks, validity overlap, MCP suspended</div></div><span class="tag grey">planned</span></div>
+<div class="row plan"><div class="grow"><div class="t">What can go wrong</div><div class="d">Geolocation miss, missing rate file, wallet mismatch, record mismatches, refunds below minimum</div></div><span class="tag grey">planned</span></div>
+<div class="row plan"><div class="grow"><div class="t">Federation and enrichment</div><div class="d">The same purchase and refunds as sent to APEX in real time and to Postilion in the enrichment file</div></div><span class="tag warn">on hold: field names and file format</span></div>
+</div>
+</main>
+</body>
+</html>

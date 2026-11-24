@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP HPP Simulator · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 16px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.newer { font-size: 14px; background: #FFFBEB; border: 1px solid #FDE68A; border-radius: 10px; padding: 12px 16px; margin-bottom: 28px; }
+.newer b { color: var(--warn-fg); }
+.newer ul { margin: 6px 0 0; padding-left: 20px; }
+.newer li { margin: 2px 0; }
+.sim { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) 400px; gap: 20px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.card > header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.card > header .num { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; font: 500 12px/24px var(--mono); text-align: center; flex: none; }
+.card > header h2 { margin: 0; font-size: 17px; font-weight: 600; color: var(--ink); }
+.card > header .who { font: 11px var(--mono); color: var(--muted); }
+.card .in { padding: 16px 18px; }
+.sub { font: 500 11px var(--mono); color: var(--muted); letter-spacing: .05em; text-transform: uppercase; margin: 14px 0 8px; }
+.sub:first-child { margin-top: 0; }
+.f { margin-bottom: 12px; }
+.f label { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 4px; }
+.f input, .f select { width: 100%; font: 14px var(--sans); padding: 7px 9px; border: 1px solid var(--border-2); border-radius: 7px; background: #fff; color: var(--ink); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 13px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.chip:hover { background: #F1F5F9; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.chip small { font: 11px var(--mono); opacity: .75; margin-left: 4px; }
+.hint { font-size: 13px; color: var(--text-2); margin: 8px 0 0; }
+.note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
+.note b { color: var(--warn-fg); }
+.info { font-size: 13px; background: #EFF6FF; border-left: 3px solid #1D4ED8; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
+.bad { font-size: 13px; background: #FEF2F2; border-left: 3px solid #B91C1C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
+.src { font: 11px var(--mono); color: var(--muted); margin-top: 10px; }
+.st { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; display: inline-block; }
+.st.ok { background: var(--money-bg); color: var(--money); }
+.st.bad { background: #FEE2E2; color: #991B1B; }
+.st.hold { background: var(--warn-bg); color: var(--warn-fg); }
+.st.grey { background: #F1F5F9; color: var(--muted); }
+.chk { width: 100%; border-collapse: collapse; font-size: 13px; }
+.chk td { padding: 7px 8px; border-top: 1px solid var(--border); vertical-align: top; }
+.chk tr:first-child td { border-top: 0; }
+.chk td.n { font-family: var(--mono); color: var(--muted); white-space: nowrap; width: 1%; }
+.chk td.r { white-space: nowrap; width: 1%; font: 500 12px var(--mono); text-align: right; }
+.chk tr.pass td.r { color: var(--money); }
+.chk tr.fail td { background: #FEF2F2; } .chk tr.fail td.r { color: #B91C1C; }
+.chk tr.stop td { background: #FFFBEB; } .chk tr.stop td.r { color: var(--warn-fg); }
+.chk tr.na td { color: var(--muted); }
+.chk .why { display: block; font-size: 12px; color: var(--text-2); margin-top: 2px; }
+.outcome { margin-top: 12px; padding: 10px 12px; border-radius: 8px; font-size: 14px; }
+.outcome.ok { background: var(--money-bg); color: #064E3B; }
+.outcome.off { background: #F1F5F9; color: var(--ink); }
+.kv { display: grid; grid-template-columns: max-content 1fr; gap: 6px 16px; font-size: 14px; margin: 0; }
+.kv dt { color: var(--text-2); }
+.kv dd { margin: 0; font-family: var(--mono); font-size: 13px; color: var(--ink); word-break: break-word; }
+.kv dd.hl { color: var(--money); font-weight: 500; }
+pre.rf { background: var(--code-bg); color: #CBD5E1; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font: 12px/1.6 var(--mono); margin: 0; }
+pre.rf .hit { color: var(--code-fg); background: rgba(167,243,208,.14); font-weight: 500; }
+pre.rf .dim { color: #64748B; }
+pre.code { background: var(--code-bg); color: #E2E8F0; padding: 12px 14px; border-radius: 8px; overflow-x: auto; font: 12.5px/1.55 var(--mono); margin: 0; }
+pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
+.calc { font: 13px var(--mono); background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 10px; }
+.calc b { color: var(--money); }
+.lower { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; margin-top: 20px; }
+.tries { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 20px; }
+.tries a { font: 500 13px var(--sans); text-decoration: none; border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 999px; padding: 5px 12px; }
+.tries a:hover { border-color: var(--money); color: var(--money); }
+.tries a.on { background: var(--money); border-color: var(--money); color: #fff; }
+.tries span { font: 11px var(--mono); color: var(--muted); align-self: center; margin-right: 4px; }
+.cmp { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.btn { font: 500 14px var(--sans); border-radius: 8px; padding: 7px 12px; cursor: pointer; border: 1px solid var(--border-2); background: var(--card); color: var(--ink); }
+.btn:hover { background: #F1F5F9; }
+
+/* ---------- MA: PGW configuration (Geidea Design System tokens, Montserrat) ---------- */
+.gx { --blue:#1554d1; --blue-soft:#eef3ff; --gink:#1c2431; --sub:#6b7280; --gmuted:#9aa1ac; --line:#e6e8ec; --pill:#f3f4f6;
+  font-family: Montserrat, Arial, sans-serif; color: var(--gink); font-size: 13px; }
+.gx .tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid #f0f0f0; margin: -4px 0 6px; }
+.gx .tab { flex: none; padding: 8px 10px 6px; color: var(--gmuted); font-size: 12px; border-bottom: 2px solid transparent; }
+.gx .tab.on { color: var(--blue); border-bottom-color: var(--blue); font-weight: 600; }
+.gx .h { font-weight: 600; font-size: 13.5px; margin: 14px 0 2px; }
+.gx .d { color: var(--sub); font-size: 11.5px; line-height: 1.45; }
+.gx .trow { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 7px 0; }
+.gx .tstate { display: flex; align-items: center; gap: 10px; font-size: 12px; flex: none; }
+.gx .tg { width: 40px; height: 24px; border-radius: 12px; background: #a8a8a8; position: relative; cursor: pointer; border: 0; padding: 0; flex: none; }
+.gx .tg::after { content: ""; position: absolute; top: 2px; left: 2px; width: 20px; height: 20px; border-radius: 50%; background: #fff; transition: left .15s; box-shadow: 0 1px 3px rgba(0,0,0,.2); }
+.gx .tg.on { background: var(--blue); } .gx .tg.on::after { left: 18px; }
+.gx .tg:disabled { opacity: .4; cursor: not-allowed; }
+.gx table { width: 100%; border-collapse: collapse; margin-top: 6px; }
+.gx th { text-align: left; font-size: 11px; color: var(--gmuted); font-weight: 500; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+.gx td { padding: 6px 8px; border-bottom: 1px solid var(--line); font-size: 12.5px; vertical-align: middle; }
+.gx td:last-child { text-align: right; }
+.gx .pill { display: inline-block; border-radius: 10px; padding: 1px 7px; font-size: 10.5px; background: #eef2f7; color: #40505f; }
+.gx .nest.off { opacity: .45; }
+.gx .banner { border-radius: 8px; padding: 8px 12px; font-size: 11.5px; margin-top: 10px; line-height: 1.45; background: var(--blue-soft); color: #1e3a8a; }
+
+/* ---------- HPP (Geidea Design System tokens, Montserrat) ---------- */
+.hpp-wrap { position: sticky; top: 72px; }
+.phone { background: #eef0f3; border-radius: 28px; padding: 14px; border: 1px solid var(--border-2); }
+.gh { --blue:#1554d1; --blue-h:#0f45ad; --gink:#1c2431; --sub:#6b7280; --gmuted:#9aa1ac; --line:#e3e6eb;
+  font-family: Montserrat, Arial, sans-serif; color: var(--gink); background: #fff; border-radius: 18px; padding: 20px 18px 18px; font-size: 13px; min-height: 560px; }
+.gh .env { text-align: center; color: var(--gmuted); font-size: 11.5px; font-weight: 600; margin-bottom: 6px; }
+.gh h3 { text-align: center; font-size: 16px; font-weight: 700; margin: 0 0 14px; }
+.gh .amt { border: 1px solid var(--line); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; }
+.gh .ar { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; padding: 3px 0; color: var(--sub); font-size: 12.5px; }
+.gh .ar.p { color: var(--gink); padding-bottom: 8px; }
+.gh .ar.p .v { font-size: 22px; font-weight: 700; }
+.gh .ar .v { font-weight: 500; text-align: right; }
+.gh .pay-in { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; font-weight: 500; }
+.gh .pay-in select { font: 600 13px Montserrat, Arial, sans-serif; color: var(--gink); border: 1px solid #d0d5dd; border-radius: 8px; padding: 6px 8px; background: #fff; }
+.gh .wbtn { width: 100%; background: #000; color: #fff; border: 0; border-radius: 10px; padding: 11px; font: 600 13.5px Montserrat, Arial, sans-serif; margin-bottom: 8px; cursor: pointer; }
+.gh .or { text-align: center; color: var(--gmuted); font-size: 11.5px; margin: 12px 0 10px; }
+.gh .m { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; background: #fff; width: 100%; text-align: left; font: inherit; color: inherit; }
+.gh .m.on { border-color: var(--blue); box-shadow: inset 0 0 0 1px var(--blue); }
+.gh .m:disabled { cursor: not-allowed; background: #fafafa; }
+.gh .m:disabled .mt { color: var(--gmuted); }
+.gh .rb { width: 16px; height: 16px; border-radius: 50%; border: 2px solid #c5cad3; flex: none; margin-top: 1px; position: relative; }
+.gh .m.on .rb { border-color: var(--blue); }
+.gh .m.on .rb::after { content: ""; position: absolute; inset: 2.5px; border-radius: 50%; background: var(--blue); }
+.gh .mt { font-weight: 600; font-size: 13px; }
+.gh .ms { color: var(--sub); font-size: 11px; margin-top: 2px; }
+.gh .ms.aed { color: #b45309; }
+.gh .cardf { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; color: var(--gmuted); font-size: 12px; margin: 2px 0 10px 26px; }
+.gh .paybtn { width: 100%; background: var(--blue); color: #fff; border: 0; border-radius: 999px; padding: 12px; font: 600 14px Montserrat, Arial, sans-serif; cursor: pointer; margin-top: 6px; }
+.gh .paybtn:hover { background: var(--blue-h); }
+.gh .fine { text-align: center; color: var(--gmuted); font-size: 10.5px; margin-top: 10px; }
+.gh .done { text-align: center; padding: 40px 10px; }
+.gh .done .tick { width: 54px; height: 54px; border-radius: 50%; margin: 0 auto 14px; display: flex; align-items: center; justify-content: center; }
+.gh .done .tick svg { width: 26px; height: 26px; stroke: #fff; fill: none; stroke-width: 3; }
+.gh .done .tick.ok { background: #16a34a; } .gh .done .tick.no { background: #dc2626; }
+.gh .done h4 { margin: 0 0 6px; font-size: 16px; }
+.gh .done p { margin: 4px 0; color: var(--sub); font-size: 12.5px; }
+.gh .none { color: var(--sub); text-align: center; padding: 80px 16px; font-size: 13px; line-height: 1.5; }
+.wtest { display: flex; gap: 8px; align-items: center; justify-content: center; font-size: 13px; color: var(--text-2); margin-top: 10px; cursor: pointer; }
+.hpp-cap { font-size: 12px; color: var(--muted); margin-top: 8px; text-align: center; }
+
+@media (max-width: 1240px) {
+  .sim { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); }
+  .hpp-col { grid-column: 1 / -1; }
+  .hpp-wrap { position: static; max-width: 420px; margin: 0 auto; }
+}
+@media (max-width: 820px) {
+  .sim, .lower, .cmp { grid-template-columns: minmax(0, 1fr); }
+  .kv { grid-template-columns: minmax(0, 1fr); gap: 2px; }
+  .kv dd { margin-bottom: 6px; }
+}
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">MCP</a> / HPP simulator</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">mcp · visual page</p>
+<h1 class="page">HPP simulator: location, rates and what the customer sees</h1>
+<p class="lead">Set up the merchant, place the customer somewhere in the world and choose the rate-file state. The HPP on the right reacts as PGW would. Pay to see what PGW stores and what the merchant sees.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects PRD v2 (09-Nov-2026) + decisions to 24-Nov-2026</span>
+<span class="tag grey">Stories: S1, S2, S3, S4, S5, S7 (draft list)</span>
+<a href="./">Back to MCP</a>
+</div>
+
+<div class="terms"><b>Terms.</b> <b>Order currency</b>: what the merchant priced in (AED). <b>Transaction currency</b>: what the customer pays in, and what the scheme clears in (APEX calls it <i>cardholder currency</i>). <b>Settlement currency</b>: what the merchant is paid out in; MCP does not change it. <b>Rate</b>: Planet's rate from AED to the transaction currency, markup included.</div>
+
+<div class="newer"><b>Newer than PRD v2 (shown on this page)</b>
+<ul>
+<li>Geolocation is MaxMind GeoIP2 (a database held by PGW), not Planet. Planet offers no geolocation (13-Nov).</li>
+<li>Rates come from Planet's daily rate file (template 194). PGW quotes from the <b>Visa section</b>, the higher of the two rates (24-Nov).</li>
+<li>The converted amount is <b>rounded up</b> to the currency's minor unit (24-Nov). Refunds keep the PRD rule: round down, with the last-cent rule on the final refund.</li>
+<li>MCP is a PGW feature toggle in the PGW configuration inside MA, built by the PGW team. There is no operational process (24-Nov).</li>
+</ul></div>
+
+<div class="tries" id="tries"><span>Try</span></div>
+
+<div class="sim">
+<!-- Column 1: merchant -->
+<div class="col">
+<section class="card" id="s-cfg">
+<header><span class="num">1</span><h2>Merchant set-up</h2><span class="who">MA · PGW configuration</span></header>
+<div class="in">
+<div class="gx" id="gx"></div>
+<p class="src">Geidea screen shown in the Geidea Design System. Toggle name is a placeholder until PGW names it (must differ from <code>ENABLE_MULTI_CURRENCY</code> and <code>ENABLE_MULTI_CURRENCY_SETTLEMENT</code>).</p>
+</div>
+</section>
+<section class="card" id="s-order">
+<header><span class="num">2</span><h2>The order</h2><span class="who">merchant → PGW</span></header>
+<div class="in">
+<div class="f"><label for="oSrc">How the order is paid</label>
+<select id="oSrc">
+<option value="api">Create Session (API), customer pays on HPP</option>
+<option value="sdk">SDK that shows Geidea HPP</option>
+<option value="pbl">Pay-by-Link</option>
+<option value="direct">Direct API (card details collected by the merchant)</option>
+<option value="recur">Recurring or merchant-initiated payment</option>
+</select></div>
+<div class="f"><label>Order currency</label>
+<div class="chips" id="oCur"></div></div>
+<div class="f"><label for="oAmt">Order amount</label>
+<input id="oAmt" type="number" min="0.01" step="0.01" value="100.00"></div>
+<p class="hint">MVP commitment is AED orders only. The solution is provisioned for any order currency (17-Nov).</p>
+</div>
+</section>
+</div>
+
+<!-- Column 2: customer and rates -->
+<div class="col">
+<section class="card" id="s-geo">
+<header><span class="num">3</span><h2>Where the customer is</h2><span class="who">customer IP → MaxMind → country</span></header>
+<div class="in">
+<div class="chips" id="geo"></div>
+<div id="geoOut"></div>
+</div>
+</section>
+<section class="card" id="s-rates">
+<header><span class="num">4</span><h2>Planet rate file</h2><span class="who">Planet → PGW, daily over SFTP</span></header>
+<div class="in">
+<div class="chips" id="rfs"></div>
+<div id="rfOut"></div>
+</div>
+</section>
+</div>
+
+<!-- Column 3: HPP -->
+<div class="col hpp-col">
+<div class="hpp-wrap">
+<div class="phone"><div class="gh" id="hpp"></div></div>
+<p class="hpp-cap">HPP as the customer sees it · Geidea Design System · <span class="tag warn">Illustrative</span></p>
+<label class="wtest"><input type="checkbox" id="wMis"> Test: the wallet token comes back with a different amount</label>
+</div>
+</div>
+</div>
+
+<div class="lower">
+<section class="card" id="s-trace">
+<header><span class="num">5</span><h2>Why the HPP looks like this</h2><span class="who">PGW checks, in order</span></header>
+<div class="in" id="trace"></div>
+</section>
+<section class="card" id="s-file">
+<header><span class="num">6</span><h2>The rate PGW used</h2><span class="who">cached file · Visa section</span></header>
+<div class="in" id="fileOut"></div>
+</section>
+</div>
+
+<section class="card" id="s-after" style="margin-top:20px">
+<header><span class="num">7</span><h2>After Pay</h2><span class="who">what PGW stores · what the merchant sees</span></header>
+<div class="in" id="after"><p class="hint">Press Pay on the HPP to see the result.</p></div>
+</section>
+
+<p class="src" style="margin-top:24px">Sources: PRD v2 (09-Nov-2026) sections 4, 5, 6, 8 (PGW); Planet rate file template 194 and sample (Project_Feed/MCP/Planet Files); MCP project note, decisions 13-Nov to 24-Nov-2026. All rates, IP addresses and file values on this page are dummy values.</p>
+</main>
+<footer class="lab-footer">PGW Feature Lab · MCP · HPP simulator</footer>
+
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* ---------- Reference data (dummy) ---------- */
+const CUR = {
+  AED: { num: 784, mu: 2 }, GBP: { num: 826, mu: 2 }, EUR: { num: 978, mu: 2 }, INR: { num: 356, mu: 2 },
+  USD: { num: 840, mu: 2 }, SAR: { num: 682, mu: 2 }, JPY: { num: 392, mu: 0 }
+};
+const MCP_LIST = ['GBP', 'EUR', 'INR', 'USD', 'SAR'];            // backend MCP currency list (2-decimal only in MVP)
+const PHASE2 = ['JPY'];
+const COUNTRIES = [
+  { c: 'GB', n: 'United Kingdom', cur: 'GBP', ip: '81.2.69.142' },
+  { c: 'FR', n: 'France', cur: 'EUR', ip: '90.84.1.20' },
+  { c: 'DE', n: 'Germany', cur: 'EUR', ip: '85.214.10.4' },
+  { c: 'IN', n: 'India', cur: 'INR', ip: '49.36.12.8' },
+  { c: 'US', n: 'United States', cur: 'USD', ip: '216.160.83.56' },
+  { c: 'SA', n: 'Saudi Arabia', cur: 'SAR', ip: '37.224.5.9' },
+  { c: 'AE', n: 'United Arab Emirates', cur: 'AED', ip: '94.200.3.17' },
+  { c: 'JP', n: 'Japan', cur: 'JPY', ip: '126.10.4.2' },
+  { c: '--', n: 'No country found', cur: null, ip: '10.4.2.1' }
+];
+// rate = AED -> target, markup included, 7 decimals (as in Planet's sample)
+const FILES = {
+  today: { date: '20261124', from: '2026-11-24T00:00:00.000Z', to: '2026-11-25T23:59:59.000Z',
+    visa: { GBP: '0.2137000', EUR: '0.2489000', INR: '23.1200000', USD: '0.2759000', SAR: '1.0345000', JPY: '41.8500000' },
+    mc:   { GBP: '0.2135000', EUR: '0.2486000', INR: '23.0950000', USD: '0.2756000', SAR: '1.0334000', JPY: '41.8000000' } },
+  yday: { date: '20261123', from: '2026-11-23T00:00:00.000Z', to: '2026-11-24T23:59:59.000Z',
+    visa: { GBP: '0.2141000', EUR: '0.2492000', INR: '23.0800000', USD: '0.2759000', SAR: '1.0345000', JPY: '41.9000000' },
+    mc:   { GBP: '0.2139000', EUR: '0.2489000', INR: '23.0550000', USD: '0.2756000', SAR: '1.0334000', JPY: '41.8500000' } }
+};
+const FILE_ORDER = ['GBP', 'EUR', 'INR', 'USD', 'SAR', 'JPY'];
+const RFS = [
+  { k: 'today', t: "Today's file loaded" },
+  { k: 'yday', t: "Today's file missing, yesterday's still valid" },
+  { k: 'none', t: 'No valid file' }
+];
+
+/* ---------- State ---------- */
+const DEF = { mcp: true, cur: { GBP: true, EUR: true, INR: true, USD: true, SAR: true }, src: 'api', ocur: 'AED', amt: '100.00',
+  geo: 'GB', rf: 'today', sel: null, method: 'card', wMis: false, paid: null };
+let S = JSON.parse(JSON.stringify(DEF));
+
+/* ---------- Money maths (BigInt, no float) ---------- */
+function toMinor(amtStr, mu) { const [i, f = ''] = String(amtStr).split('.'); return BigInt(i || '0') * 10n ** BigInt(mu) + BigInt((f + '0'.repeat(mu)).slice(0, mu) || '0'); }
+function fmt(minor, mu) { minor = BigInt(minor); const neg = minor < 0n; if (neg) minor = -minor; const d = 10n ** BigInt(mu); const i = minor / d; const f = minor % d; let s = i.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); if (mu > 0) s += '.' + f.toString().padStart(mu, '0'); return (neg ? '-' : '') + s; }
+function rateInt(r) { return toMinor(r, 7); }
+// AED minor (2dp) x rate (7dp) -> target minor, rounded UP
+function convert(aedMinor, rate, tmu) {
+  const num = aedMinor * rateInt(rate) * 10n ** BigInt(tmu);
+  const den = 10n ** 9n; // 2 (AED) + 7 (rate)
+  const q = num / den; return { val: num % den === 0n ? q : q + 1n, exact: num, den };
+}
+function exactStr(num, den, tmu) { // num/den in target major units, show 9 - ... keep 7 decimals of target minor
+  const scale = 10n ** BigInt(tmu); const dec = 7;
+  const v = num * 10n ** BigInt(dec) / (den * scale);
+  return fmt(v, dec);
+}
+
+/* ---------- Derivation ---------- */
+function activeFile() { return S.rf === 'none' ? null : FILES[S.rf]; }
+function derive() {
+  const ctry = COUNTRIES.find(x => x.c === S.geo);
+  const file = activeFile();
+  const steps = []; let stop = null; // stop: {kind:'off'|'aed', why}
+  const push = (n, t, res, why) => steps.push({ n, t, res, why });
+  const onHpp = ['api', 'sdk', 'pbl'].includes(S.src);
+  // 1
+  if (!onHpp) { push(1, 'Order is paid on Geidea HPP', 'stop', 'Direct API, recurring and merchant-initiated payments have no customer page to offer a currency on. They stay in order currency (PRD v2 5.1).'); stop = stop || 'src'; }
+  else push(1, 'Order is paid on Geidea HPP', 'pass', { api: 'Create Session, then HPP', sdk: 'SDK renders Geidea HPP', pbl: 'Pay-by-Link opens HPP' }[S.src]);
+  // 2
+  if (stop) push(2, 'Order currency is AED', 'na');
+  else if (S.ocur !== 'AED') { push(2, 'Order currency is AED', 'stop', 'MVP is AED orders only. Other order currencies are processed as today, without MCP (PRD v2 5.1).'); stop = 'ocur'; }
+  else push(2, 'Order currency is AED', 'pass');
+  // 3
+  if (stop) push(3, 'MCP is on for this merchant', 'na');
+  else if (!S.mcp) { push(3, 'MCP is on for this merchant', 'stop', 'Toggle off in PGW configuration. HPP shows AED only.'); stop = 'mcp'; }
+  else push(3, 'MCP is on for this merchant', 'pass');
+  // 4
+  if (stop) push(4, 'A valid rate file is cached', 'na');
+  else if (!file) { push(4, 'A valid rate file is cached', 'stop', 'No file within its validity. MCP is suspended for all merchants, HPP shows AED only, Operations is alerted (PRD v2 8, Rates).'); stop = 'rf'; }
+  else push(4, 'A valid rate file is cached', 'pass', S.rf === 'today' ? 'File ' + file.date + ' v01, valid to 25-Nov 23:59 UTC' : "Today's file not received. Yesterday's file " + file.date + ' is used until it expires (24-Nov 23:59 UTC)');
+  // 5
+  let proposed = null;
+  if (stop) push(5, 'MaxMind returns a country for the customer IP', 'na');
+  else if (!ctry.cur) { push(5, 'MaxMind returns a country for the customer IP', 'stop', 'No country. The order is processed as a regular AED transaction. MCP_offered = N.'); stop = 'geo'; }
+  else push(5, 'MaxMind returns a country for the customer IP', 'pass', ctry.ip + ' → ' + ctry.c);
+  // 6
+  if (stop) push(6, 'Country maps to an active MCP currency', 'na');
+  else if (ctry.cur === 'AED') { push(6, 'Country maps to an active MCP currency', 'stop', 'AE maps to AED, the order currency. Nothing to propose; the customer can still pick a currency.'); stop = 'home'; }
+  else if (PHASE2.includes(ctry.cur)) { push(6, 'Country maps to an active MCP currency', 'stop', ctry.c + ' → ' + ctry.cur + ' is inactive: 0 and 3-decimal currencies are Phase 2 (PRD v2 5.3).'); stop = 'p2'; }
+  else push(6, 'Country maps to an active MCP currency', 'pass', ctry.c + ' → ' + ctry.cur);
+  // 7
+  if (stop) push(7, 'Currency is on for this merchant', 'na');
+  else if (!S.cur[ctry.cur]) { push(7, 'Currency is on for this merchant', 'stop', ctry.cur + ' is off in the merchant currency list.'); stop = 'curoff'; }
+  else push(7, 'Currency is on for this merchant', 'pass');
+  // 8
+  if (stop) push(8, 'Rate AED → currency is in the file (Visa section)', 'na');
+  else if (!file.visa[ctry.cur]) { push(8, 'Rate AED → currency is in the file (Visa section)', 'stop', 'No rate for this pair.'); stop = 'norate'; }
+  else { push(8, 'Rate AED → currency is in the file (Visa section)', 'pass', '1 AED = ' + file.visa[ctry.cur] + ' ' + ctry.cur); proposed = ctry.cur; }
+
+  // selector available? only when HPP + AED order + MCP on + file valid + geo found (any outcome after that)
+  const selectorOn = !['src', 'ocur', 'mcp', 'rf', 'geo'].includes(stop);
+  const options = selectorOn ? MCP_LIST.filter(c => S.cur[c] && file.visa[c]) : [];
+  const offered = !!proposed;
+  let chosen = S.sel;
+  if (!selectorOn) chosen = S.ocur;
+  else if (chosen == null || (chosen !== 'AED' && !options.includes(chosen))) chosen = proposed || 'AED';
+  return { ctry, file, steps, stop, proposed, selectorOn, options, offered, chosen, onHpp };
+}
+
+function quote(d) {
+  const aedMinor = toMinor(S.amt || '0', 2);
+  if (d.chosen === 'AED' || !d.file || d.chosen === S.ocur) return { cur: d.chosen, minor: aedMinor, mu: 2, mcp: false, aedMinor };
+  const rate = d.file.visa[d.chosen]; const mu = CUR[d.chosen].mu;
+  const c = convert(aedMinor, rate, mu);
+  return { cur: d.chosen, minor: c.val, mu, mcp: true, rate, aedMinor, exact: exactStr(c.exact, c.den, mu) };
+}
+
+/* ---------- Render: MA config ---------- */
+function renderCfg() {
+  let h = '<div class="tabs"><span class="tab">General</span><span class="tab">Payment Methods</span><span class="tab">Gateway Settings</span><span class="tab on">Multi-currency pricing</span><span class="tab">Webhooks</span></div>';
+  h += '<div class="trow"><div><div class="h">Dynamic multi-currency pricing</div><div class="d">Offer the customer a price in their own currency on HPP, based on their location. The merchant keeps pricing, reporting and settlement in the order currency.</div></div>';
+  h += '<div class="tstate"><span>' + (S.mcp ? 'Enabled' : 'Disabled') + '</span><button class="tg' + (S.mcp ? ' on' : '') + '" id="tgMcp" role="switch" aria-checked="' + S.mcp + '" aria-label="Dynamic multi-currency pricing"></button></div></div>';
+  h += '<div class="nest' + (S.mcp ? '' : ' off') + '"><div class="h">Currencies offered</div><div class="d">From the MCP currency list (APEX-supported and present in Planet\'s rate file).</div>';
+  h += '<table><thead><tr><th>Currency</th><th>Decimals</th><th>Offered</th></tr></thead><tbody>';
+  MCP_LIST.forEach(c => { h += '<tr><td>' + c + '</td><td>' + CUR[c].mu + '</td><td><button class="tg' + (S.cur[c] ? ' on' : '') + '" data-cur="' + c + '" role="switch" aria-checked="' + S.cur[c] + '" aria-label="Offer ' + c + '"' + (S.mcp ? '' : ' disabled') + '></button></td></tr>'; });
+  PHASE2.forEach(c => { h += '<tr><td>' + c + ' <span class="pill">Phase 2</span></td><td>' + CUR[c].mu + '</td><td><button class="tg" disabled aria-label="' + c + ' not available"></button></td></tr>'; });
+  h += '</tbody></table></div>';
+  h += '<div class="banner">No markup is set here. Markup is held at Planet and is already in the rates.</div>';
+  $('gx').innerHTML = h;
+  $('tgMcp').onclick = () => { S.mcp = !S.mcp; S.paid = null; render(); };
+  $('gx').querySelectorAll('[data-cur]').forEach(b => b.onclick = () => { const c = b.dataset.cur; S.cur[c] = !S.cur[c]; S.paid = null; render(); });
+}
+
+/* ---------- Render: controls ---------- */
+function renderControls(d) {
+  $('oSrc').value = S.src;
+  $('oAmt').value = S.amt;
+  $('oCur').innerHTML = ['AED', 'USD'].map(c => '<button class="chip" data-ocur="' + c + '" aria-pressed="' + (S.ocur === c) + '">' + c + '</button>').join('');
+  $('oCur').querySelectorAll('[data-ocur]').forEach(b => b.onclick = () => { S.ocur = b.dataset.ocur; S.sel = null; S.paid = null; render(); });
+  $('geo').innerHTML = COUNTRIES.map(x => '<button class="chip" data-geo="' + x.c + '" aria-pressed="' + (S.geo === x.c) + '">' + esc(x.n) + (x.cur ? '<small>' + x.cur + '</small>' : '') + '</button>').join('');
+  $('geo').querySelectorAll('[data-geo]').forEach(b => b.onclick = () => { S.geo = b.dataset.geo; S.sel = null; S.paid = null; render(); });
+  const c = d.ctry;
+  $('geoOut').innerHTML = '<dl class="kv" style="margin-top:14px"><dt>Customer IP</dt><dd>' + c.ip + ' <span class="st grey">dummy</span></dd><dt>MaxMind result</dt><dd>' + (c.cur ? c.c : 'no country') + '</dd><dt>Mapped currency</dt><dd>' + (c.cur ? c.cur + (PHASE2.includes(c.cur) ? ' (inactive, Phase 2)' : '') : '—') + '</dd></dl>' +
+    '<p class="hint">PGW looks up the IP in the MaxMind GeoIP2 database it holds (no call out during the session), then maps the country to a currency using its own country-to-currency table.</p>' +
+    (c.c === 'AE' ? '<div class="note"><b>Not defined:</b> for a customer in the UAE, PRD v2 does not say whether MCP_offered is set when the customer opens the selector and picks another currency (e.g. an Indian tourist in Dubai paying in INR). Shown here as N, because no converted currency was proposed.</div>' : '');
+  $('rfs').innerHTML = RFS.map(x => '<button class="chip" data-rf="' + x.k + '" aria-pressed="' + (S.rf === x.k) + '">' + x.t + '</button>').join('');
+  $('rfs').querySelectorAll('[data-rf]').forEach(b => b.onclick = () => { S.rf = b.dataset.rf; S.paid = null; render(); });
+  $('rfOut').innerHTML = S.rf === 'today' ? '<p class="hint">File 20261124 v01 loaded and checked (complete, trailer totals match, rates within bounds). PGW caches it; every HPP quote today comes from this copy.</p>'
+    : S.rf === 'yday' ? '<p class="hint">Today\'s file has not arrived. Yesterday\'s file (20261123) is valid for 48 hours, to 24-Nov 23:59 UTC, so PGW keeps quoting from it.</p><div class="note"><b>Open with Planet:</b> rate validity and behaviour when the daily file is late (PRD v2 open items). The 48-hour window is taken from Planet\'s sample file.</div>'
+    : '<div class="bad">No cached file is inside its validity window. PGW suspends MCP: every HPP shows AED only, and Operations gets an alert.</div>';
+}
+
+/* ---------- Render: HPP ---------- */
+const TICK = '<svg viewBox="0 0 24 24"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>';
+const CROSS = '<svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>';
+function renderHpp(d, q) {
+  const H = $('hpp');
+  if (!d.onHpp) { H.innerHTML = '<div class="env">Test Merchant</div><div class="none">No HPP in this flow.<br>The merchant collects the card details itself and the payment is made in the order currency (' + esc(S.ocur) + ').</div>'; return; }
+  if (S.paid) {
+    const p = S.paid;
+    H.innerHTML = '<div class="env">Test Merchant</div><div class="done"><div class="tick ' + (p.ok ? 'ok' : 'no') + '">' + (p.ok ? TICK : CROSS) + '</div>' +
+      '<h4>' + (p.ok ? 'Payment successful' : 'Payment failed') + '</h4>' +
+      (p.ok ? '<p><b>' + p.cur + ' ' + fmt(p.minor, p.mu) + '</b></p>' + (p.mcp ? '<p>Order amount AED ' + fmt(p.aedMinor, 2) + '</p>' : '') : '<p>' + esc(p.msg) + '</p>') +
+      '<p style="margin-top:18px"><button class="btn" id="again">Start again</button></p></div>' +
+      (p.ok && p.mcp ? '<div class="fine" style="color:#b45309">Not defined: which currency the confirmation and receipt show. Shown here in the currency paid, with the order amount.</div>' : '');
+    $('again').onclick = () => { S.paid = null; render(); };
+    return;
+  }
+  const curTxt = q.cur + ' ' + fmt(q.minor, q.mu);
+  let h = '<div class="env">Test Merchant</div><h3>Choose how to pay</h3><div class="amt">';
+  if (q.mcp) {
+    h += '<div class="ar p"><span>Total</span><span class="v">' + curTxt + '</span></div>';
+    h += '<div class="ar"><span>Order amount</span><span class="v">AED ' + fmt(q.aedMinor, 2) + '</span></div>';
+    h += '<div class="ar"><span>Exchange rate</span><span class="v">1 AED = ' + q.rate.replace(/0+$/, '').replace(/\.$/, '') + ' ' + q.cur + '</span></div>';
+  } else h += '<div class="ar p"><span>Total</span><span class="v">' + curTxt + '</span></div>';
+  h += '</div>';
+  if (d.selectorOn) {
+    h += '<div class="pay-in"><span>Paying in</span><select id="hSel" aria-label="Paying in">';
+    ['AED'].concat(d.options).forEach(c => { h += '<option value="' + c + '"' + (c === d.chosen ? ' selected' : '') + '>' + c + '</option>'; });
+    h += '</select></div>';
+  }
+  h += '<button class="wbtn" data-m="apple">Apple Pay | ' + curTxt + '</button><button class="wbtn" data-m="google">Google Pay | ' + curTxt + '</button>';
+  h += '<div class="or">or pay with</div>';
+  const isAed = q.cur === 'AED';
+  const M = [{ k: 'card', t: 'Credit or debit card', s: 'Visa, Mastercard' }, { k: 'tabby', t: 'Tabby', s: 'Split in 4', apm: true }, { k: 'tamara', t: 'Tamara', s: 'Pay later', apm: true }];
+  M.forEach(m => {
+    const dis = m.apm && !isAed;
+    h += '<button class="m' + (S.method === m.k ? ' on' : '') + '" data-m="' + m.k + '"' + (dis ? ' disabled' : '') + '><span class="rb"></span><span><span class="mt">' + m.t + '</span><div class="ms' + (dis ? ' aed' : '') + '">' + (m.apm && d.selectorOn ? 'Available in AED only' : m.s) + '</div></span></button>';
+    if (m.k === 'card' && S.method === 'card') h += '<div class="cardf">Card number · MM/YY · CVV</div>';
+  });
+  h += '<button class="paybtn" id="hPay">Pay ' + curTxt + '</button>';
+  h += '<div class="fine">The amount shown stays fixed for this payment session.</div>';
+  H.innerHTML = h;
+  if ($('hSel')) $('hSel').onchange = e => { S.sel = e.target.value; if (S.sel !== 'AED' && ['tabby', 'tamara'].includes(S.method)) S.method = 'card'; render(); };
+  H.querySelectorAll('.m[data-m]').forEach(b => b.onclick = () => { S.method = b.dataset.m; render(); });
+  H.querySelectorAll('.wbtn[data-m]').forEach(b => b.onclick = () => { S.method = b.dataset.m; pay(); });
+  $('hPay').onclick = () => pay();
+}
+
+function pay() {
+  const d = derive(); const q = quote(d);
+  const wallet = ['apple', 'google'].includes(S.method);
+  if (['tabby', 'tamara'].includes(S.method) && q.cur !== 'AED') { S.paid = { ok: false, msg: 'Tabby and Tamara are available in AED only.' }; render(); return; }
+  if (wallet && S.wMis && q.mcp) {
+    S.paid = { ok: false, msg: 'The wallet amount does not match the amount shown. The payment was rejected.', walletMis: true, q, d }; render(); scrollAfter(); return;
+  }
+  S.paid = { ok: true, ocur: S.ocur, cur: q.cur, minor: q.minor, mu: q.mu, mcp: q.mcp, aedMinor: q.aedMinor, rate: q.rate, method: S.method, offered: d.offered, file: d.file };
+  render(); scrollAfter();
+}
+function scrollAfter() { const el = $('s-after'); if (el && window.innerWidth < 1240) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }
+
+/* ---------- Render: trace, file, after ---------- */
+function renderTrace(d, q) {
+  let h = '<table class="chk"><tbody>';
+  d.steps.forEach(s => {
+    const cls = s.res === 'pass' ? 'pass' : s.res === 'stop' ? 'stop' : 'na';
+    const r = s.res === 'pass' ? 'Yes' : s.res === 'stop' ? 'No' : 'not reached';
+    h += '<tr class="' + cls + '"><td class="n">' + s.n + '</td><td>' + esc(s.t) + (s.why ? '<span class="why">' + esc(s.why) + '</span>' : '') + '</td><td class="r">' + r + '</td></tr>';
+  });
+  h += '</tbody></table>';
+  if (d.proposed) h += '<div class="outcome ok">HPP proposes <b>' + d.proposed + '</b>. MCP_offered = Y. The customer can switch to any offered currency or back to AED.</div>';
+  else if (d.selectorOn) h += '<div class="outcome off">No currency proposed. HPP opens in AED with the currency selector. MCP_offered = N.</div>';
+  else h += '<div class="outcome off">HPP shows ' + esc(S.ocur) + ' only, with no selector. MCP_offered = N.</div>';
+  if (d.selectorOn && d.chosen !== (d.proposed || 'AED')) h += '<div class="info">The customer switched to <b>' + d.chosen + '</b>. The selector re-prices from the same cached file; nothing is fetched from Planet during the session.</div>';
+  if (d.stop === 'curoff' || d.stop === 'home' || d.stop === 'p2') h += '<div class="note"><b>Not defined:</b> PRD v2 says MCP applies only when the proposed currency is on for the merchant. It does not say whether the selector is still shown when nothing is proposed. Shown here with the selector, so the customer can still pick an offered currency.</div>';
+  $('trace').innerHTML = h;
+}
+function fileText(f, hitCur) {
+  const lines = []; const det = [];
+  const sec = (code, hdr, trl, rates, base) => {
+    lines.push({ t: code + 'LFH,' + hdr + ',' + f.date + ',01' });
+    let sumCode = 0, sumRate = 0n, n = 0;
+    FILE_ORDER.forEach((c, i) => {
+      const r = rates[c]; if (!r) return;
+      lines.push({ t: code + 'D,' + (base + i) + ',AED,784,2,' + c + ',' + CUR[c].num + ',' + CUR[c].mu + ',' + r + ',' + f.from + ',' + f.to, hit: code === 'VI' && c === hitCur, dim: code === 'MC' });
+      sumCode += CUR[c].num; sumRate += rateInt(r); n++;
+    });
+    lines.push({ t: code + 'LFT,' + trl + ',' + sumCode + ',' + fmt(sumRate, 7).replace(/,/g, '') + ',' + n, dim: code === 'MC' });
+    return { sumCode, sumRate, n };
+  };
+  lines.push({ t: 'PFH,' + f.date + ',01' });
+  const a = sec('VI', 'HPLANET VISA', 'TPLANET VISA', f.visa, 2001);
+  const b = sec('MC', 'HPLANET MASTERCARD', 'TPLANET MASTERCARD', f.mc, 3001);
+  lines.push({ t: 'PFT,TXN RATES,' + (a.sumCode + b.sumCode) + ',' + fmt(a.sumRate + b.sumRate, 7).replace(/,/g, '') + ',' + (a.n + b.n) });
+  return lines.map(l => {  return '<span class="' + (l.hit ? 'hit' : l.dim ? 'dim' : '') + '">' + esc(l.t) + '</span>'; }).join('\n');
+}
+function renderFile(d, q) {
+  if (!d.file) { $('fileOut').innerHTML = '<p class="hint">No valid file is cached, so there is no rate to show.</p>'; return; }
+  let h = '<pre class="rf">' + fileText(d.file, q.mcp ? q.cur : null) + '</pre>';
+  h += '<p class="src">Layout: Planet template 194 (Visa section VILFH/VID/VILFT, Mastercard section MCLFH/MCD/MCLFT). Rates are dummy, AED-based, markup included. Planet\'s sample writes the currency symbol in baseCurr/targetCurr; codes are used here for readability. Mastercard rows are greyed: PGW quotes from the Visa section.</p>';
+  if (q.mcp) {
+    h += '<div class="calc">AED ' + fmt(q.aedMinor, 2) + ' × ' + q.rate + ' = ' + q.exact + ' ' + q.cur + '<br>round up to ' + CUR[q.cur].mu + ' decimals → <b>' + q.cur + ' ' + fmt(q.minor, q.mu) + '</b></div>';
+    h += '<p class="hint">Try an order amount like 99.99 to see the rounding at work.</p>';
+  } else h += '<p class="hint">The customer is paying in ' + esc(q.cur) + ', so no rate is applied.</p>';
+  $('fileOut').innerHTML = h;
+}
+function renderAfter() {
+  const p = S.paid; const A = $('after');
+  if (!p) { A.innerHTML = '<p class="hint">Press Pay on the HPP to see the result.</p>'; return; }
+  if (!p.ok) {
+    A.innerHTML = '<div class="bad"><b>Rejected.</b> ' + esc(p.msg) + '</div>' + (p.walletMis ? '<p class="hint">PGW checks that the amount and currency inside the wallet token match the quote shown on HPP, and rejects the payment if not (PRD v2 8, Wallets).</p>' : '');
+    return;
+  }
+  const meth = { card: 'Card', apple: 'Apple Pay', google: 'Google Pay', tabby: 'Tabby', tamara: 'Tamara' }[p.method];
+  let h = '<div class="cmp"><div><p class="sub">PGW stores (order model, illustrative)</p><dl class="kv">';
+  h += '<dt>order.amount / currency</dt><dd>' + fmt(p.aedMinor, 2) + ' ' + p.ocur + '</dd>';
+  h += '<dt>transaction.amount / currency</dt><dd class="' + (p.mcp ? 'hl' : '') + '">' + fmt(p.minor, p.mu) + ' ' + p.cur + '</dd>';
+  h += '<dt>mcpBaseAmount / Currency</dt><dd class="' + (p.mcp ? 'hl' : '') + '">' + fmt(p.aedMinor, 2) + ' ' + p.ocur + '</dd>';
+  h += '<dt>MCP</dt><dd class="' + (p.mcp ? 'hl' : '') + '">' + (p.mcp ? 'true' : 'false') + '</dd>';
+  h += '<dt>MCP_offered</dt><dd>' + (p.offered ? 'Y' : 'N') + '</dd>';
+  h += '<dt>MCP rate</dt><dd>' + (p.mcp ? p.rate + ' (AED → ' + p.cur + ')' : '—') + '</dd>';
+  h += '<dt>Rate source</dt><dd>' + (p.mcp ? 'Planet file ' + p.file.date + ' v01, Visa section' : '—') + '</dd>';
+  h += '<dt>Method</dt><dd>' + meth + ', authorised in ' + p.cur + ' via MPGS or CYBS</dd>';
+  h += '</dl>';
+  if (p.mcp) h += '<p class="hint">The rate is stored on the transaction. Every later refund uses this rate, never a newer one.</p>';
+  h += '</div><div><p class="sub">The merchant sees (webhook, Retrieve Order, portal)</p>';
+  h += '<pre class="code">{\n  <span class="k">"order"</span>: { <span class="k">"amount"</span>: <span class="s">' + fmt(p.aedMinor, 2).replace(/,/g, '') + '</span>, <span class="k">"currency"</span>: <span class="s">"' + p.ocur + '"</span> },\n  <span class="k">"transaction"</span>: { <span class="k">"amount"</span>: <span class="s">' + fmt(p.aedMinor, 2).replace(/,/g, '') + '</span>, <span class="k">"currency"</span>: <span class="s">"' + p.ocur + '"</span> }\n}</pre>';
+  h += '<p class="hint">' + (p.mcp ? 'Transaction amount and currency are filled with the AED order values. The rate and the MCP flag are not sent, and there is no setting to send them. The merchant never learns the customer paid in ' + p.cur + '.' : 'A regular ' + p.ocur + ' payment: the merchant sees it as today.') + '</p>';
+  h += '<p class="src">Fields shown are the amount and currency only; the rest of the payload is unchanged.</p></div></div>';
+  if (p.mcp) h += '<div class="info">To APEX, PGW sends AED ' + fmt(p.aedMinor, 2) + ' in the main amount and currency fields, and ' + p.cur + ' ' + fmt(p.minor, p.mu) + ', the rate and the MCP flag in the new cardholder fields. Exact field names are pending from APEX; this is covered on the Federation and enrichment page (planned).</div>';
+  A.innerHTML = h;
+}
+
+/* ---------- Try scenarios ---------- */
+const TRY = {
+  'gb-card': { t: 'UK customer pays in GBP', s: {} },
+  'gb-aed': { t: 'Switches back to AED', s: { sel: 'AED' } },
+  'eu': { t: 'Germany: EUR', s: { geo: 'DE' } },
+  'us': { t: 'US: USD', s: { geo: 'US' } },
+  'uae-inr': { t: 'In the UAE, picks INR', s: { geo: 'AE', sel: 'INR' } },
+  'geo-miss': { t: 'No country found', s: { geo: '--' } },
+  'cur-off': { t: 'INR off for merchant', s: { geo: 'IN', cur: { GBP: true, EUR: true, INR: false, USD: true, SAR: true } } },
+  'jp': { t: 'Japan (Phase 2)', s: { geo: 'JP' } },
+  'mcp-off': { t: 'MCP off', s: { mcp: false } },
+  'order-usd': { t: 'Order in USD', s: { ocur: 'USD' } },
+  'direct-api': { t: 'Direct API', s: { src: 'direct' } },
+  'pbl': { t: 'Pay-by-Link', s: { src: 'pbl', geo: 'FR' } },
+  'rate-yday': { t: "Yesterday's rates", s: { rf: 'yday' } },
+  'rate-none': { t: 'No valid rate file', s: { rf: 'none' } },
+  'apm': { t: 'Wants Tabby', s: { sel: 'AED', method: 'tabby' } },
+  'rounding': { t: 'Rounding up', s: { amt: '99.99' } },
+  'wallet': { t: 'Apple Pay in GBP', s: { method: 'apple' }, pay: true },
+  'wallet-mismatch': { t: 'Wallet amount mismatch', s: { method: 'apple', wMis: true }, pay: true }
+};
+function renderTries() {
+  const cur = (location.hash.match(/try=([\w-]+)/) || [])[1];
+  $('tries').innerHTML = '<span>Try</span>' + Object.keys(TRY).map(k => '<a href="#try=' + k + '" class="' + (k === cur ? 'on' : '') + '">' + esc(TRY[k].t) + '</a>').join('');
+}
+function applyHash() {
+  const m = location.hash.match(/try=([\w-]+)/);
+  if (m && TRY[m[1]]) {
+    S = JSON.parse(JSON.stringify(DEF)); Object.assign(S, JSON.parse(JSON.stringify(TRY[m[1]].s)));
+    render(); if (TRY[m[1]].pay) pay();
+  } else render();
+  renderTries();
+}
+
+/* ---------- Main ---------- */
+function render() {
+  const d = derive(); const q = quote(d);
+  renderCfg(); renderControls(d); renderHpp(d, q); renderTrace(d, q); renderFile(d, q); renderAfter();
+  $('wMis').checked = S.wMis;
+}
+$('oSrc').onchange = e => { S.src = e.target.value; S.paid = null; render(); };
+$('oAmt').oninput = e => { const v = e.target.value; if (/^\d{1,9}(\.\d{0,2})?$/.test(v) && Number(v) > 0) { S.amt = v; S.paid = null; const d = derive(), q = quote(d); renderHpp(d, q); renderTrace(d, q); renderFile(d, q); renderAfter(); } };
+$('wMis').onchange = e => { S.wMis = e.target.checked; S.paid = null; render(); };
+window.addEventListener('hashchange', applyHash);
+applyHash();
+window.__mcp = { get state() { return S; }, derive, quote, convert, toMinor, fmt, TRY, set(o) { Object.assign(S, o); render(); }, pay, reset() { S = JSON.parse(JSON.stringify(DEF)); render(); } };
+})();
+</script>
+</body>
+</html>
