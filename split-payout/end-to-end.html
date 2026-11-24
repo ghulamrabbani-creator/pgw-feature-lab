@@ -156,19 +156,20 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
   // ---------------- settings ----------------
   const DEF = { m: 'DYNAMIC', t: 'AMOUNT', s: 'with', f: 'partner', a: 'up', v: 'pass' };
   const O = Object.assign({}, DEF);
+  function norm() { if (O.m === 'FIXED') O.s = 'with'; if (O.a === 'down' && O.v === 'fixed') O.v = 'pass'; }
   const CTRL = [
     ['m', 'Split mode', [['DYNAMIC', 'Dynamic'], ['FIXED', 'Fixed'], ['PROFILE', 'Profile']]],
     ['t', 'Split type', [['AMOUNT', 'Amount'], ['PERCENTAGE', 'Percentage']]],
     ['s', 'Split sent', [['with', 'With the order'], ['deferred', 'Later (deferredSplit)']]],
     ['f', 'Transfer fees borne by', [['partner', 'Partner'], ['vendor', 'Vendors']]],
     ['a', 'APEX real-time call', [['up', 'Reached'], ['down', 'Not reachable']]],
-    ['v', 'Amount validation', [['pass', 'Passes'], ['fixed', 'Fails, corrected'], ['released', 'Fails, not corrected']]]
+    ['v', 'APEX outcome', [['pass', 'Accepted'], ['fixed', 'Rejected in the call, corrected same day'], ['released', 'Amount check fails']]]
   ];
   function ctrlHtml() {
     $('ctrl').innerHTML = CTRL.map(([k, t, opts]) => `<div class="g"><span>${t}</span><div class="seg" role="group" aria-label="${t}">${opts.map(([v, l]) =>
-      `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${O[k] === v}" ${k === 's' && v === 'deferred' && O.m === 'FIXED' ? 'disabled title="A Fixed MID sends no split fields"' : ''}>${l}</button>`).join('')}</div></div>`).join('') +
-      `<div class="note" id="cnote">${O.m === 'FIXED' ? 'Fixed mode: PGW applies the template to every order, so the split is always with the order. The type is the template’s type. The Payout Advice API is not available (flow B).' : O.m === 'PROFILE' ? 'Profile mode: the partner sends a profile ID; the type is the profile’s type (examples: PRF-INSURER-B for amount, PRF-INSURER-A for percentage).' : ''}</div><button type="button" class="reset" id="reset">Reset to the default</button>`;
-    document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { O[b.dataset.k] = b.dataset.v; if (O.m === 'FIXED') O.s = 'with'; update(); });
+      `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${O[k] === v}" ${k === 's' && v === 'deferred' && O.m === 'FIXED' ? 'disabled title="A Fixed MID sends no split fields"' : k === 'v' && v === 'fixed' && O.a === 'down' ? 'disabled title="No real-time call reaches APEX"' : ''}>${l}</button>`).join('')}</div></div>`).join('') +
+      `<div class="note" id="cnote">${O.a === 'down' ? 'APEX not reachable: there is no real-time answer, so "Rejected in the call" is not available. ' : ''}${O.m === 'FIXED' ? 'Fixed mode: PGW applies the template to every order, so the split is always with the order. The type is the template’s type. The Payout Advice API is not available (flow B).' : O.m === 'PROFILE' ? 'Profile mode: the partner sends a profile ID; the type is the profile’s type (examples: PRF-INSURER-B for amount, PRF-INSURER-A for percentage).' : ''}</div><button type="button" class="reset" id="reset">Reset to the default</button>`;
+    document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { O[b.dataset.k] = b.dataset.v; norm(); update(); });
     $('reset').onclick = () => { Object.assign(O, DEF); update(); };
   }
 
@@ -239,33 +240,44 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     ];
   }
   const AGREED = 'Agreed with APEX on 23-Nov: the APEX advice API only creates advices. An UPDATE is not sent in real time; it goes in the day-end file, where it overwrites the earlier advice. Stories v0.5 and doc v1.6 still describe a real-time U.';
+  const RULE = 'Rule (Rabbani, 24-Nov): an UPDATE is accepted on the transaction date only. An UPDATE after that day’s day-end file is rejected.';
   function validationSteps(prefix) {
     const pct = split().type === 'PERCENTAGE';
     const ok = S({ id: prefix + 'val', lane: L.X, kind: 'sys', title: 'Amount validation', sub: 'Rule 1, Rule 2: pass', d: { by: 'APEX, scheduled once pricing is known',
       p: 'APEX checks the amounts against the real fees.' + (pct ? ' Percentages are first converted to amounts on the gross order amount.' : ''),
       list: ['Rule 1: partner residual not negative (net − legs + commissions − fees borne by the partner ≥ 0).', 'Rule 2: every leg above zero after commission and its fee (if the vendor bears it).', 'Single payout: a transaction is never paid out twice.'],
       src: [['Product doc 6.5', PD + 'amount-validation']], also: [['Money flow: amount validation', 'money-flow.html#amount-validation']] } });
-    if (O.v === 'pass') return [ok];
+    if (O.v !== 'released') return [ok];
     const fail = S({ id: prefix + 'valx', lane: L.X, kind: 'fail', title: 'Amount validation fails', sub: 'Rule 1 · REJECTED', d: { by: 'APEX',
       p: 'Rule 1 fails: once MDR, VAT and fees come off, the partner’s residual would be negative. APEX rejects the whole advice with a reason code. Nothing is paid to vendors; the transaction stays held.',
-      flag: 'Open point: the stories do not say whether PGW learns of this rejection. The PGW record still shows ACCEPTED from the real-time call.',
+      flag: 'Open points: whether PGW learns of this rejection (its record still shows ACCEPTED); and when APEX runs amount validation. If it runs after the transaction date, this rejection can no longer be corrected (UPDATE on the transaction date only).',
       src: [['Product doc 6.5', PD + 'amount-validation']], also: [['What can go wrong: Rule 1', 'what-can-go-wrong.html#amt-rule1']] } });
-    const rep = S({ id: prefix + 'rep', lane: L.P, kind: 'act', title: 'Reads the reason', sub: 'split payout report', d: { by: 'Partner', p: 'The rejection and its reason code reach the partner through the APEX split payout report. This is the partner’s channel for the outcome of its advices.', src: [['Product doc 6.7', PD + 'reporting']] } });
-    if (O.v === 'released') return [fail, rep, ...releaseSteps(prefix, true)];
-    return [fail, rep,
-      S({ id: prefix + 'upd', lane: L.P, kind: 'act', title: 'Sends UPDATE', sub: 'Payout Advice API · smaller split', d: { by: 'Partner → PGW', p: 'Before P + N, the partner sends the complete corrected split with UPDATE and the latest advice ID.', pre: apiReq('UPDATE', true), preCap: 'Payout Advice API request', src: [['Story SP-8 section 1', ST + 'request'], ['Product doc 7.3', PD + 'payout-advice-api']], tryH: 'simulator.html#s4b', tryT: 'Try it in the simulator' } }),
-      S({ id: prefix + 'u', lane: L.G, kind: 'sys', title: 'Checks and stores it', sub: 'SP-8 2.1–2.6 · not sent now', d: { by: 'PGW', flag: AGREED,
-        p: 'PGW checks the call (2.5: the advice ID is the latest), stores the new split on the order and answers the partner. It does not send the update to APEX in real time.',
+    const rep = S({ id: prefix + 'repx', phx: 'Validation', lane: L.P, kind: 'act', title: 'Reads the reason', sub: 'no UPDATE possible now', d: { by: 'Partner', flag: RULE,
+      p: 'The rejection and its reason code reach the partner through the APEX split payout report. The transaction date has passed, so the partner can no longer send an UPDATE. The transaction stays held until it is released.', src: [['Product doc 6.7', PD + 'reporting']] } });
+    return [fail, rep, ...releaseSteps(prefix, true)];
+  }
+  function correctionSteps(prefix, fromApi) {
+    return [
+      S({ id: prefix + 'crx', lane: L.X, kind: 'fail', title: 'Rejected in the call', sub: 'vendor inactive · REJECTED', d: { by: 'APEX', p: 'A structural check fails in the real-time call, for example a vendor that is deactivated at APEX. APEX answers REJECTED with a reason code. Nothing is paid to vendors; the transaction stays held.', src: [['Story SP-7 section 4', ST + 'errors-and-retry'], ['Product doc 6.4', PD + 'real-time-split-advice-api']], also: [['What can go wrong: APEX checks', 'what-can-go-wrong.html#apex-reject']], tryH: 'simulator.html#try=apex-reject', tryT: 'Try it' } }),
+      S({ id: prefix + 'rep', lane: L.P, kind: 'act', title: 'Sees the rejection', sub: 'same day', d: { by: 'Partner', p: fromApi ? 'The Payout Advice API response returns REJECTED with the reason code.' : 'PGW stores REJECTED and the reason on the order (SP-7 section 4).',
+        flag: fromApi ? null : 'Open point: how the partner learns of this on the same day for a split sent with the order (the stories store the status; the split payout report comes later).', src: [['Story SP-7 section 4', ST + 'errors-and-retry'], ['SP-8 section 4', ST + 'response']] } }),
+      S({ id: prefix + 'upd', lane: L.P, kind: 'act', title: 'Sends UPDATE', sub: 'on the transaction date', d: { by: 'Partner → PGW', flag: RULE, p: 'The partner sends the complete corrected split with UPDATE and the latest advice ID, before midnight on the transaction date.', pre: apiReq('UPDATE', true), preCap: 'Payout Advice API request', src: [['Story SP-8 section 1', ST + 'request'], ['Product doc 7.3', PD + 'payout-advice-api']], tryH: 'simulator.html#try=apex-reject', tryT: 'Try it in the simulator' } }),
+      S({ id: prefix + 'u', lane: L.G, kind: 'sys', title: 'Checks and stores it', sub: 'not sent now', d: { by: 'PGW', flag: AGREED,
+        p: 'PGW checks the call (2.5: the advice ID is the latest; the transaction date is today), stores the new split on the order and answers the partner. It does not send the update to APEX in real time.',
+        list: ['Check numbers and the message for the transaction-date rule: stories v0.6.'],
         pre: { splitAdviceId: 'ADV-2', splitAdviceStatus: '...', '...': '... status value for a stored UPDATE not defined yet (stories v0.6)' }, preCap: 'Response to the partner', src: [['Story SP-8 section 2', ST + 'checks']] } }),
       S({ id: prefix + 'ueod', lane: L.G, kind: 'sys', title: 'Day-end file', sub: 'carries the updated split', d: { by: 'PGW, after the Ecomm cut-off (midnight, UAE time)', flag: AGREED,
         p: 'The day-end file carries the latest split for the order: the update. This is the only way an update reaches APEX.', pre: adviceBody('U', true), preCap: 'Record in the day-end file (APEX draft, P3)',
-        list: ['Open point: an UPDATE received after that day’s file was generated: next day’s file or reject, and whether APEX accepts it in a later file.'],
         src: [['Story SP-9', ST + 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', PD + 'day-end-split-advice-file']] } }),
-      S({ id: prefix + 'uc', lane: L.X, kind: 'sys', title: 'Overwrites the advice', sub: 'REJECTED → CREATED', d: { by: 'APEX', p: 'The file record has a different split from the advice APEX holds, so APEX overwrites it with the file’s split and processes it. Allowed while the advice is CREATED, REJECTED or PENDING_MATCH; refused once PROCESSED or RELEASED.', src: [['Product doc 6.4', PD + 'day-end-split-advice-file']], also: [['Advice lifecycle: rejected, then corrected', 'advice-lifecycle.html#sc=corrected']] } }),
-      Object.assign({}, ok, { id: prefix + 'val2', sub: 'passes this time' })];
+      S({ id: prefix + 'uc', lane: L.X, kind: 'sys', title: 'Overwrites the advice', sub: 'REJECTED → CREATED', d: { by: 'APEX', p: 'The file record has a different split from the advice APEX holds, so APEX overwrites it with the file’s split and processes it.', src: [['Product doc 6.4', PD + 'day-end-split-advice-file']], also: [['Advice lifecycle: rejected, then corrected', 'advice-lifecycle.html#sc=corrected']] } })
+    ];
   }
   function sendSteps(prefix, fromApi) {
     const body = adviceBody('A');
+    if (O.a === 'up' && O.v === 'fixed') return [
+      S({ id: prefix + 'adv', lane: L.G, kind: 'sys', title: 'Send advice A', sub: 'real time', d: { by: 'PGW → APEX Split Advice API (create only)', p: fromApi ? 'PGW forwards the accepted NEW to APEX in real time as action A (create).' : 'Once the payment succeeds, PGW sends the split to APEX as action A (create).', pre: adviceBody('A'), preCap: 'Advice to APEX (APEX draft, P3)', src: [['Story SP-7', ST + 'sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3']] } }),
+      ...correctionSteps(prefix, fromApi)
+    ];
     if (O.a === 'up') return [
       S({ id: prefix + 'adv', lane: L.G, kind: 'sys', title: 'Send advice A', sub: 'real time · ACCEPTED', d: { by: 'PGW → APEX Split Advice API (create only)', p: fromApi ? 'PGW forwards the accepted NEW to APEX in real time as action A (create) and returns the result to the partner.' : 'Once the payment succeeds, PGW sends the split to APEX as action A (create).',
         pre: body, preCap: 'Advice to APEX (APEX draft, P3)', list: ['PGW keeps the advice status: pending, sent, APEX response, included in the day-end file.', 'The APEX API only creates advices (agreed 23-Nov). Updates go in the day-end file.'],
@@ -337,7 +349,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     return `<button type="button" class="${cls}" data-i="${i}" data-id="${s.id}"><span class="n">${String(i + 1).padStart(2, '0')}${list ? `<span class="lane">${LANES[s.lane]}</span>` : ''}</span>${s.title}${s.sub ? `<span class="sub">${s.sub}</span>` : ''}</button>`;
   }
   const PH = id => /pay$|ven$|res$|rel$|rp$|rv$|pdue$/.test(id) ? 'Payout'
-    : /(rep|upd|u|ueod|uc)$/.test(id) ? 'Correction'
+    : /(crx|rep|upd|u|ueod|uc)$/.test(id) ? 'Correction'
     : /val/.test(id) ? 'Validation'
     : /^a[1-4]$/.test(id) ? 'Order and payment'
     : /^b[12]x?$/.test(id) ? 'Payout Advice API'
@@ -345,7 +357,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
   function render(k) {
     const F = FL[k], steps = F.build(); F.steps = steps;
     if (!steps.length) { $(F.lanes).innerHTML = ''; $(F.list).innerHTML = ''; F.prev = {}; F.cur = 0; return; }
-    steps.forEach(st => st.ph = PH(st.id));
+    steps.forEach(st => st.ph = st.phx || PH(st.id));
     const cols = layout(steps);
     const lanesUsed = k === 'B' ? [1, 2, 3, 4] : [0, 1, 2, 3, 4];
     const g = $(F.lanes);
@@ -428,11 +440,11 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     const sp = split(), d = deferred();
     $('aStart').textContent = `${O.m[0] + O.m.slice(1).toLowerCase()} MID · ${sp.type.toLowerCase()} split${O.m === 'PROFILE' ? ' (' + sp.profile + ')' : ''}${d ? ' · sent later' : ''}`;
     $('aDesc').textContent = d ? 'The partner creates the order without the split. PGW flags the transaction, APEX holds it, and the flow continues when the partner sends the split (flow B).'
-      : `The split (${legsText()}) travels with the order. ` + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: 'APEX rejects the amounts; the partner corrects them with UPDATE, which reaches APEX in the day-end file.', released: 'APEX rejects the amounts; the partner does not correct them in time.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
+      : `The split (${legsText()}) travels with the order. ` + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: 'APEX rejects the advice in the call; the partner corrects it with UPDATE the same day, and the day-end file carries it.', released: 'APEX\u2019s amount check fails after the transaction date, so no UPDATE is possible: the transaction is released after N days.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
     const on = deferred();
     $('bBody').hidden = !on; $('bOff').hidden = on; $('bStart').hidden = !on;
     $('bStart').textContent = 'Starts with: a paid order created with deferredSplit, held at APEX, no advice yet';
-    $('bDesc').textContent = 'The partner sends the split after payment. ' + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: 'APEX rejects the amounts; the partner corrects them with UPDATE, which reaches APEX in the day-end file.', released: 'APEX rejects the amounts and the partner does not correct them in time.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
+    $('bDesc').textContent = 'The partner sends the split after payment. ' + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: 'APEX rejects the advice in the call; the partner corrects it with UPDATE the same day, and the day-end file carries it.', released: 'APEX\u2019s amount check fails after the transaction date, so no UPDATE is possible: the transaction is released after N days.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
   }
   function update() {
     ctrlHtml(); descs(); render('A'); render('B');
@@ -443,7 +455,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
   function readHash() {
     Object.assign(O, DEF);
     (location.hash.slice(1).split('&')).forEach(kv => { const [k, v] = kv.split('='); if (!(k in O) || !v) return; const opt = (CTRL.find(c => c[0] === k) || [, , []])[2].map(o => o[0]); const hit = opt.find(o => o.toLowerCase() === v.toLowerCase()); if (hit) O[k] = hit; });
-    if (O.m === 'FIXED') O.s = 'with';
+    norm();
   }
   readHash();
   addEventListener('hashchange', () => { readHash(); update(); });

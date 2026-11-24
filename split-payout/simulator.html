@@ -176,7 +176,7 @@ textarea.code:focus { outline: 2px solid var(--link); }
 <a href="docs/stories.html#sp-6-be-create-session-with-split-payout">Read the stories →</a>
 <a href="docs/product.html#transaction-flow">Read the product doc →</a>
 </div>
-<div class="terms"><b>Terms follow the PGW stories.</b> Merchant = the MID with split payout on (the "partner" in the product doc). Partner = a payee of the split, with a Partner ID from APEX (a "vendor" in the product doc). Field names are the stories' proposals. APEX advice fields and the day-end file layout are drafts until the Emcrey spec (P3). Updates reach APEX only in the day-end file, as agreed with APEX on 23-Nov (stories v0.5 still say real time). Nothing here calls a real system.</div>
+<div class="terms"><b>Terms follow the PGW stories.</b> Merchant = the MID with split payout on (the "partner" in the product doc). Partner = a payee of the split, with a Partner ID from APEX (a "vendor" in the product doc). Field names are the stories' proposals. APEX advice fields and the day-end file layout are drafts until the Emcrey spec (P3). Updates reach APEX only in the day-end file, as agreed with APEX on 23-Nov, and are accepted on the transaction date only (rule of 24-Nov). Stories v0.5 still say real time. Nothing here calls a real system.</div>
 
 <div id="tryBanner" class="tryb" role="status" hidden></div>
 <section class="sec" id="s1">
@@ -714,6 +714,7 @@ function callApi() {
     { n: '2.3', label: 'The order has splitPayout = true.', ok: o.res.order.splitPayout, msg: 'Order is not a split order.' },
     { n: '2.4', label: 'NEW: the order has deferredSplit = true and no advice yet.', na: q.action !== 'NEW', ok: o.res.order.deferredSplit && !latest, msg: 'A split already exists for this order. Use UPDATE.' },
     { n: '2.5', label: `UPDATE: splitAdviceId (${esc(q.splitAdviceId || '—')}) is the latest advice ID (${latest || '—'}).`, na: q.action !== 'UPDATE', ok: q.splitAdviceId === latest, msg: 'Advice ID is not the latest.' },
+    { n: 'new', label: `UPDATE: sent on the transaction date (order paid on Day ${o.day}, today is Day ${S.day}). Rule of 24-Nov; number and message: stories v0.6.`, na: q.action !== 'UPDATE', ok: o.day === S.day, msg: 'Update not accepted after the transaction date (message to be set in stories v0.6).' },
     ...(q.splitPayoutProfileId !== undefined ? [{ n: '2.6 (3.8)', label: `splitPayoutProfileId is a profile of the MID (${esc(q.splitPayoutProfileId)}).`, ok: profOk, msg: `Unknown split profile: ${q.splitPayoutProfileId}.` }] : []),
     ...(profOk ? legChecks(cfgPartners(cfg), legs, type, o.res.req.amount, N) : [])
   ];
@@ -866,7 +867,7 @@ $('runEod').onclick = () => {
 const _ev = evHtml;
 evHtml = function (o, ev) {
   if (ev.kind === 'note') return `<div class="ev"><h3><span class="st info">day-end</span> ${esc(ev.text)}</h3></div>`;
-  if (ev.kind === 'queued') return `<div class="ev"><h3><span class="st hold">stored for day-end</span> Update ${ev.id} is not sent to APEX in real time</h3><p>Agreed with APEX on 23-Nov: the APEX advice API only creates advices. PGW stores the update and the Day ${ev.day} day-end file carries it (section 5); there APEX overwrites the earlier advice. Stories v0.5 still say real time. Open point: an UPDATE received after that day\u2019s file was generated.</p>${src([['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', 'day-end-split-advice-file', 'p']])}</div>`;
+  if (ev.kind === 'queued') return `<div class="ev"><h3><span class="st hold">stored for day-end</span> Update ${ev.id} is not sent to APEX in real time</h3><p>Agreed with APEX on 23-Nov: the APEX advice API only creates advices. PGW stores the update and the Day ${ev.day} day-end file carries it (section 5); there APEX overwrites the earlier advice. Stories v0.5 still say real time. Updates are accepted on the transaction date only (rule of 24-Nov).</p>${src([['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', 'day-end-split-advice-file', 'p']])}</div>`;
   return _ev(o, ev);
 };
 
@@ -900,7 +901,8 @@ const TRY = {
   'api-new-exists': { cfg: 'dynamic', req: amt(L2), pay: true, api: [{ action: 'NEW', legs: L2 }], at: 's4b', t: 'NEW for an order that already has a split (SP-8 check 2.4).' },
   'api-stale-id': { cfg: 'dynamic', req: amt(L2), pay: true, api: [{ action: 'UPDATE', adviceId: 'LATEST', legs: [{ partnerId: 'P000301', value: 450 }, { partnerId: 'P000302', value: 300 }] }, { action: 'UPDATE', adviceId: 'FIRST', legs: L2 }], at: 's4b', t: 'A late retry of an old UPDATE with an older advice ID (SP-8 check 2.5).' },
   'api-over-total': { cfg: 'dynamic', req: Object.assign({}, BASE, { deferredSplit: true }), pay: true, api: [{ action: 'NEW', legs: [{ partnerId: 'P000301', value: 700 }, { partnerId: 'P000302', value: 400 }] }], at: 's4b', t: 'NEW with legs above the order amount (SP-8 check 2.6, as SP-6 3.6).' },
-  'apex-reject': { cfg: 'dynamic', req: amt(L2), apex: 'reject', pay: true, at: 's4', t: 'APEX rejects the advice: a Partner ID is inactive at APEX (SP-7 section 4). Correct it with an UPDATE in section 4: PGW stores it, and the day-end file (section 5) carries it to APEX.' },
+  'apex-reject': { cfg: 'dynamic', req: amt(L2), apex: 'reject', pay: true, at: 's4', t: 'APEX rejects the advice: a Partner ID is inactive at APEX (SP-7 section 4). Correct it with an UPDATE in section 4 on the same day (before running day-end): PGW stores it, and the day-end file (section 5) carries it to APEX. An UPDATE after the transaction date is rejected.' },
+  'api-late-update': { cfg: 'dynamic', req: amt(L2), pay: true, eod: true, api: [{ action: 'UPDATE', adviceId: 'LATEST', legs: [{ partnerId: 'P000301', value: 450 }, { partnerId: 'P000302', value: 300 }] }], at: 's4b', t: 'An UPDATE sent the day after the transaction, once that day\u2019s file was generated (rule of 24-Nov: updates on the transaction date only).' },
   'apex-down': { cfg: 'dynamic', req: amt(L2), apex: 'down', pay: true, at: 's4', t: 'APEX not reachable: the advice stays PENDING and PGW retries (SP-7 section 4). Run day-end in section 5 to see the file carry it.' }
 };
 function runTry(k) {
@@ -912,6 +914,7 @@ function runTry(k) {
   $('fire').click();
   const o = S.orders[S.cur];
   if (t.pay && !o.res.rejected) pay(true);
+  if (t.eod) $('runEod').click();
   (t.api || []).forEach(st => {
     const id = st.adviceId === 'LATEST' ? (o.advices.length ? o.advices[o.advices.length - 1].id : '') : st.adviceId === 'FIRST' ? (o.advices[0] ? o.advices[0].id : '') : '';
     Object.assign(API, { for: o.n, action: st.action, type: 'AMOUNT', adviceId: id, profileId: '', legs: st.legs.map(l => ({ partnerId: l.partnerId, value: String(l.value) })) });

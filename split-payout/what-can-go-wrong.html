@@ -65,7 +65,7 @@
 <a href="docs/stories.html#checks-before-payment">Stories: SP-6 checks →</a>
 <a href="docs/stories.html#checks">SP-8 checks →</a>
 </div>
-<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Updates reach APEX only in the day-end file, as agreed with APEX on 23-Nov (stories v0.5 and doc v1.6 still describe a real-time update). The PGW stories call these merchant and partner, so the messages quoted from them say "partner ID" for a vendor's ID. Messages are verbatim from the stories; PGW engineering sets the error codes.</div>
+<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Updates reach APEX only in the day-end file, as agreed with APEX on 23-Nov, and are accepted on the transaction date only (rule of 24-Nov). Stories v0.5 and doc v1.6 still describe a real-time update. The PGW stories call these merchant and partner, so the messages quoted from them say "partner ID" for a vendor's ID. Messages are verbatim from the stories; PGW engineering sets the error codes.</div>
 
 <div class="strip" id="strip" role="group" aria-label="Filter by stage"></div>
 <div class="tools">
@@ -182,6 +182,11 @@
     { id: 'api-over-total', s: 'api', code: 'SP-8 2.6', title: 'The split fails the Create Session checks', out: 'rej', outT: 'Call rejected',
       when: 'Unknown or duplicate vendor ID, too many legs, total too high, bad value or unknown profile (SP-6 3.4 to 3.8).', msg: ['As in SP-6, for example: Split total is more than the order amount.'],
       money: 'Nothing changes. The transaction stays held.', fix: 'Correct the split and send again.', story: ['SP-8 section 2', 'checks'], tryable: 1 },
+    { id: 'api-late-update', s: 'api', code: 'Rule 24-Nov', title: 'UPDATE after the transaction date', out: 'rej', outT: 'Call rejected',
+      when: 'An UPDATE sent after the transaction date, once PGW has generated that day’s day-end file.', msg: ['Message to be set in stories v0.6.'],
+      money: 'Nothing changes. The advice keeps its last status; a held transaction stays held until a valid advice or the N-day release.', fix: 'Send updates on the transaction date, before midnight (UAE time).',
+      note: 'Rule set by Rabbani on 24-Nov: updates are accepted on the transaction date only. Updates reach APEX only in that day’s day-end file (agreed with APEX on 23-Nov).',
+      story: ['SP-8 section 2', 'checks'], doc: ['7.3', 'payout-advice-api'], tryable: 1 },
     { id: 'api-after-change', s: 'api', code: 'Open point 6', title: 'UPDATE after the MID’s mode was changed', out: 'tbd', outT: 'Not defined',
       when: 'An order created in the old mode is updated after Geidea changed the mode.', msg: null, money: 'Not defined.', fix: '—', open: 'Open point 6 in the stories: how an UPDATE is checked for an order created in the old mode.', story: ['Open points', 'open-points'] },
 
@@ -194,7 +199,7 @@
     // ---------- apex structural ----------
     { id: 'apex-reject', s: 'apex', code: 'APEX 6.4', title: 'Vendor not found, inactive or not linked to the MID', out: 'hold', outT: 'Advice REJECTED · held',
       when: 'APEX does not find a beneficiary, it is deactivated, or it is linked to another MID.', msg: ['Reason code from APEX (APEX to define).'],
-      money: 'Nothing is paid to vendors. The transaction stays held.', fix: 'The partner sends a corrected, complete split with UPDATE. PGW stores it and the day-end file carries it to APEX, which must be within N days. If the vendor was deactivated, contact Geidea.',
+      money: 'Nothing is paid to vendors. The transaction stays held.', fix: 'The partner sends a corrected, complete split with UPDATE on the same day (the transaction date). PGW stores it and the day-end file carries it to APEX. If the vendor was deactivated, contact Geidea.',
       note: 'PGW holds no vendor bank details and does not check vendor status: only APEX catches an inactive vendor.', story: ['SP-7 section 4', 'errors-and-retry'], doc: ['6.4', 'real-time-split-advice-api'], tryable: 1, also: ['Advice lifecycle', 'advice-lifecycle.html#sc=corrected'] },
     { id: 'apex-other', s: 'apex', code: 'APEX 6.4', title: 'Other structural checks fail', out: 'hold', outT: 'Advice REJECTED · held',
       when: 'MID does not match the transaction; transaction not flagged; both percentage and amount in a rule; A when an advice already exists; an update (in the day-end file) for an advice already PROCESSED or RELEASED.', msg: ['Reason code from APEX.'],
@@ -207,22 +212,18 @@
     // ---------- amount validation ----------
     { id: 'amt-rule1', s: 'amt', code: 'APEX Rule 1', title: 'Partner residual would be negative', out: 'hold', outT: 'Advice REJECTED · held',
       when: 'net − Σ advised amounts + Σ vendor commissions − transfer fees borne by the partner < 0 (net = amount − MDR − VAT on MDR).', msg: ['Reason code from APEX, shown in the split payout report.'],
-      money: 'Nothing is paid to vendors. The transaction stays held.', fix: 'The partner sends a smaller split with UPDATE. It reaches APEX in the day-end file, which must be within N days.',
+      money: 'Nothing is paid to vendors. The transaction stays held.', fix: 'An UPDATE is accepted on the transaction date only. If this rejection comes after that date, it cannot be corrected and the transaction is released to the partner after N days.',
       note: 'A split that passes PGW check 3.6 (total ≤ order amount) can still fail here, because MDR, VAT and fees come off first.',
-      open: 'Open point: the stories do not say whether PGW learns of this rejection. The real-time call already returned ACCEPTED.', doc: ['6.5', 'amount-validation'], also: ['Try it in Money flow', 'money-flow.html#amount-validation'] },
+      open: 'Open points: whether PGW learns of this rejection (the real-time call already returned ACCEPTED); and when APEX runs amount validation, same day or later. If later, the rejection cannot be corrected.', doc: ['6.5', 'amount-validation'], also: ['Try it in Money flow', 'money-flow.html#amount-validation'] },
     { id: 'amt-rule2', s: 'amt', code: 'APEX Rule 2', title: 'A vendor leg would be zero or negative', out: 'hold', outT: 'Advice REJECTED · held',
       when: 'For any vendor: advised amount − commission − transfer fee (if the vendor bears it) ≤ 0. Example: a leg of 0.80, commission 0.02, fee 1.00 gives −0.22.', msg: ['Reason code from APEX.'],
-      money: 'The whole advice is rejected, not only that leg.', fix: 'Remove or raise the small leg and send an UPDATE (reaches APEX in the day-end file).', doc: ['6.5', 'amount-validation'], also: ['Try it in Money flow', 'money-flow.html#amount-validation'] },
+      money: 'The whole advice is rejected, not only that leg.', fix: 'Correctable only with an UPDATE on the transaction date; otherwise the transaction is released after N days.', doc: ['6.5', 'amount-validation'], also: ['Try it in Money flow', 'money-flow.html#amount-validation'] },
     { id: 'amt-twice', s: 'amt', code: 'APEX single payout', title: 'A transaction would be paid out twice', out: 'ok', outT: 'Blocked by APEX',
       when: 'Any path that would pay the same transaction again.', msg: null, money: 'Blocked: a transaction is never paid out twice.', fix: '—', doc: ['6.5', 'amount-validation'] },
 
     // ---------- day-end file ----------
     { id: 'file-diff', s: 'file', code: 'APEX 6.4', title: 'File split differs from the real-time advice', out: 'ok', outT: 'File wins',
       when: 'The same advice is in the API and the file, with a different split.', msg: null, money: 'APEX overwrites with the file’s split and processes it.', fix: 'None. This is also how every UPDATE reaches APEX: the APEX API only creates advices (agreed with APEX on 23-Nov).', doc: ['6.4', 'day-end-split-advice-file'], story: ['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'] },
-    { id: 'file-late-update', s: 'file', code: 'Open point', title: 'UPDATE received after the day’s file was generated', out: 'tbd', outT: 'Not defined',
-      when: 'The partner sends an UPDATE after midnight, once PGW has already generated that day’s file.', msg: null,
-      money: 'Not defined. The update waits for a later file, or is rejected.', fix: '—', open: 'Open point from the 23-Nov APEX alignment: next day’s file or reject, and whether APEX accepts the update in a later day’s file. Owners: PGW, APEX (Arul).',
-      doc: ['6.4', 'day-end-split-advice-file'], story: ['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'] },
     { id: 'file-only', s: 'file', code: 'APEX 6.4', title: 'Advice only in the file', out: 'ok', outT: 'Processed as new',
       when: 'The real-time call never reached APEX.', msg: null, money: 'APEX processes it as new. This is how an API failure is covered.', fix: 'None.', doc: ['6.4', 'day-end-split-advice-file'], story: ['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], tryHref: 'simulator.html#try=apex-down', tryT: 'Try it' },
     { id: 'file-missing', s: 'file', code: 'APEX 6.4', title: 'Advice received over the API, missing in the file', out: 'hold', outT: 'Mismatched · held',
