@@ -176,7 +176,7 @@ textarea.code:focus { outline: 2px solid var(--link); }
 <a href="docs/stories.html#sp-6-be-create-session-with-split-payout">Read the stories →</a>
 <a href="docs/product.html#transaction-flow">Read the product doc →</a>
 </div>
-<div class="terms"><b>Terms follow the PGW stories.</b> Merchant = the MID with split payout on (the "partner" in the product doc). Partner = a payee of the split, with a Partner ID from APEX (a "vendor" in the product doc). Field names are the stories' proposals. APEX advice fields and the day-end file layout are drafts until the Emcrey spec (P3). Nothing here calls a real system.</div>
+<div class="terms"><b>Terms follow the PGW stories.</b> Merchant = the MID with split payout on (the "partner" in the product doc). Partner = a payee of the split, with a Partner ID from APEX (a "vendor" in the product doc). Field names are the stories' proposals. APEX advice fields and the day-end file layout are drafts until the Emcrey spec (P3). Updates reach APEX only in the day-end file, as agreed with APEX on 23-Nov (stories v0.5 still say real time). Nothing here calls a real system.</div>
 
 <div id="tryBanner" class="tryb" role="status" hidden></div>
 <section class="sec" id="s1">
@@ -643,12 +643,10 @@ $('orderSel').onchange = e => { S.cur = +e.target.value; renderResult(); renderR
 function apexStructural(o, action) {
   const prev = o.apexStatus;
   return [
-    { n: 'a', label: 'Split enabled on the MID.', ok: o.cfgSnap.enabled },
     { n: 'b', label: 'Every beneficiary found, active and linked to the MID.', ok: APEXMODE !== 'reject', msg: 'A Partner ID is inactive at APEX (reason code from APEX).' },
     { n: 'c', label: 'MID matches the transaction; transaction carries the split flag.', ok: true },
     { n: 'd', label: 'One of percentage or amount per rule.', ok: true },
-    { n: 'e', label: action === 'A' ? 'A only when no advice exists for the transaction.' : 'U only when the advice is CREATED, REJECTED or PENDING_MATCH.',
-      ok: action === 'A' ? !prev : ['CREATED', 'REJECTED', 'PENDING_MATCH'].includes(prev), msg: action === 'A' ? 'An advice already exists.' : 'Advice is ' + prev + '.' }
+    { n: 'e', label: 'A only when no advice exists for the transaction (the APEX API only creates advices).', ok: !prev, msg: 'An advice already exists.' }
   ];
 }
 function adviceBody(o, action) {
@@ -685,6 +683,7 @@ function pay(ok) {
     if (o.res.order.splitPayoutTransaction.length) sendAdvice(o, 'A', 'Pay succeeded on an order with legs (SP-7 1.1)');
     else o.events.push({ kind: 'wait' });
   }
+  API.for = null; // refresh the Payout Advice API form defaults (NEW or UPDATE, latest advice ID) after payment
   renderAll();
 }
 const API = { action: 'NEW', type: 'PERCENTAGE', legs: [], profileId: '', adviceId: '', for: null };
@@ -727,7 +726,14 @@ function callApi() {
     o.res.order.splitPayoutType = type;
     if (q.splitPayoutProfileId !== undefined) o.res.order.splitPayoutProfileId = q.splitPayoutProfileId;
     o.res.order.splitPayoutTransaction = legs.map(l => ({ partnerId: l.partnerId, value: l.value }));
-    const a = sendAdvice(o, q.action === 'NEW' ? 'A' : 'U', 'Payout Advice API ' + q.action + ' (SP-7 1.' + (q.action === 'NEW' ? '2' : '3') + ')', null, o.apiEvents, 'api');
+    let a;
+    if (q.action === 'NEW') a = sendAdvice(o, 'A', 'Payout Advice API NEW (SP-7 1.2)', null, o.apiEvents, 'api');
+    else {
+      // Agreed with APEX on 23-Nov: an UPDATE is not sent in real time. PGW stores it; the day-end file carries it and APEX overwrites the earlier advice.
+      a = { id: 'ADV-' + (++S.advSeq), action: 'U', status: 'QUEUED', reason: 'Stored by PGW; goes in the Day ' + S.day + ' day-end file', body: adviceBody(o, 'U'), src: 'api' };
+      o.advices.push(a); o.lastAdviceDay = S.day;
+      o.apiEvents.push({ kind: 'queued', id: a.id, day: S.day });
+    }
     ev.result = a;
     if (q.action === 'NEW') o.advices.find(x => x.id === a.id).reqKey = JSON.stringify(q);
   }
@@ -755,6 +761,7 @@ function evHtml(o, ev) {
   }
   if (ev.kind === 'api') {
     const resp = ev.fail ? { httpStatus: 400, message: ev.fail.msg } : ev.idem ? { splitAdviceId: ev.idem, '...': '... same NEW sent again: first advice ID returned, no second advice' }
+      : ev.result.status === 'QUEUED' ? { splitAdviceId: ev.result.id, splitAdviceStatus: '...', '...': '... not sent to APEX now; goes in today\u2019s day-end file. Status value for a stored UPDATE not defined yet' }
       : Object.assign({ splitAdviceId: ev.result.id, splitAdviceStatus: ev.result.status }, ev.result.reason ? { reasonCode: '... from APEX', reasonMessage: ev.result.reason } : {});
     return `<div class="ev"><h3><span class="st ${ev.fail ? 'bad' : 'info'}">${ev.fail ? 'HTTP 400' : 'HTTP 200'}</span> Payout Advice API · ${ev.req.action}</h3>
       <p>Merchant → PGW. <span style="font-family:var(--mono);font-size:13px">POST /pgw/api/v1/direct/splitPayout</span> (name and path: PGW engineering). Checked against the MID settings as they are now.</p>
@@ -767,7 +774,7 @@ function apiForm(o) {
   if (API.for !== o.n) apiDefaults(o);
   const prof = apiIsProfile();
   let h = `<div class="ev" style="background:#F8FAFC"><h3>Request for order #${o.n} <span class="st grey">${o.pay === 'success' ? 'paid' : o.pay ? 'pay declined' : 'not paid yet'}</span></h3>
-    <p style="font-size:13px">NEW sends the split of a paid order created with deferredSplit. UPDATE replaces the whole split, for example after APEX rejected it. Try NEW on an order that already has a split, or UPDATE with an older advice ID, to see the checks.</p>
+    <p style="font-size:13px">NEW sends the split of a paid order created with deferredSplit. UPDATE replaces the whole split, for example after APEX rejected it, and reaches APEX in the day-end file. Try NEW on an order that already has a split, or UPDATE with an older advice ID, to see the checks.</p>
     <div class="seg" role="group" aria-label="action">${['NEW', 'UPDATE'].map(a => `<button type="button" data-api="${a}" aria-pressed="${API.action === a}">${a}</button>`).join('')}</div>
     <div class="form">${API.action === 'UPDATE' ? `<div class="f"><label for="aAdv">splitAdviceId</label><input id="aAdv" class="mono" value="${esc(API.adviceId)}"></div>` : ''}
     ${prof ? `<div class="f"><label for="aProf">splitPayoutProfileId</label><input id="aProf" class="mono" value="${esc(API.profileId)}"></div>` : ''}</div>`;
@@ -806,7 +813,7 @@ function renderAPI() {
   $('s4b').classList.toggle('locked', !ok);
   if (!o) return;
   if (!ok) { $('apiView').innerHTML = '<p class="empty">This session was rejected, so there is no order to send a split for.</p>'; return; }
-  let h = `<p style="font-size:14px;margin:0 0 12px">A separate merchant API. NEW sends the split of a paid order created with deferredSplit. UPDATE replaces the whole split, for example after APEX rejected it. PGW checks the request and forwards it to APEX as advice A or U. Try NEW on an order that already has a split, UPDATE with an older advice ID, or a call before payment, to see the checks.</p>${src([['SP-8', 'sp-8-be-pgw-split-payout-api'], ['SP-7 section 1', 'when-pgw-sends-an-advice']])}<div style="height:12px"></div>`;
+  let h = `<p style="font-size:14px;margin:0 0 12px">A separate merchant API. NEW sends the split of a paid order created with deferredSplit. UPDATE replaces the whole split, for example after APEX rejected it. PGW checks the request. A NEW goes to APEX in real time as advice A; an UPDATE is stored and sent only in the day-end file (agreed with APEX on 23-Nov). Try NEW on an order that already has a split, UPDATE with an older advice ID, or a call before payment, to see the checks.</p>${src([['SP-8', 'sp-8-be-pgw-split-payout-api'], ['SP-7 section 1', 'when-pgw-sends-an-advice']])}<div style="height:12px"></div>`;
   h += apiForm(o);
   h += o.apiEvents.map(ev => evHtml(o, ev)).join('');
   const last = o.advices[o.advices.length - 1];
@@ -832,7 +839,7 @@ function renderEod() {
      ${rows.map(o => { const a = o.advices[o.advices.length - 1]; return `<tr><td class="m">#${o.n} ${esc(o.ref)}</td><td>${o.res.rejected ? '<span class="st bad">rejected</span>' : o.pay ? o.pay : 'created'}</td>
        <td class="m">${o.res.rejected ? '—' : o.res.order.splitPayout}</td><td class="m">${a ? a.id + ' · ' + a.action + ' · ' + a.status : '—'}</td><td>${o.lastAdviceDay === S.day ? '<span class="st ok">yes</span>' : '<span class="st grey">no</span>'}</td></tr>`; }).join('')}</table></div>`
     : '<p class="empty">No orders today yet.</p>';
-  h += `<p style="font-size:13px;margin-top:10px">The file carries every advice created or updated today, in its latest state (action A or U). A PENDING advice is included: the file is the backup when the real-time call failed. Orders with no advice are not in the file.</p>
+  h += `<p style="font-size:13px;margin-top:10px">The file carries every advice created or updated today, in its latest state (action A or U). A PENDING advice is included: the file is the backup when the real-time call failed. It is also the only route for an UPDATE: the APEX API only creates advices (agreed with APEX on 23-Nov). Orders with no advice are not in the file.</p>
     ${src([['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', 'day-end-split-advice-file', 'p']])}</div><div><p class="sub">Files sent</p>`;
   h += S.files.length ? S.files.slice().reverse().map(fl => `<div class="ev"><h3><span class="st ok">sent</span> Day ${fl.day} file · ${fl.recs.length} record${fl.recs.length === 1 ? '' : 's'}</h3>
       <div class="tw"><table class="t"><tr><th>Action</th><th>Merchant</th><th>TransactionReference</th><th>SplitRules</th></tr>
@@ -848,13 +855,20 @@ $('runEod').onclick = () => {
   const recs = inFile.map(o => o.advices[o.advices.length - 1].body);
   const pend = inFile.filter(o => o.advices[o.advices.length - 1].status === 'PENDING');
   pend.forEach(o => { const a = o.advices[o.advices.length - 1]; a.status = 'SENT'; a.reason = 'Delivered in the Day ' + S.day + ' file'; o.apexStatus = 'CREATED'; (a.src === 'api' ? o.apiEvents : o.events).push({ kind: 'note', text: `Advice ${a.id} reached APEX in the Day ${S.day} day-end file. APEX processes it as new.` }); });
+  const upd = inFile.filter(o => o.advices[o.advices.length - 1].status === 'QUEUED');
+  upd.forEach(o => { const a = o.advices[o.advices.length - 1]; const had = !!o.apexStatus; a.status = 'SENT'; a.reason = 'Delivered in the Day ' + S.day + ' file'; o.apexStatus = 'CREATED';
+    o.apiEvents.push({ kind: 'note', text: had ? `Update ${a.id} reached APEX in the Day ${S.day} day-end file. Its split differs from the advice APEX holds, so APEX overwrites it and processes it (CREATED).` : `Update ${a.id} reached APEX in the Day ${S.day} day-end file. APEX holds no advice for it yet, so it processes it as new (CREATED).` }); });
   S.files.push({ day: S.day, recs, fromPending: pend.map(o => o.advices[o.advices.length - 1].id).join(', ') });
   S.day++;
   toast('Day-end file sent. Now Day ' + S.day);
   renderAll();
 };
 const _ev = evHtml;
-evHtml = function (o, ev) { return ev.kind === 'note' ? `<div class="ev"><h3><span class="st info">day-end</span> ${esc(ev.text)}</h3></div>` : _ev(o, ev); };
+evHtml = function (o, ev) {
+  if (ev.kind === 'note') return `<div class="ev"><h3><span class="st info">day-end</span> ${esc(ev.text)}</h3></div>`;
+  if (ev.kind === 'queued') return `<div class="ev"><h3><span class="st hold">stored for day-end</span> Update ${ev.id} is not sent to APEX in real time</h3><p>Agreed with APEX on 23-Nov: the APEX advice API only creates advices. PGW stores the update and the Day ${ev.day} day-end file carries it (section 5); there APEX overwrites the earlier advice. Stories v0.5 still say real time. Open point: an UPDATE received after that day\u2019s file was generated.</p>${src([['SP-9', 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', 'day-end-split-advice-file', 'p']])}</div>`;
+  return _ev(o, ev);
+};
 
 
 // ===================== TRY presets (opened from "What can go wrong") =====================
@@ -886,7 +900,7 @@ const TRY = {
   'api-new-exists': { cfg: 'dynamic', req: amt(L2), pay: true, api: [{ action: 'NEW', legs: L2 }], at: 's4b', t: 'NEW for an order that already has a split (SP-8 check 2.4).' },
   'api-stale-id': { cfg: 'dynamic', req: amt(L2), pay: true, api: [{ action: 'UPDATE', adviceId: 'LATEST', legs: [{ partnerId: 'P000301', value: 450 }, { partnerId: 'P000302', value: 300 }] }, { action: 'UPDATE', adviceId: 'FIRST', legs: L2 }], at: 's4b', t: 'A late retry of an old UPDATE with an older advice ID (SP-8 check 2.5).' },
   'api-over-total': { cfg: 'dynamic', req: Object.assign({}, BASE, { deferredSplit: true }), pay: true, api: [{ action: 'NEW', legs: [{ partnerId: 'P000301', value: 700 }, { partnerId: 'P000302', value: 400 }] }], at: 's4b', t: 'NEW with legs above the order amount (SP-8 check 2.6, as SP-6 3.6).' },
-  'apex-reject': { cfg: 'dynamic', req: amt(L2), apex: 'reject', pay: true, at: 's4', t: 'APEX rejects the advice: a Partner ID is inactive at APEX (SP-7 section 4). Correct it with an UPDATE in section 4 after setting APEX response back to Accepts.' },
+  'apex-reject': { cfg: 'dynamic', req: amt(L2), apex: 'reject', pay: true, at: 's4', t: 'APEX rejects the advice: a Partner ID is inactive at APEX (SP-7 section 4). Correct it with an UPDATE in section 4: PGW stores it, and the day-end file (section 5) carries it to APEX.' },
   'apex-down': { cfg: 'dynamic', req: amt(L2), apex: 'down', pay: true, at: 's4', t: 'APEX not reachable: the advice stays PENDING and PGW retries (SP-7 section 4). Run day-end in section 5 to see the file carry it.' }
 };
 function runTry(k) {

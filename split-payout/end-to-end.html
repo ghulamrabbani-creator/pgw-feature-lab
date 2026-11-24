@@ -127,15 +127,16 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
 
 <div style="height:26px"></div>
 <section class="panel bleed" id="flowB" aria-label="Flow B">
-<div class="fh"><h2>B. From a Payout Advice API call to payout</h2>
-<div class="seg" role="group" aria-label="Payout Advice API action" id="bAct"><button type="button" data-b="NEW">NEW: send a deferred split</button><button type="button" data-b="UPDATE">UPDATE: correct a split</button></div>
-<span class="start" id="bStart"></span></div>
+<div class="fh"><h2>B. Deferred split: from the Payout Advice API to payout</h2><span class="start" id="bStart"></span></div>
+<div id="bBody">
 <p class="fdesc" id="bDesc"></p>
 <div class="lane-wrap" id="bWrap"><div class="lanes" id="bLanes"></div></div>
 <p class="scrollhint" id="bHint">Scroll sideways to see the whole flow →</p>
 <div class="vlist" id="bList"></div>
 <div class="nav"><button class="btn" data-f="B" data-go="-1">← Previous</button><button class="btn primary" data-f="B" data-go="1">Next step →</button><span class="pos" id="bPos"></span></div>
 <div class="detail" id="bDetail" aria-live="polite"></div>
+</div>
+<p class="fdesc" id="bOff" hidden>Shown when <b>Split sent</b> is set to <b>Later (deferredSplit)</b>.</p>
 </section>
 </main>
 <footer class="lab-footer">Illustrative explanation of the product document and stories. The documents are the requirement; where they differ, the documents win.</footer>
@@ -153,7 +154,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
   const L = { C: 0, P: 1, G: 2, X: 3, V: 4 };
 
   // ---------------- settings ----------------
-  const DEF = { m: 'DYNAMIC', t: 'AMOUNT', s: 'with', f: 'partner', a: 'up', v: 'pass', b: 'NEW' };
+  const DEF = { m: 'DYNAMIC', t: 'AMOUNT', s: 'with', f: 'partner', a: 'up', v: 'pass' };
   const O = Object.assign({}, DEF);
   const CTRL = [
     ['m', 'Split mode', [['DYNAMIC', 'Dynamic'], ['FIXED', 'Fixed'], ['PROFILE', 'Profile']]],
@@ -169,9 +170,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
       `<div class="note" id="cnote">${O.m === 'FIXED' ? 'Fixed mode: PGW applies the template to every order, so the split is always with the order. The type is the template’s type. The Payout Advice API is not available (flow B).' : O.m === 'PROFILE' ? 'Profile mode: the partner sends a profile ID; the type is the profile’s type (examples: PRF-INSURER-B for amount, PRF-INSURER-A for percentage).' : ''}</div><button type="button" class="reset" id="reset">Reset to the default</button>`;
     document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { O[b.dataset.k] = b.dataset.v; if (O.m === 'FIXED') O.s = 'with'; update(); });
     $('reset').onclick = () => { Object.assign(O, DEF); update(); };
-    document.querySelectorAll('[data-b]').forEach(b => b.setAttribute('aria-pressed', b.dataset.b === O.b));
   }
-  document.querySelectorAll('[data-b]').forEach(b => b.onclick = () => { O.b = b.dataset.b; update(); });
 
   // ---------------- example data ----------------
   function split() {
@@ -239,7 +238,8 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
       S({ id: prefix + 'rv', lane: L.V, kind: 'rel', par: true, title: 'Vendors not paid through Geidea', sub: 'partner settles them', d: { by: 'Vendors', p: 'No payout is made to the vendors for this transaction. Settling with them is between the partner and its vendors.', src: [['Product doc 4.3', PD + 'outcomes']] } })
     ];
   }
-  function validationSteps(prefix, afterUpdateInB) {
+  const AGREED = 'Agreed with APEX on 23-Nov: the APEX advice API only creates advices. An UPDATE is not sent in real time; it goes in the day-end file, where it overwrites the earlier advice. Stories v0.5 and doc v1.6 still describe a real-time U.';
+  function validationSteps(prefix) {
     const pct = split().type === 'PERCENTAGE';
     const ok = S({ id: prefix + 'val', lane: L.X, kind: 'sys', title: 'Amount validation', sub: 'Rule 1, Rule 2: pass', d: { by: 'APEX, scheduled once pricing is known',
       p: 'APEX checks the amounts against the real fees.' + (pct ? ' Percentages are first converted to amounts on the gross order amount.' : ''),
@@ -252,29 +252,34 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
       src: [['Product doc 6.5', PD + 'amount-validation']], also: [['What can go wrong: Rule 1', 'what-can-go-wrong.html#amt-rule1']] } });
     const rep = S({ id: prefix + 'rep', lane: L.P, kind: 'act', title: 'Reads the reason', sub: 'split payout report', d: { by: 'Partner', p: 'The rejection and its reason code reach the partner through the APEX split payout report. This is the partner’s channel for the outcome of its advices.', src: [['Product doc 6.7', PD + 'reporting']] } });
     if (O.v === 'released') return [fail, rep, ...releaseSteps(prefix, true)];
-    if (afterUpdateInB) return [fail, rep, S({ id: prefix + 'again', lane: L.P, kind: 'link', title: 'Sends another UPDATE', sub: 'repeat flow B', d: { by: 'Partner', p: 'The partner corrects the split again with UPDATE and the latest advice ID, before P + N. Flow B starts again.', src: [['Story SP-8', ST + 'sp-8-be-pgw-split-payout-api']] } })];
     return [fail, rep,
-      S({ id: prefix + 'upd', lane: L.P, kind: 'link', title: 'Sends UPDATE, smaller split', sub: 'Payout Advice API, see flow B', go: 'UPDATE', d: { by: 'Partner', p: 'Before P + N, the partner sends the complete corrected split with UPDATE and the latest advice ID. Flow B with UPDATE shows each step of this call.', pre: apiReq('UPDATE', true), preCap: 'Payout Advice API request', src: [['Story SP-8', ST + 'sp-8-be-pgw-split-payout-api']], also: [['Show it in flow B', '#flowB']] } }),
-      S({ id: prefix + 'u', lane: L.G, kind: 'sys', title: 'Checks, forwards U', sub: 'SP-8 2.1–2.6', d: { by: 'PGW', p: 'PGW checks the call (2.5: the advice ID is the latest) and forwards it to APEX as action U.', pre: adviceBody('U', true), preCap: 'Advice to APEX (draft)', src: [['Story SP-8 section 2', ST + 'checks'], ['SP-7 section 1', ST + 'when-pgw-sends-an-advice']] } }),
-      S({ id: prefix + 'uc', lane: L.X, kind: 'sys', title: 'U accepted', sub: 'REJECTED → CREATED', d: { by: 'APEX', p: 'U is allowed while the advice is CREATED, REJECTED or PENDING_MATCH. Structural checks pass; the advice is CREATED again.', src: [['Product doc 6.4', PD + 'real-time-split-advice-api']] } }),
+      S({ id: prefix + 'upd', lane: L.P, kind: 'act', title: 'Sends UPDATE', sub: 'Payout Advice API · smaller split', d: { by: 'Partner → PGW', p: 'Before P + N, the partner sends the complete corrected split with UPDATE and the latest advice ID.', pre: apiReq('UPDATE', true), preCap: 'Payout Advice API request', src: [['Story SP-8 section 1', ST + 'request'], ['Product doc 7.3', PD + 'payout-advice-api']], tryH: 'simulator.html#s4b', tryT: 'Try it in the simulator' } }),
+      S({ id: prefix + 'u', lane: L.G, kind: 'sys', title: 'Checks and stores it', sub: 'SP-8 2.1–2.6 · not sent now', d: { by: 'PGW', flag: AGREED,
+        p: 'PGW checks the call (2.5: the advice ID is the latest), stores the new split on the order and answers the partner. It does not send the update to APEX in real time.',
+        pre: { splitAdviceId: 'ADV-2', splitAdviceStatus: '...', '...': '... status value for a stored UPDATE not defined yet (stories v0.6)' }, preCap: 'Response to the partner', src: [['Story SP-8 section 2', ST + 'checks']] } }),
+      S({ id: prefix + 'ueod', lane: L.G, kind: 'sys', title: 'Day-end file', sub: 'carries the updated split', d: { by: 'PGW, after the Ecomm cut-off (midnight, UAE time)', flag: AGREED,
+        p: 'The day-end file carries the latest split for the order: the update. This is the only way an update reaches APEX.', pre: adviceBody('U', true), preCap: 'Record in the day-end file (APEX draft, P3)',
+        list: ['Open point: an UPDATE received after that day’s file was generated: next day’s file or reject, and whether APEX accepts it in a later file.'],
+        src: [['Story SP-9', ST + 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', PD + 'day-end-split-advice-file']] } }),
+      S({ id: prefix + 'uc', lane: L.X, kind: 'sys', title: 'Overwrites the advice', sub: 'REJECTED → CREATED', d: { by: 'APEX', p: 'The file record has a different split from the advice APEX holds, so APEX overwrites it with the file’s split and processes it. Allowed while the advice is CREATED, REJECTED or PENDING_MATCH; refused once PROCESSED or RELEASED.', src: [['Product doc 6.4', PD + 'day-end-split-advice-file']], also: [['Advice lifecycle: rejected, then corrected', 'advice-lifecycle.html#sc=corrected']] } }),
       Object.assign({}, ok, { id: prefix + 'val2', sub: 'passes this time' })];
   }
-  function sendSteps(prefix, action, fromApi) {
-    const body = fromApi ? adviceBody(action) : adviceBody('A');
+  function sendSteps(prefix, fromApi) {
+    const body = adviceBody('A');
     if (O.a === 'up') return [
-      S({ id: prefix + 'adv', lane: L.G, kind: 'sys', title: `Send advice ${action}`, sub: 'real time · ACCEPTED', d: { by: 'PGW', p: fromApi ? `PGW forwards the accepted ${action === 'A' ? 'NEW' : 'UPDATE'} to the APEX Split Advice API in real time and returns the result to the partner.` : 'Once the payment succeeds, PGW sends the split to the APEX Split Advice API as action A.',
-        pre: body, preCap: 'Advice to APEX (APEX draft, P3)', list: ['PGW keeps the advice status: pending, sent, APEX response, included in the day-end file.'],
+      S({ id: prefix + 'adv', lane: L.G, kind: 'sys', title: 'Send advice A', sub: 'real time · ACCEPTED', d: { by: 'PGW → APEX Split Advice API (create only)', p: fromApi ? 'PGW forwards the accepted NEW to APEX in real time as action A (create) and returns the result to the partner.' : 'Once the payment succeeds, PGW sends the split to APEX as action A (create).',
+        pre: body, preCap: 'Advice to APEX (APEX draft, P3)', list: ['PGW keeps the advice status: pending, sent, APEX response, included in the day-end file.', 'The APEX API only creates advices (agreed 23-Nov). Updates go in the day-end file.'],
         src: [['Story SP-7', ST + 'sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3'], ['Product doc 7.5', PD + 'forwarding-advices-to-apex']] } }),
-      S({ id: prefix + 'cr', lane: L.X, kind: 'sys', title: 'Structural checks', sub: 'advice CREATED', d: { by: 'APEX', p: 'APEX checks in the call and answers: split on for the MID, every vendor found, active and linked to the MID, MID matches the transaction, transaction flagged, one of percentage or amount per rule' + (action === 'U' ? ', U only while CREATED, REJECTED or PENDING_MATCH.' : ', A only when no advice exists.'),
-        list: ['If the transaction has not reached APEX yet, the advice is parked as PENDING_MATCH and linked when it arrives.'], src: [['Product doc 6.4', PD + 'real-time-split-advice-api']], also: [['What can go wrong: APEX checks', 'what-can-go-wrong.html#stage-apex'], ['Advice lifecycle', 'advice-lifecycle.html#statuses']] } }),
-      S({ id: prefix + 'eod', lane: L.G, kind: 'sys', title: 'Day-end file', sub: 'after midnight', d: { by: 'PGW, after the Ecomm cut-off (midnight, UAE time)', p: `The day-end file carries every advice created or updated that day, in its latest state. This advice is in it as action ${action}. APEX finds the same split it received over the API: no action.`,
+      S({ id: prefix + 'cr', lane: L.X, kind: 'sys', title: 'Structural checks', sub: 'advice CREATED', d: { by: 'APEX', p: 'APEX checks in the call and answers: every vendor found, active and linked to the MID; MID matches the transaction; transaction flagged; one of percentage or amount per rule; A only when no advice exists.',
+        list: ['Split enablement is no longer checked by APEX here: PGW checks it, as it holds the split set-up (agreed 23-Nov).', 'If the transaction has not reached APEX yet, the advice is parked as PENDING_MATCH and linked when it arrives.'], src: [['Product doc 6.4', PD + 'real-time-split-advice-api']], also: [['What can go wrong: APEX checks', 'what-can-go-wrong.html#stage-apex'], ['Advice lifecycle', 'advice-lifecycle.html#statuses']] } }),
+      S({ id: prefix + 'eod', lane: L.G, kind: 'sys', title: 'Day-end file', sub: 'after midnight · backup', d: { by: 'PGW, after the Ecomm cut-off (midnight, UAE time)', p: 'The day-end file carries every advice of the day in its latest state, including this one. APEX finds the same split it received over the API: no action.',
         list: ['Trailer with the record count; an empty file with count 0 on days with no advices.'], src: [['Story SP-9', ST + 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', PD + 'day-end-split-advice-file']] } })
     ];
     return [
-      S({ id: prefix + 'advx', lane: L.G, kind: 'wait', title: `Send advice ${action}: timeout`, sub: 'PENDING · retry', d: { by: 'PGW', p: 'APEX cannot be reached. PGW keeps the advice PENDING and retries (count and interval: PGW engineering). ' + (fromApi ? 'The API response returns splitAdviceStatus PENDING.' : 'The payment result does not change.'),
+      S({ id: prefix + 'advx', lane: L.G, kind: 'wait', title: 'Send advice A: timeout', sub: 'PENDING · retry', d: { by: 'PGW', p: 'APEX cannot be reached. PGW keeps the advice PENDING and retries (count and interval: PGW engineering). ' + (fromApi ? 'The API response returns splitAdviceStatus PENDING.' : 'The payment result does not change.'),
         pre: body, preCap: 'Advice PGW keeps sending (draft)', src: [['Story SP-7 section 4', ST + 'errors-and-retry']], also: [['Try it', 'simulator.html#try=apex-down']] } }),
       S({ id: prefix + 'hold2', lane: L.X, kind: 'held', title: 'No advice yet', sub: 'still held', d: { by: 'APEX', p: 'The transaction is flagged, so APEX keeps holding it while no advice has arrived.', src: [['Product doc 7.3', PD + 'payout-advice-api']] } }),
-      S({ id: prefix + 'eod', lane: L.G, kind: 'sys', title: 'Day-end file', sub: 'carries the advice', d: { by: 'PGW, after midnight', p: `The day-end file is the backup channel. It carries the advice (action ${action}) in its latest state, PENDING included.`, src: [['Story SP-9', ST + 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3']] } }),
+      S({ id: prefix + 'eod', lane: L.G, kind: 'sys', title: 'Day-end file', sub: 'carries the advice', d: { by: 'PGW, after midnight', p: 'The day-end file is the backup channel. It carries the advice in its latest state, PENDING included.', src: [['Story SP-9', ST + 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3']] } }),
       S({ id: prefix + 'new', lane: L.X, kind: 'sys', title: 'Only in the file', sub: 'processed as new · CREATED', d: { by: 'APEX', p: 'The advice is in the file but was never received over the API, so APEX processes it as new. This is how an API failure is covered.', src: [['Product doc 6.4', PD + 'day-end-split-advice-file']], also: [['What can go wrong: day-end file', 'what-can-go-wrong.html#stage-file']] } })
     ];
   }
@@ -299,30 +304,27 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     ];
     if (d) {
       steps.push(S({ id: 'a6w', lane: L.G, kind: 'wait', title: 'No advice yet', sub: 'waits for the split', d: { by: 'PGW', p: 'With deferredSplit and no legs, PGW sends nothing to APEX until the partner calls the Payout Advice API. APEX keeps holding the transaction.', src: [['Story SP-7 section 1', ST + 'when-pgw-sends-an-advice']] } }));
-      steps.push(S({ id: 'a7l', lane: L.P, kind: 'link', title: 'Sends the split later', sub: 'continues in flow B (NEW)', go: 'NEW', d: { by: 'Partner', p: 'The partner sends the complete split with the Payout Advice API, action NEW, before P + N. Flow B shows each step.', src: [['Story SP-8', ST + 'sp-8-be-pgw-split-payout-api'], ['Product doc 7.3', PD + 'payout-advice-api']], also: [['Show it in flow B', '#flowB']] } }));
+      steps.push(S({ id: 'a7l', lane: L.P, kind: 'link', title: 'Sends the split later', sub: 'continues in flow B', go: 'B', d: { by: 'Partner', p: 'The partner sends the complete split with the Payout Advice API, action NEW, before P + N. Flow B shows each step.', src: [['Story SP-8', ST + 'sp-8-be-pgw-split-payout-api'], ['Product doc 7.3', PD + 'payout-advice-api']], also: [['Show it in flow B', '#flowB']] } }));
       return steps;
     }
-    steps.push(...sendSteps('a', 'A', false), ...validationSteps('a', false));
+    steps.push(...sendSteps('a', false), ...validationSteps('a'));
     if (O.v !== 'released') steps.push(...payoutSteps('a'));
     return steps;
   }
   // ---------------- flow B ----------------
   function flowB() {
-    const act = O.b, A_ = act === 'NEW' ? 'A' : 'U';
-    if (O.m === 'FIXED') return [
-      S({ id: 'b1', lane: L.P, kind: 'act', title: `Payout Advice API ${act}`, sub: 'Fixed MID', d: { by: 'Partner → PGW', p: 'A Fixed MID gets its split from the template on every order.', pre: Object.assign(apiReq(act), { splitPayoutType: split().type }), preCap: 'POST (path: PGW engineering)', src: [['Story SP-8 section 1', ST + 'request']] } }),
-      S({ id: 'b2x', lane: L.G, kind: 'fail', title: 'Rejected · HTTP 400', sub: 'check 2.1', d: { by: 'PGW', p: 'Check 2.1 fails: "Not allowed for Fixed split." Nothing changes on the order. To change a Fixed split, Geidea changes the template.', src: [['Story SP-8 section 2', ST + 'checks']], tryH: 'simulator.html#try=api-fixed', tryT: 'Try it' } })];
+    if (!deferred()) return [];
     const steps = [
-      S({ id: 'b1', lane: L.P, kind: 'act', title: `Payout Advice API ${act}`, sub: act === 'NEW' ? 'complete split' : 'latest advice ID', d: { by: 'Partner → PGW (a separate merchant API)',
-        p: act === 'NEW' ? 'The partner sends the complete split for a paid order it created with deferredSplit.' : 'The partner replaces the whole split, for example after APEX rejected it. It must send the latest advice ID, so an older retried request cannot undo a newer correction.',
-        pre: apiReq(act, act === 'UPDATE'), preCap: 'POST /pgw/api/v1/direct/splitPayout (name and path: PGW engineering)', src: [['Story SP-8 section 1', ST + 'request'], ['Product doc 7.3', PD + 'payout-advice-api']], tryH: 'simulator.html#s4b', tryT: 'Try it in the simulator' } }),
+      S({ id: 'b1', lane: L.P, kind: 'act', title: 'Payout Advice API NEW', sub: 'complete split', d: { by: 'Partner → PGW (a separate merchant API)',
+        p: 'The partner sends the complete split for the paid order it created with deferredSplit. Repeating the same NEW returns the first advice ID, so a retry after a timeout is safe.',
+        pre: apiReq('NEW'), preCap: 'POST /pgw/api/v1/direct/splitPayout (name and path: PGW engineering)', src: [['Story SP-8 section 1', ST + 'request'], ['Product doc 7.3', PD + 'payout-advice-api']], tryH: 'simulator.html#s4b', tryT: 'Try it in the simulator' } }),
       S({ id: 'b2', lane: L.G, kind: 'sys', title: 'Check the call', sub: 'SP-8 2.1–2.6', d: { by: 'PGW', p: 'Any failure rejects the call (HTTP 400) with a message; nothing changes on the order and the transaction stays held.',
-        list: ['2.1 split on; mode Dynamic or Profile', '2.2 order exists, belongs to the MID, Pay succeeded', '2.3 order has splitPayout = true', act === 'NEW' ? '2.4 NEW: order created with deferredSplit, no advice yet' : '2.5 UPDATE: advice ID is the latest', '2.6 the split passes SP-6 checks 3.4 to 3.8'],
+        list: ['2.1 split on; mode Dynamic or Profile', '2.2 order exists, belongs to the MID, Pay succeeded', '2.3 order has splitPayout = true', '2.4 NEW: order created with deferredSplit, no advice yet', '2.6 the split passes SP-6 checks 3.4 to 3.8'],
         src: [['Story SP-8 section 2', ST + 'checks']], also: [['What can go wrong: Payout Advice API', 'what-can-go-wrong.html#stage-api']] } }),
-      ...sendSteps('b', A_, true),
-      ...validationSteps('b', act === 'UPDATE')
+      ...sendSteps('b', true),
+      ...validationSteps('b')
     ];
-    if (O.v === 'pass' || (O.v === 'fixed' && act === 'NEW')) steps.push(...payoutSteps('b'));
+    if (O.v !== 'released') steps.push(...payoutSteps('b'));
     return steps;
   }
 
@@ -335,18 +337,20 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     return `<button type="button" class="${cls}" data-i="${i}" data-id="${s.id}"><span class="n">${String(i + 1).padStart(2, '0')}${list ? `<span class="lane">${LANES[s.lane]}</span>` : ''}</span>${s.title}${s.sub ? `<span class="sub">${s.sub}</span>` : ''}</button>`;
   }
   const PH = id => /pay$|ven$|res$|rel$|rp$|rv$|pdue$/.test(id) ? 'Payout'
-    : /val|valx|rep|upd|u$|uc$|again/.test(id) ? 'Validation'
+    : /(rep|upd|u|ueod|uc)$/.test(id) ? 'Correction'
+    : /val/.test(id) ? 'Validation'
     : /^a[1-4]$/.test(id) ? 'Order and payment'
     : /^b[12]x?$/.test(id) ? 'Payout Advice API'
     : id[0] === 'b' ? 'Advice to APEX' : 'Hold and advice';
   function render(k) {
     const F = FL[k], steps = F.build(); F.steps = steps;
+    if (!steps.length) { $(F.lanes).innerHTML = ''; $(F.list).innerHTML = ''; F.prev = {}; F.cur = 0; return; }
     steps.forEach(st => st.ph = PH(st.id));
     const cols = layout(steps);
     const lanesUsed = k === 'B' ? [1, 2, 3, 4] : [0, 1, 2, 3, 4];
     const g = $(F.lanes);
-    g.style.gridTemplateColumns = `96px repeat(${cols}, minmax(100px, 1fr))`;
-    g.style.minWidth = (96 + cols * 100) + 'px';
+    g.style.gridTemplateColumns = `96px repeat(${cols}, minmax(94px, 1fr))`;
+    g.style.minWidth = (96 + cols * 94) + 'px';
     g.style.gridTemplateRows = `auto repeat(${lanesUsed.length}, minmax(72px, auto))`;
     let h = '<svg class="links" aria-hidden="true"></svg><div style="grid-row:1;grid-column:1"></div>';
     // phase headers: consecutive runs of the same phase
@@ -362,12 +366,28 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     const first = !Object.keys(F.prev).length;
     if (!first) document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => { if (F.prev[c.dataset.id] !== now[c.dataset.id]) c.classList.add('chg'); });
     F.prev = now;
-    document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => c.onclick = () => { const s = F.steps[+c.dataset.i]; if (s.go) { O.b = s.go; update(); setTimeout(() => $('flowB').scrollIntoView({ block: 'start' }), 30); } go(k, +c.dataset.i); });
+    document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => c.onclick = () => { const s = F.steps[+c.dataset.i]; if (s.go) { $('flowB').scrollIntoView({ block: 'start' }); } go(k, +c.dataset.i); });
     F.cur = Math.min(F.cur, steps.length - 1);
     requestAnimationFrame(() => { draw(k); go(k, F.cur); });
   }
+
+  // Connector rule: same lane -> straight across. Other lane -> leave from the bottom/top centre, one turn into the left side.
+  // If that vertical would cross another card, go across first, then drop into the top/bottom of the target.
+  function route(A, B, G, others) {
+    const r = x => ({ l: x.left - G.left, r: x.right - G.left, t: x.top - G.top, b: x.bottom - G.top, cx: x.left + x.width / 2 - G.left, cy: x.top + x.height / 2 - G.top });
+    const a = r(A), b = r(B), os = others.map(r);
+    const hitV = (x, y1, y2) => os.some(o => x > o.l - 2 && x < o.r + 2 && Math.max(y1, y2) > o.t && Math.min(y1, y2) < o.b);
+    const hitH = (y, x1, x2) => os.some(o => y > o.t - 2 && y < o.b + 2 && Math.max(x1, x2) > o.l && Math.min(x1, x2) < o.r);
+    if (Math.abs(a.cy - b.cy) < 4) return `M${a.r},${a.cy} L${b.l - 2},${b.cy}`;
+    const down = b.cy > a.cy, sy = down ? a.b : a.t;
+    if (!hitV(a.cx, sy, b.cy) && !hitH(b.cy, a.cx, b.l)) return `M${a.cx},${sy} L${a.cx},${b.cy} L${b.l - 2},${b.cy}`;
+    const ey = down ? b.t : b.b;
+    if (!hitH(a.cy, a.r, b.cx) && !hitV(b.cx, a.cy, ey)) return `M${a.r},${a.cy} L${b.cx},${a.cy} L${b.cx},${ey + (down ? -2 : 2)}`;
+    const mx = (a.r + b.l) / 2;
+    return `M${a.r},${a.cy} L${mx},${a.cy} L${mx},${b.cy} L${b.l - 2},${b.cy}`;
+  }
   function draw(k) {
-    const F = FL[k], g = $(F.lanes); if (!g.offsetParent) return;
+    const F = FL[k], g = $(F.lanes); if (!g.offsetParent || !F.steps.length) return;
     const svg = g.querySelector('svg'), G = g.getBoundingClientRect();
     svg.setAttribute('width', G.width); svg.setAttribute('height', G.height);
     const cards = [...g.querySelectorAll('.card')];
@@ -377,8 +397,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     svg.innerHTML = '<defs><marker id="ah' + k + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#94A3B8"/></marker><marker id="ahk' + k + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0F172A"/></marker></defs>' +
       edges.map(([a, b]) => {
         const A = cards[a].getBoundingClientRect(), B = cards[b].getBoundingClientRect();
-        const x1 = A.right - G.left, y1 = A.top + A.height / 2 - G.top, x2 = B.left - G.left, y2 = B.top + B.height / 2 - G.top;
-        const p = Math.abs(y1 - y2) < 4 ? `M${x1},${y1} L${x2 - 2},${y2}` : `M${x1},${y1} L${(x1 + x2) / 2},${y1} L${(x1 + x2) / 2},${y2} L${x2 - 2},${y2}`;
+        const p = route(A, B, G, cards.filter((_, i) => i !== a && i !== b).map(c => c.getBoundingClientRect()));
         return `<path data-t="${b}" d="${p}" marker-end="url(#ah${k})"/>`;
       }).join('');
     const wrap = $(F.wrap); $(F.hint).style.display = wrap.scrollWidth > wrap.clientWidth + 2 ? 'block' : 'none';
@@ -398,7 +417,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     (d.also || []).forEach(([t, h]) => links.push(`<a href="${h}" ${h === '#flowB' ? `data-tob="${s.go || ''}"` : ''}>${t}</a>`));
     $(F.det).innerHTML = `<div><h3>${F.cur + 1}. ${s.title}</h3><p class="by">${d.by}</p>${d.flag ? `<div class="flag">${d.flag}</div>` : ''}<p>${d.p}</p>${d.list ? `<ul>${d.list.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}<div class="lk">${links.join('')}</div></div>
       <div>${d.pre ? `<p class="cap">${d.preCap || ''}</p><pre>${json(d.pre)}</pre>` : '<p class="empty">No payload at this step.</p>'}</div>`;
-    $(F.det).querySelectorAll('[data-tob]').forEach(a => a.onclick = e => { e.preventDefault(); if (a.dataset.tob) { O.b = a.dataset.tob; update(); } $('flowB').scrollIntoView({ block: 'start' }); });
+    $(F.det).querySelectorAll('[data-tob]').forEach(a => a.onclick = e => { e.preventDefault(); $('flowB').scrollIntoView({ block: 'start' }); });
     $(F.pos).textContent = `Step ${F.cur + 1} of ${F.steps.length}`;
     document.querySelectorAll(`[data-f="${k}"]`).forEach(b => b.disabled = (+b.dataset.go < 0 && F.cur === 0) || (+b.dataset.go > 0 && F.cur === F.steps.length - 1));
     mark(k);
@@ -409,9 +428,11 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
     const sp = split(), d = deferred();
     $('aStart').textContent = `${O.m[0] + O.m.slice(1).toLowerCase()} MID · ${sp.type.toLowerCase()} split${O.m === 'PROFILE' ? ' (' + sp.profile + ')' : ''}${d ? ' · sent later' : ''}`;
     $('aDesc').textContent = d ? 'The partner creates the order without the split. PGW flags the transaction, APEX holds it, and the flow continues when the partner sends the split (flow B).'
-      : `The split (${legsText()}) travels with the order. ` + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: 'APEX rejects the amounts; the partner corrects them with UPDATE.', released: 'APEX rejects the amounts; the partner does not correct them in time.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
-    $('bStart').textContent = O.m === 'FIXED' ? 'Not available for a Fixed MID' : O.b === 'NEW' ? 'Starts with: a paid order created with deferredSplit, held at APEX, no advice' : 'Starts with: a paid split order whose advice APEX rejected (or that the partner wants to change)';
-    $('bDesc').textContent = O.m === 'FIXED' ? 'PGW rejects the call at check 2.1.' : (O.b === 'NEW' ? 'The partner sends the split after payment. ' : 'The partner replaces the whole split. ') + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: O.b === 'NEW' ? 'APEX rejects the amounts first; the partner then corrects them with UPDATE (flow B with UPDATE).' : 'APEX rejects the amounts again; the partner sends another UPDATE.', released: 'APEX rejects the amounts and the partner does not correct them in time.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
+      : `The split (${legsText()}) travels with the order. ` + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: 'APEX rejects the amounts; the partner corrects them with UPDATE, which reaches APEX in the day-end file.', released: 'APEX rejects the amounts; the partner does not correct them in time.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
+    const on = deferred();
+    $('bBody').hidden = !on; $('bOff').hidden = on; $('bStart').hidden = !on;
+    $('bStart').textContent = 'Starts with: a paid order created with deferredSplit, held at APEX, no advice yet';
+    $('bDesc').textContent = 'The partner sends the split after payment. ' + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: 'APEX rejects the amounts; the partner corrects them with UPDATE, which reaches APEX in the day-end file.', released: 'APEX rejects the amounts and the partner does not correct them in time.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
   }
   function update() {
     ctrlHtml(); descs(); render('A'); render('B');
@@ -421,7 +442,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
   // read hash state
   function readHash() {
     Object.assign(O, DEF);
-    (location.hash.slice(1).split('&')).forEach(kv => { const [k, v] = kv.split('='); if (!(k in O) || !v) return; const opt = k === 'b' ? ['NEW', 'UPDATE'] : (CTRL.find(c => c[0] === k) || [, , []])[2].map(o => o[0]); const hit = opt.find(o => o.toLowerCase() === v.toLowerCase()); if (hit) O[k] = hit; });
+    (location.hash.slice(1).split('&')).forEach(kv => { const [k, v] = kv.split('='); if (!(k in O) || !v) return; const opt = (CTRL.find(c => c[0] === k) || [, , []])[2].map(o => o[0]); const hit = opt.find(o => o.toLowerCase() === v.toLowerCase()); if (hit) O[k] = hit; });
     if (O.m === 'FIXED') O.s = 'with';
   }
   readHash();

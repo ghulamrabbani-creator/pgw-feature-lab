@@ -240,27 +240,34 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
   // links
   const svg = $('links');
   const EDGES = [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [4, 'hit', 'dash']];
+
+  // Connector rule: same lane -> straight across. Other lane -> leave from the bottom/top centre, one turn into the left side.
+  // If that vertical would cross another card, go across first, then drop into the top/bottom of the target.
+  function route(A, B, G, others) {
+    const r = x => ({ l: x.left - G.left, r: x.right - G.left, t: x.top - G.top, b: x.bottom - G.top, cx: x.left + x.width / 2 - G.left, cy: x.top + x.height / 2 - G.top });
+    const a = r(A), b = r(B), os = others.map(r);
+    const hitV = (x, y1, y2) => os.some(o => x > o.l - 2 && x < o.r + 2 && Math.max(y1, y2) > o.t && Math.min(y1, y2) < o.b);
+    const hitH = (y, x1, x2) => os.some(o => y > o.t - 2 && y < o.b + 2 && Math.max(x1, x2) > o.l && Math.min(x1, x2) < o.r);
+    if (Math.abs(a.cy - b.cy) < 4) return `M${a.r},${a.cy} L${b.l - 2},${b.cy}`;
+    const down = b.cy > a.cy, sy = down ? a.b : a.t;
+    if (!hitV(a.cx, sy, b.cy) && !hitH(b.cy, a.cx, b.l)) return `M${a.cx},${sy} L${a.cx},${b.cy} L${b.l - 2},${b.cy}`;
+    const ey = down ? b.t : b.b;
+    if (!hitH(a.cy, a.r, b.cx) && !hitV(b.cx, a.cy, ey)) return `M${a.r},${a.cy} L${b.cx},${a.cy} L${b.cx},${ey + (down ? -2 : 2)}`;
+    const mx = (a.r + b.l) / 2;
+    return `M${a.r},${a.cy} L${mx},${a.cy} L${mx},${b.cy} L${b.l - 2},${b.cy}`;
+  }
   function draw() {
     if (!grid.offsetParent) return;
     const g = grid.getBoundingClientRect();
     svg.setAttribute('width', g.width); svg.setAttribute('height', g.height);
     svg.innerHTML = EDGES.map(([a, b, d]) => {
       const A = cards[a].getBoundingClientRect(), B = cards[b].getBoundingClientRect();
-      let x1, y1, x2, y2, p;
-      if (Math.abs(A.top - B.top) < 4) { // same lane
-        x1 = A.right - g.left; y1 = A.top + A.height / 2 - g.top; x2 = B.left - g.left; y2 = y1;
-        p = `M${x1},${y1} L${x2 - 2},${y2}`;
-      } else if (Math.abs(A.left - B.left) < 4) { // same column, vertical
-        x1 = A.left + A.width / 2 - g.left; x2 = x1;
-        const down = B.top > A.top;
-        y1 = (down ? A.bottom : A.top) - g.top; y2 = (down ? B.top : B.bottom) - g.top;
-        p = `M${x1},${y1} L${x2},${y2 + (down ? -2 : 2)}`;
-      } else { // elbow: out right, then vertical, then into left side
-        x1 = A.right - g.left; y1 = A.top + A.height / 2 - g.top;
-        x2 = B.left - g.left; y2 = B.top + B.height / 2 - g.top;
-        const mx = (x1 + x2) / 2;
-        p = `M${x1},${y1} L${mx},${y1} L${mx},${y2} L${x2 - 2},${y2}`;
-      }
+      const others = Object.values(cards).filter(c => c !== cards[a] && c !== cards[b]).map(c => c.getBoundingClientRect());
+      let p;
+      if (Math.abs(A.left - B.left) < 4) { // same column: straight up or down
+        const x = A.left + A.width / 2 - g.left, down = B.top > A.top;
+        p = `M${x},${(down ? A.bottom : A.top) - g.top} L${x},${(down ? B.top : B.bottom) - g.top + (down ? -2 : 2)}`;
+      } else p = route(A, B, g, others);
       return `<path data-e="${a}-${b}" class="${d || ''}" d="${p}" marker-end="url(#ah)"/>`;
     }).join('') + '<defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#94A3B8" stroke="none"/></marker></defs>';
     mark();

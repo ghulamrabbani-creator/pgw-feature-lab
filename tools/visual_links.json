@@ -16,7 +16,7 @@
     "payout-advice-api": [
       [
         "End-to-end view: flow B",
-        "../end-to-end.html#s=deferred&b=new"
+        "../end-to-end.html#s=deferred"
       ],
       [
         "Simulator: Payout Advice API",
@@ -295,7 +295,7 @@
     "sp-8-be-pgw-split-payout-api": [
       [
         "End-to-end view: deferred split",
-        "../end-to-end.html#s=deferred&b=new"
+        "../end-to-end.html#s=deferred"
       ],
       [
         "Simulator: Payout Advice API",

@@ -96,7 +96,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <a href="docs/stories.html#sp-8-be-pgw-split-payout-api">SP-8 →</a>
 <a href="docs/stories.html#sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3">SP-9 →</a>
 </div>
-<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Action <b>A</b> creates an advice at APEX, <b>U</b> replaces it. PGW sends A for a split sent with the order or a Payout Advice API NEW, and U for an UPDATE. APEX advice fields and statuses are drafts until the Emcrey spec (P3).</div>
+<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Action <b>A</b> creates an advice at APEX, <b>U</b> replaces it. PGW sends A in real time for a split sent with the order or a Payout Advice API NEW. An UPDATE is not sent in real time: the day-end file carries it and APEX overwrites the earlier advice (agreed with APEX on 23-Nov; stories v0.5 and doc v1.6 still describe a real-time U). APEX advice fields and statuses are drafts until the Emcrey spec (P3).</div>
 
 <h2 class="section-title" id="statuses">The statuses at APEX</h2>
 <section class="panel">
@@ -105,7 +105,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <defs><marker id="ah" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#64748B"/></marker>
 <marker id="ahk" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0F172A"/></marker></defs>
 <rect class="grp" x="12" y="14" width="660" height="392"/>
-<text class="gl" x="28" y="36">NOT FINAL · TRANSACTION HELD · U ALLOWED (EXCEPT NO ADVICE)</text>
+<text class="gl" x="28" y="36">NOT FINAL · TRANSACTION HELD · UPDATE VIA DAY-END FILE</text>
 <rect class="grp" x="712" y="14" width="276" height="392"/>
 <text class="gl" x="728" y="36">FINAL · NO FURTHER UPDATES</text>
 <g id="edges"></g>
@@ -129,15 +129,15 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <h2 class="section-title">What the partner can still do</h2>
 <section class="panel"><div class="tw">
 <table class="t">
-<tr><th>APEX status</th><th>Payout Advice API NEW</th><th>Payout Advice API UPDATE</th><th>APEX accepts U</th><th>Money</th></tr>
+<tr><th>APEX status</th><th>Payout Advice API NEW</th><th>Payout Advice API UPDATE</th><th>Update in the day-end file</th><th>Money</th></tr>
 <tr><td><span class="chip a-none">no advice</span></td><td><span class="yes">Yes</span>, if the order was created with deferredSplit</td><td>—</td><td>—</td><td><span class="chip m-held">held</span></td></tr>
-<tr><td><span class="chip a-PENDING_MATCH">PENDING_MATCH</span></td><td><span class="no">No</span>: a split exists</td><td><span class="yes">Yes</span>, with the latest advice ID</td><td><span class="yes">Yes</span></td><td><span class="chip m-held">held</span></td></tr>
-<tr><td><span class="chip a-CREATED">CREATED</span></td><td><span class="no">No</span></td><td><span class="yes">Yes</span>, with the latest advice ID</td><td><span class="yes">Yes</span></td><td><span class="chip m-held">held</span> until payout</td></tr>
-<tr><td><span class="chip a-REJECTED">REJECTED</span></td><td><span class="no">No</span></td><td><span class="yes">Yes</span>: this is how a rejection is corrected, within N days</td><td><span class="yes">Yes</span></td><td><span class="chip m-held">held</span></td></tr>
-<tr><td><span class="chip a-PROCESSED">PROCESSED</span></td><td><span class="no">No</span></td><td>PGW forwards it; APEX refuses it</td><td><span class="no">No</span></td><td><span class="chip m-paid">paid out</span></td></tr>
-<tr><td><span class="chip a-RELEASED">RELEASED</span></td><td><span class="no">No</span></td><td>PGW forwards it; APEX refuses it</td><td><span class="no">No</span></td><td><span class="chip m-rel">released to the partner</span></td></tr>
+<tr><td><span class="chip a-PENDING_MATCH">PENDING_MATCH</span></td><td><span class="no">No</span>: a split exists</td><td><span class="yes">Yes</span>, with the latest advice ID</td><td><span class="yes">Overwrites</span> the advice</td><td><span class="chip m-held">held</span></td></tr>
+<tr><td><span class="chip a-CREATED">CREATED</span></td><td><span class="no">No</span></td><td><span class="yes">Yes</span>, with the latest advice ID</td><td><span class="yes">Overwrites</span> the advice</td><td><span class="chip m-held">held</span> until payout</td></tr>
+<tr><td><span class="chip a-REJECTED">REJECTED</span></td><td><span class="no">No</span></td><td><span class="yes">Yes</span>: this is how a rejection is corrected, within N days</td><td><span class="yes">Overwrites</span> the advice</td><td><span class="chip m-held">held</span></td></tr>
+<tr><td><span class="chip a-PROCESSED">PROCESSED</span></td><td><span class="no">No</span></td><td>PGW stores it; APEX refuses it</td><td><span class="no">Refused</span>: final</td><td><span class="chip m-paid">paid out</span></td></tr>
+<tr><td><span class="chip a-RELEASED">RELEASED</span></td><td><span class="no">No</span></td><td>PGW stores it; APEX refuses it</td><td><span class="no">Refused</span>: final</td><td><span class="chip m-rel">released to the partner</span></td></tr>
 </table></div>
-<p class="src">Source: <a href="docs/product.html#payout-advice-api">product doc 7.3</a> · <a href="docs/product.html#real-time-split-advice-api">6.4</a> · <a href="docs/stories.html#checks">SP-8 section 2</a>. Rejections at each step: <a href="what-can-go-wrong.html">What can go wrong</a>.</p>
+<p class="src">Source: <a href="docs/product.html#payout-advice-api">product doc 7.3</a> · <a href="docs/product.html#real-time-split-advice-api">6.4</a> · <a href="docs/stories.html#checks">SP-8 section 2</a>. Rejections at each step: <a href="what-can-go-wrong.html">What can go wrong</a>. The day-end file route for updates was agreed with APEX on 23-Nov; stories v0.5 and doc v1.6 still describe a real-time U. Open point: an UPDATE received after that day’s file was generated.</p>
 </section>
 </main>
 <footer class="lab-footer">Illustrative explanation of the product document and stories. The documents are the requirement; where they differ, the documents win.</footer>
@@ -153,11 +153,11 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
       p: 'The transaction is flagged (splitPayout = Y) but APEX has no advice for it yet: a deferred split not yet sent, or an advice still in transit.',
       money: 'Held from payout.', can: 'Send NEW through the Payout Advice API (deferred split only).', pgw: 'No advice record, or PENDING if the call to APEX failed.', src: ['6.3', 'hold-of-flagged-transactions'] },
     PENDING_MATCH: { x: 290, y: 70, t: 'PENDING_MATCH', s: 'before the transaction',
-      p: 'Received before the transaction reached APEX.', money: 'Held.', can: 'UPDATE with the latest advice ID.', pgw: 'Not defined in the stories which status PGW shows.', src: ['6.4', 'transaction-not-yet-on-apex'] },
+      p: 'Received before the transaction reached APEX.', money: 'Held.', can: 'UPDATE with the latest advice ID; it reaches APEX in the day-end file.', pgw: 'Not defined in the stories which status PGW shows.', src: ['6.4', 'transaction-not-yet-on-apex'] },
     CREATED: { x: 470, y: 190, t: 'CREATED', s: 'awaiting validation',
-      p: 'Received and passed structural checks; awaiting amount validation and payout.', money: 'Held until the payout.', can: 'UPDATE with the latest advice ID.', pgw: 'ACCEPTED (from the real-time response).', src: ['6.5', 'advice-statuses'] },
+      p: 'Received and passed structural checks; awaiting amount validation and payout.', money: 'Held until the payout.', can: 'UPDATE with the latest advice ID; it reaches APEX in the day-end file and overwrites this advice.', pgw: 'ACCEPTED (from the real-time response).', src: ['6.5', 'advice-statuses'] },
     REJECTED: { x: 470, y: 320, t: 'REJECTED', s: 'reason code recorded', cls: 'rej',
-      p: 'Failed a check; reason code recorded. Can be corrected with U within N days.', money: 'Held. Nothing is paid to vendors.', can: 'UPDATE with a corrected, complete split.',
+      p: 'Failed a check; reason code recorded. Can be corrected with U within N days.', money: 'Held. Nothing is paid to vendors.', can: 'UPDATE with a corrected, complete split. PGW stores it; the day-end file carries it and APEX overwrites the advice.',
       pgw: 'REJECTED with reason if APEX rejected in the call. After a later amount-validation rejection PGW still shows ACCEPTED (open point).', src: ['6.5', 'advice-statuses'] },
     PROCESSED: { x: 770, y: 120, t: 'PROCESSED', s: 'paid out', cls: 'proc fin',
       p: 'Paid out to vendors and residual settled. No further updates.', money: 'Vendors paid; residual to the partner.', can: 'Nothing. Final.', pgw: 'No change. The outcome reaches the partner in the split payout report.', src: ['6.5', 'advice-statuses'] },
@@ -172,7 +172,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
     { id: 'PENDING_MATCH-CREATED', a: 'PENDING_MATCH', b: 'CREATED', d: () => { const p = c('PENDING_MATCH', 'r'), q = c('CREATED', 't'); return `M${p} L${q[0]},${p[1]} L${q[0]},${q[1] - 2}`; }, l: 'transaction arrives', lx: 470, ly: 92 },
     { id: 'PENDING_MATCH-REJECTED', a: 'PENDING_MATCH', b: 'REJECTED', d: () => { const p = c('PENDING_MATCH', 'b'); return `M${p} L${p[0]},${N.REJECTED.y + 18} L${N.REJECTED.x - 2},${N.REJECTED.y + 18}`; }, l: 'unmatched at', l2: 'day end', lx: 300, ly: 296 },
     { id: 'CREATED-REJECTED', a: 'CREATED', b: 'REJECTED', d: () => `M${N.CREATED.x + 60},${N.CREATED.y + H} L${N.CREATED.x + 60},${N.REJECTED.y - 2}`, l: 'amount', l2: 'check fails', lx: 476, ly: 262 },
-    { id: 'REJECTED-CREATED', a: 'REJECTED', b: 'CREATED', d: () => `M${N.CREATED.x + 112},${N.REJECTED.y} L${N.CREATED.x + 112},${N.CREATED.y + H + 2}`, l: 'U, corrected', lx: 590, ly: 284 },
+    { id: 'REJECTED-CREATED', a: 'REJECTED', b: 'CREATED', d: () => `M${N.CREATED.x + 112},${N.REJECTED.y} L${N.CREATED.x + 112},${N.CREATED.y + H + 2}`, l: 'U in day-end', l2: 'file', lx: 590, ly: 278 },
     { id: 'CREATED-PROCESSED', a: 'CREATED', b: 'PROCESSED', d: () => { const p = c('CREATED', 'r'), q = c('PROCESSED', 'l'); return `M${p} L${p[0] + 40},${p[1]} L${p[0] + 40},${q[1]} L${q[0] - 2},${q[1]}`; }, l: 'valid, paid on P', lx: 660, ly: 140 },
     { id: 'held-RELEASED', a: 'held', b: 'RELEASED', d: () => `M672,${N.RELEASED.y + H / 2} L${N.RELEASED.x - 2},${N.RELEASED.y + H / 2}`, l: 'P + N days,', l2: 'no valid advice', lx: 680, ly: 338 }
   ];
@@ -192,6 +192,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
   const A = s => `<span class="chip a-${s || 'none'}">${s || 'no advice'}</span>`;
   const M = m => `<span class="chip m-${m}">${{ held: 'held', paid: 'paid out', rel: 'released to partner', none: '—' }[m]}</span>`;
   const OP2 = 'Open point: the stories do not say whether PGW learns of this. Its record still shows ACCEPTED.';
+  const AGREED = 'Agreed with APEX on 23-Nov: the APEX advice API only creates advices, so the update waits for the day-end file. Open point: an UPDATE received after that day\u2019s file was generated.';
   const SC = {
     with: { t: 'Split with the order', d: 'The partner sends the legs in Create Session. PGW sends the advice the moment the payment succeeds.',
       rows: () => [
@@ -212,17 +213,18 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
         ['Day 0', 'Creates a session with the legs; the customer pays.', 'Federates splitPayout = Y. Sends advice A.', 'Structural checks pass.', 'CREATED', 'ACCEPTED', 'held'],
         ['Day 0, after midnight', '—', 'Day-end file carries advice A.', 'No action.', 'CREATED', 'included in file', 'held'],
         ['Day 1', 'Sees the rejection and reason code in the split payout report.', '—', 'Amount validation: Rule 1 fails (partner residual negative). Rejects the whole advice.', 'REJECTED', 'ACCEPTED', 'held', OP2],
-        ['Day 1', 'Calls the Payout Advice API with UPDATE, the latest advice ID and a smaller split.', 'Check 2.5: the advice ID is the latest. Forwards advice U.', 'U is allowed on a REJECTED advice. Structural checks pass.', 'CREATED', 'ACCEPTED', 'held'],
-        ['Day 1, after midnight', '—', 'Day-end file carries advice U.', 'No action.', 'CREATED', 'included in file', 'held'],
+        ['Day 1', 'Calls the Payout Advice API with UPDATE, the latest advice ID and a smaller split.', 'Check 2.5: the advice ID is the latest. Stores the update; does not send it in real time.', '—', 'REJECTED', 'stored for day-end file', 'held', AGREED],
+        ['Day 1, after midnight', '—', 'Day-end file carries the updated split.', 'The file split differs from the advice it holds: overwrites the advice and processes it.', 'CREATED', 'included in file', 'held'],
         ['P', '—', '—', 'Amount validation passes. Pays vendors and the residual.', 'PROCESSED', '—', 'paid']],
-      flag: 'The UPDATE must reach APEX before P + N. A REJECTED advice is never paid on its own.' },
+      flag: 'The update reaches APEX in that day\u2019s day-end file, which must be before P + N. A REJECTED advice is never paid on its own.' },
     early: { t: 'Advice before the transaction', d: 'The advice reaches APEX before the transaction itself, for example while the transaction federation is being retried.',
       opt: 'arrive', rows: o => {
         const r = [['Day 0', 'Creates a session with the legs; the customer pays.', 'Sends advice A. The transaction federation has not reached APEX yet.', 'No transaction to match: parks the advice.', 'PENDING_MATCH', 'not defined', 'held', 'The stories do not say which status PGW shows for PENDING_MATCH.']];
         if (o.arrive) r.push(['Day 0, later', '—', 'Transaction federation succeeds.', 'Transaction arrives. Links the advice.', 'CREATED', '—', 'held'],
           ['P', '—', '—', 'Amount validation passes. Pays vendors and the residual.', 'PROCESSED', '—', 'paid']);
         else r.push(['Day 0, day end', 'Sees the rejection and reason code in the split payout report.', '—', 'Still unmatched at day end: rejects with a reason code.', 'REJECTED', '—', 'held'],
-          ['Day 1', 'Sends UPDATE once the transaction is on APEX.', 'Forwards advice U.', 'U is allowed on a REJECTED advice.', 'CREATED', 'ACCEPTED', 'held'],
+          ['Day 1', 'Sends UPDATE once the transaction is on APEX.', 'Stores the update; does not send it in real time.', '—', 'REJECTED', 'stored for day-end file', 'held'],
+          ['Day 1, after midnight', '—', 'Day-end file carries the updated split.', 'Overwrites the advice and processes it.', 'CREATED', 'included in file', 'held'],
           ['P', '—', '—', 'Amount validation passes. Pays vendors and the residual.', 'PROCESSED', '—', 'paid']);
         return r; } },
     released: { t: 'Released after N days', d: 'No valid advice is processed within N days of the scheduled payout date. The timer runs on the transaction, not on an advice.',
