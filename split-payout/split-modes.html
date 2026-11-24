@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Split modes · Split Payout · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.cmp { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.mode { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; display: flex; flex-direction: column; }
+.mode h3 { margin: 0 0 4px; font-size: 20px; color: var(--ink); font-weight: 600; }
+.mode .one { font-size: 15px; color: var(--text-2); margin: 0 0 14px; min-height: 3.2em; }
+.mode dl { margin: 0; display: grid; gap: 10px; flex: 1; }
+.mode dt { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.mode dd { margin: 2px 0 0; font-size: 14px; color: var(--text); }
+.mode code { font-size: 12.5px; }
+.mode .try { margin-top: 16px; font-size: 14px; }
+.who { display: inline-flex; gap: 6px; align-items: center; font: 500 12px var(--mono); padding: 3px 9px; border-radius: 6px; }
+.who.p { background: #EDE9FE; color: #5B21B6; } .who.g { background: #E0F2FE; color: #075985; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+.seg { display: inline-flex; flex-wrap: wrap; background: #F1F5F9; border: 1px solid var(--border); border-radius: 10px; padding: 4px; gap: 4px; }
+.seg button { font: 500 14px var(--sans); color: var(--text-2); background: transparent; border: 0; border-radius: 7px; padding: 8px 16px; cursor: pointer; transition: background .2s, color .2s; }
+.seg button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(15,23,42,.12); }
+.ctl { display: flex; flex-wrap: wrap; gap: 16px; align-items: center; margin-bottom: 18px; }
+.ctl label { display: flex; gap: 8px; align-items: center; font: 500 12px var(--mono); color: var(--muted); }
+.ctl input { width: 110px; font: 14px var(--mono); padding: 7px 9px; border: 1px solid var(--border-2); border-radius: 7px; }
+.flow3 { display: grid; grid-template-columns: minmax(0, 1fr) 28px minmax(0, 1fr) 28px minmax(0, 1fr); gap: 0; align-items: start; }
+.step { border: 1px solid var(--border); border-radius: 10px; padding: 14px; display: flex; flex-direction: column; min-width: 0; }
+.step h4 { margin: 0 0 4px; font-size: 14px; color: var(--ink); display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.step p { margin: 0 0 10px; font-size: 13px; color: var(--text-2); }
+.step pre { margin: 0; background: var(--code-bg); color: #E2E8F0; border-radius: 8px; padding: 10px 12px; font-size: 12px; line-height: 1.55; overflow-x: auto; }
+.step pre .k { color: #93C5FD; } .step pre .s { color: var(--code-fg); font-weight: 500; } .step pre .c { color: #64748B; }
+.step.empty pre { color: #64748B; }
+.arrow { display: flex; align-items: center; justify-content: center; color: var(--money); }
+.arrow svg { width: 22px; height: 22px; }
+.legs { width: 100%; border-collapse: collapse; font-size: 13px; }
+.legs td, .legs th { padding: 6px 4px; border-bottom: 1px solid var(--border); text-align: left; }
+.legs th { font: 500 11px var(--mono); color: var(--muted); }
+.legs td.n { font-family: var(--mono); text-align: right; }
+.legs tr.rest td { color: var(--muted); }
+.note { font-size: 13px; color: var(--text-2); margin: 14px 0 0; }
+.rules { margin: 0; padding-left: 20px; display: grid; gap: 8px; font-size: 15px; }
+table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
+table.t th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 8px; border-bottom: 1px solid var(--border); }
+table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.src { font: 12px var(--mono); color: var(--muted); margin-top: 12px; }
+.src a { color: var(--muted); }
+@media (max-width: 960px) {
+  .cmp { grid-template-columns: minmax(0, 1fr); }
+  .mode .one { min-height: 0; }
+  .flow3 { grid-template-columns: minmax(0, 1fr); }
+  .arrow { transform: rotate(90deg); height: 28px; }
+}
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Split Payout</a> / Split modes</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual · split payout</p>
+<h1 class="page">Split modes</h1>
+<p class="lead">Each partner MID uses one split mode. The mode decides who defines the split, and when: the partner with each order, or Geidea once in the PGW configuration.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects product doc v1.6 and PGW stories v0.5</span>
+<a href="docs/product.html#split-modes">Read the requirement →</a>
+</div>
+<div class="terms"><b>Terms:</b> partner = the Geidea merchant (MID) with split payout on; vendor = a payee of the split, identified by an ID from APEX (the stories call it a Partner ID). Field names are from the PGW stories and can be renamed by PGW engineering.</div>
+
+<h2 class="section-title">The three modes side by side</h2>
+<div class="cmp">
+<article class="mode">
+<h3>Dynamic</h3>
+<p class="one">The partner sends the split with each order, or later.</p>
+<dl>
+<dt>Who defines the split</dt><dd><span class="who p">Partner</span> per order</dd>
+<dt>Set up by Geidea in PGW</dt><dd>Vendor IDs only. No template.</dd>
+<dt>Sent with the order</dt><dd><code>splitPayoutType</code> + <code>splitPayoutTransaction[]</code>, or <code>deferredSplit = true</code>, or nothing (normal payment)</dd>
+<dt>Split after payment</dt><dd>Yes: Payout Advice API, NEW or UPDATE with legs</dd>
+<dt>Typical use</dt><dd>Marketplace: several sellers in one checkout. Delivery platform: restaurant or store and the platform.</dd>
+</dl>
+<a class="try" href="simulator.html#cfg=dynamic">Try it in the simulator →</a>
+</article>
+<article class="mode">
+<h3>Fixed</h3>
+<p class="one">One template, set by Geidea, applies to every order.</p>
+<dl>
+<dt>Who defines the split</dt><dd><span class="who g">Geidea</span> once, for all orders</dd>
+<dt>Set up by Geidea in PGW</dt><dd>Vendor IDs + one template (<code>splitPayoutFixedTemplate</code>)</dd>
+<dt>Sent with the order</dt><dd>Nothing. Any split field is rejected.</dd>
+<dt>Split after payment</dt><dd>No. The Payout Advice API rejects a Fixed MID.</dd>
+<dt>Typical use</dt><dd>Standing revenue share: the same share of every sale goes to a supplier.</dd>
+</dl>
+<a class="try" href="simulator.html#cfg=fixed">Try it in the simulator →</a>
+</article>
+<article class="mode">
+<h3>Profile</h3>
+<p class="one">Geidea sets a catalog of templates; the partner picks one per order.</p>
+<dl>
+<dt>Who defines the split</dt><dd><span class="who g">Geidea</span> defines the catalog, <span class="who p">partner</span> picks per order</dd>
+<dt>Set up by Geidea in PGW</dt><dd>Vendor IDs + profile catalog (<code>splitPayoutProfiles</code>), up to 10 profiles</dd>
+<dt>Sent with the order</dt><dd><code>splitPayoutProfileId</code>, or <code>deferredSplit = true</code>. Legs are rejected.</dd>
+<dt>Split after payment</dt><dd>Yes: Payout Advice API, NEW or UPDATE with a profile ID</dd>
+<dt>Typical use</dt><dd>Aggregator with standard terms: an insurance aggregator with a pre-agreed split per insurer.</dd>
+</dl>
+<a class="try" href="simulator.html#cfg=profile">Try it in the simulator →</a>
+</article>
+</div>
+<p class="src">Source: product doc v1.6, <a href="docs/product.html#use-cases">2 Use cases</a> and <a href="docs/product.html#split-modes">3.2 Split modes</a>; stories <a href="docs/stories.html#sp-3-febe-enable-split-partner-ids-and-dynamic-mode">SP-3</a>, <a href="docs/stories.html#sp-4-febe-fixed-mode">SP-4</a>, <a href="docs/stories.html#sp-5-febe-profile-mode">SP-5</a>, <a href="docs/stories.html#what-pgw-does-with-each-request">SP-6 section 2</a>, <a href="docs/stories.html#checks">SP-8 check 2.1</a>.</p>
+
+<h2 class="section-title">One order, three modes</h2>
+<div class="panel">
+<div class="ctl">
+<div class="seg" role="group" aria-label="Mode">
+<button type="button" data-m="DYNAMIC" aria-pressed="true">Dynamic</button>
+<button type="button" data-m="FIXED" aria-pressed="false">Fixed</button>
+<button type="button" data-m="PROFILE" aria-pressed="false">Profile</button>
+</div>
+<label for="amt">order amount (AED) <input id="amt" value="1000.00" inputmode="decimal"></label>
+</div>
+<div class="flow3" aria-live="polite">
+<section class="step" id="st1"></section>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+<section class="step" id="st2"></section>
+<div class="arrow" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M5 12h14M13 6l6 6-6 6"/></svg></div>
+<section class="step" id="st3"></section>
+</div>
+<p class="note" id="foot"></p>
+<p class="src">Examples: stories SP-4 section 4 (Fixed template) and SP-5 section 4 (profile catalog); Dynamic legs as in the product doc worked example. Illustrative values.</p>
+</div>
+
+<h2 class="section-title">Rules for every mode</h2>
+<div class="panel">
+<ul class="rules">
+<li>A leg names a vendor ID and a value. The value is an amount or a percentage of the gross transaction amount, never both.</li>
+<li>All legs of one split use the same type: all amounts or all percentages.</li>
+<li>Percentages are converted to amounts by APEX, not by PGW. Each amount is rounded to 2 decimals; the partner's residual absorbs the rounding difference.</li>
+<li>Templates and profiles are configured by Geidea only. The partner has no access to split configuration.</li>
+<li>A split carries vendor IDs and values only. Bank details always come from Geidea's records, never from the partner's request.</li>
+<li>Maximum 10 legs per split (template, profile, or a split sent with an order or through the API). Configured as a system setting.</li>
+<li>Amount legs are checked against the order amount at Create Session, not at setup: the order amount is not known when a template or profile is saved.</li>
+</ul>
+<p class="src">Source: product doc v1.6, <a href="docs/product.html#split-modes">3.2 Rules common to all modes</a>; stories SP-2 section 2, SP-4 section 2, SP-6 check 3.6.</p>
+</div>
+
+<h2 class="section-title">Changing the mode or the set-up</h2>
+<div class="panel">
+<div style="overflow-x:auto"><table class="t">
+<tr><th style="width:34%">Change saved in PGW</th><th>Effect</th></tr>
+<tr><td>Mode changed</td><td>Applies to orders created after the save. The old mode's template or profiles stay stored but are not applied. Orders already created keep their split.</td></tr>
+<tr><td>Template or profile edited</td><td>Applies to orders created after the save. Orders already created keep the legs they were given.</td></tr>
+<tr><td>Profile deleted</td><td>New orders with that profile ID are rejected.</td></tr>
+<tr><td>Vendor ID deleted</td><td>New orders and API calls with that ID are rejected. Splits already sent to APEX do not change. A vendor ID used in the template or a profile cannot be deleted.</td></tr>
+<tr><td>Split turned off</td><td>New orders with split fields and Payout Advice API calls are rejected. Orders already flagged stay flagged; APEX releases them after N days. Operations also turns split off in APEX.</td></tr>
+</table></div>
+<p class="src">Source: stories <a href="docs/stories.html#split-mode">SP-3 section 3</a>, <a href="docs/stories.html#effect-of-a-saved-change">SP-3 section 6</a>, <a href="docs/stories.html#effect">SP-4 section 3</a>, <a href="docs/stories.html#effect-1">SP-5 section 3</a>, <a href="docs/stories.html#store-on-the-order">SP-6 section 4</a>.</p>
+</div>
+</main>
+<footer class="lab-footer">Illustrative explanation of the product document and stories. The documents are the requirement; where they differ, the documents win.</footer>
+
+<script>
+(function () {
+  const $ = id => document.getElementById(id);
+  const esc = t => String(t ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const f = n => Number(n).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+  const r2 = n => Math.round(n * 100) / 100;
+  const SK = /^(split|deferredSplit|partnerId|value|profileId|legs)/;
+  const json = o => esc(JSON.stringify(o, null, 2))
+    .replace(/&quot;([A-Za-z\[\]\.]+)&quot;:/g, (m, k) => `<span class="${SK.test(k) ? 's' : 'k'}">"${k}"</span>:`)
+    .replace(/&quot;(\.\.\.[^&]*)&quot;/g, '<span class="c">$1</span>');
+  const DATA = {
+    DYNAMIC: { setup: { splitPayoutMode: 'DYNAMIC', splitPayoutPartners: ['P000301', 'P000302', 'P000303'] },
+      type: 'AMOUNT', legs: [['P000301', 500], ['P000302', 300], ['P000303', 100]],
+      s1: 'Vendor IDs only. No split is stored.', s2: 'The partner sends the legs it wants for this order.',
+      foot: 'The split can differ on every order. The partner can also send deferredSplit = true and send the split after payment with the Payout Advice API.' },
+    FIXED: { setup: { splitPayoutMode: 'FIXED', splitPayoutPartners: ['P000301', 'P000302'], splitPayoutFixedTemplate: { splitType: 'PERCENTAGE', legs: [{ partnerId: 'P000301', value: 60.00 }, { partnerId: 'P000302', value: 30.00 }] } },
+      type: 'PERCENTAGE', legs: [['P000301', 60], ['P000302', 30]],
+      s1: 'One template for every order.', s2: 'A normal order. No split fields.',
+      foot: 'Every order of this MID gets the same split. PGW copies the template to the order at Create Session; a later template change does not change that order.' },
+    PROFILE: { setup: { splitPayoutMode: 'PROFILE', splitPayoutPartners: ['P000401', 'P000402', 'P000403'], splitPayoutProfiles: [
+        { profileId: 'PRF-INSURER-A', splitType: 'PERCENTAGE', legs: [{ partnerId: 'P000401', value: 90.00 }, { partnerId: 'P000403', value: 5.00 }] },
+        { profileId: 'PRF-INSURER-B', splitType: 'AMOUNT', legs: [{ partnerId: 'P000402', value: 500.00 }, { partnerId: 'P000403', value: 25.00 }] }] },
+      type: 'PERCENTAGE', legs: [['P000401', 90], ['P000403', 5]], profile: 'PRF-INSURER-A',
+      s1: 'A catalog of profiles, each a predefined split.', s2: 'The partner names one profile for this order.',
+      foot: 'The partner chooses which pre-agreed split applies to each order, but cannot change the legs. PGW copies the profile’s legs to the order at Create Session.' }
+  };
+  let mode = 'DYNAMIC';
+  function render() {
+    const d = DATA[mode];
+    const amtOk = /^\d+(\.\d{1,2})?$/.test($('amt').value.trim()) && parseFloat($('amt').value) > 0;
+    const amt = amtOk ? parseFloat($('amt').value) : 1000;
+    $('amt').style.borderColor = amtOk ? '' : '#DC2626';
+    document.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === mode));
+    $('st1').innerHTML = `<h4><span class="who g">Geidea</span> Set up once in PGW</h4><p>${d.s1}</p><pre>${json(d.setup)}</pre>`;
+    const req = { amount: amt, currency: 'AED', paymentOperation: 'Pay' };
+    if (mode === 'DYNAMIC') { req.splitPayoutType = d.type; req.splitPayoutTransaction = d.legs.map(([p, v]) => ({ partnerId: p, value: v })); }
+    if (mode === 'PROFILE') req.splitPayoutProfileId = d.profile;
+    req['...'] = '... other Create Session fields';
+    $('st2').innerHTML = `<h4><span class="who p">Partner</span> Sent with each order</h4><p>${d.s2}</p><pre>${json(req)}</pre>`;
+    const rows = d.legs.map(([p, v]) => { const a = d.type === 'PERCENTAGE' ? r2(amt * v / 100) : v; return { p, v, a }; });
+    const tot = r2(rows.reduce((s, x) => s + x.a, 0));
+    const over = tot > amt + 1e-9;
+    $('st3').innerHTML = `<h4>Legs on the order, sent to APEX</h4><p>${d.type === 'PERCENTAGE' ? 'PGW stores and sends the percentages. APEX converts them on the gross amount:' : 'PGW stores and sends the amounts:'}</p>
+      <table class="legs"><tr><th>Vendor ID</th><th>${d.type === 'PERCENTAGE' ? 'Sent' : 'Amount'}</th>${d.type === 'PERCENTAGE' ? '<th style="text-align:right">APEX amount</th>' : ''}</tr>
+      ${rows.map(x => `<tr><td style="font-family:var(--mono)">${x.p}</td><td style="font-family:var(--mono)">${d.type === 'PERCENTAGE' ? x.v + '%' : f(x.v)}</td>${d.type === 'PERCENTAGE' ? `<td class="n">${f(x.a)}</td>` : ''}</tr>`).join('')}
+      <tr class="rest"><td colspan="${d.type === 'PERCENTAGE' ? 2 : 1}">Partner keeps the rest</td><td class="n">${over ? '—' : f(r2(amt - tot))}</td></tr></table>
+      <p style="margin:10px 0 0;font-size:12px">${over ? '<span style="color:#B91C1C">The amount legs add up to more than this order: PGW rejects it at Create Session (SP-6 check 3.6).</span>' : 'Before MDR, VAT, partner commission and remittance fees. See <a href="money-flow.html">Money flow</a>.'}</p>`;
+    $('foot').textContent = d.foot;
+  }
+  document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mode = b.dataset.m; render(); });
+  $('amt').oninput = render;
+  render();
+})();
+</script>
+</body>
+</html>

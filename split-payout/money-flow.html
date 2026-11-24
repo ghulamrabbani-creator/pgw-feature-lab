@@ -115,7 +115,7 @@
 
 <h2 class="section-title" style="margin-top:0">The numbers</h2>
 <div class="panel nums">
-<div class="nums-head"><span class="tag" id="srcBadge">Doc worked example (4.2)</span><span class="nums-note">Fictional numbers. What matters is how each component works, not the values.</span><button type="button" class="btn-s" id="reset">Reset to the doc example</button></div>
+<div class="nums-head"><span class="tag" id="srcBadge">Doc worked example (4.2)</span><span class="nums-note"><b>MDR</b>: what Geidea deducts from the partner (MID). <b>Commission</b>: what the partner takes from each vendor's leg. Numbers are fictional; what matters is how each component works.</span><button type="button" class="btn-s" id="reset">Reset to the doc example</button></div>
 <div class="ngrid">
 <label class="nf"><span>Order amount (AED)</span><input id="nTxn" inputmode="decimal"></label>
 <label class="nf"><span>Geidea MDR (%)</span><input id="nMdr" inputmode="decimal"></label>
@@ -123,7 +123,7 @@
 <label class="nf"><span>Fee per payout (AED)</span><input id="nFee" inputmode="decimal"></label>
 <div class="nf"><span>Split type</span><div class="seg sm" role="group" aria-label="Split type"><button type="button" data-stype="AMOUNT" aria-pressed="true">Amount</button><button type="button" data-stype="PERCENTAGE" aria-pressed="false">Percentage</button></div></div>
 </div>
-<div class="vtw"><table class="vt"><thead><tr><th>Vendor</th><th id="splitHd">Split (AED)</th><th>Commission (%)</th><th></th></tr></thead><tbody id="vRows"></tbody></table></div>
+<div class="vtw"><table class="vt"><thead><tr><th>Vendor</th><th id="splitHd">Split (AED)</th><th>Partner commission (%)</th><th></th></tr></thead><tbody id="vRows"></tbody></table></div>
 <button type="button" class="lnk" id="addV">+ Add vendor</button>
 <p class="nums-note" id="numsErr" style="color:#B91C1C"></p>
 </div>
@@ -296,7 +296,7 @@
     else {
       c.legs.forEach((l, i) => outs.push({ key: 'v' + i, label: l.name, sub: 'to vendor IBAN', v: l.payout }));
       outs.push({ key: 'fee', label: 'Remittance fees', sub: m === 'opt1' ? `${c.legs.length + 1} × ${f(N.fee)}, from partner` : `${c.legs.length} from vendors + 1 from partner`, v: c.fees, fee: true });
-      outs.push({ key: 'p', label: 'Partner residual', sub: 'incl. ' + f(c.comm) + ' commission', v: c.residual });
+      outs.push({ key: 'p', label: 'Partner residual', sub: 'incl. ' + f(c.comm) + ' partner commission', v: c.residual });
     }
     const gap3 = outs.length > 1 ? 26 : 0;
     let y = net.y - (outs.length > 1 ? 30 : 0);
@@ -333,7 +333,7 @@
       $('legs').innerHTML = c.legs.map((l, i) => `
         <div class="leg" data-key="v${i}"><div class="who">${esc(l.name)}${P.type === 'PERCENTAGE' ? ` <span style="font:12px var(--mono);color:var(--muted)">${l.raw}% of ${f(N.txn)}</span>` : ''}</div><div class="eq">
           <span class="chip"><small>split</small>${f(l.a)}</span><span class="op">−</span>
-          <span class="chip${l.comm ? '' : ' off'}"><small>commission ${l.pct ? l.pct + '%' : 'none'}</small>${f(l.comm)}</span><span class="op">−</span>
+          <span class="chip${l.comm ? '' : ' off'}"><small>partner commission ${l.pct ? l.pct + '%' : 'none'}</small>${f(l.comm)}</span><span class="op">−</span>
           <span class="chip${l.fee ? '' : ' off'}"><small>remittance fee</small>${f(l.fee)}</span><span class="op">=</span>
           <span class="res"${l.payout > 0 ? '' : ' style="background:#FEE2E2;color:#991B1B"'}>${f(l.payout)}</span></div></div>`).join('');
     }
@@ -357,10 +357,10 @@
     if (m === 'none') { $('rules').innerHTML = '<p class="empty" style="font-size:14px;color:var(--muted);margin:0">No split advice, so APEX runs no amount validation. Pick a split scenario above.</p>'; return; }
     const r1 = c.rule1 >= 0;
     const r1h = `<div class="rule"><h4><span class="${r1 ? 'pass' : 'fail'}">${r1 ? 'pass' : 'FAIL'}</span> Rule 1 – partner residual not negative</h4>
-      <p class="f">net − Σ advised amounts + Σ commissions − remittance fees borne by the partner ≥ 0</p>
+      <p class="f">net − Σ advised amounts + Σ partner commissions − remittance fees borne by the partner ≥ 0</p>
       <div class="rcalc"><div><span>net (${f(N.txn)} − MDR ${f(c.mdr)} − VAT ${f(c.vat)})</span><span>${f(c.net)}</span></div>
       <div><span>− Σ advised amounts</span><span>−${f(c.sa)}</span></div>
-      <div><span>+ Σ commissions</span><span>+${f(c.comm)}</span></div>
+      <div><span>+ Σ partner commissions</span><span>+${f(c.comm)}</span></div>
       <div><span>− remittance fees borne by the partner (${m === 'opt1' ? (c.legs.length + 1) + ' payouts' : 'its own payout'})</span><span>−${f(c.feesPartner)}</span></div>
       <div class="t ${r1 ? 'ok' : 'bad'}"><span>result</span><span>${f(c.rule1)}</span></div></div>
       ${r1 && c.sa > c.net ? '<p style="font-size:13px;margin:8px 0 0">The splits are above the partner’s net, but commission covers the gap: valid. A plain "split ≤ net" check would wrongly reject this.</p>' : ''}</div>`;

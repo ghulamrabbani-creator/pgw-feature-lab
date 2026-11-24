@@ -7,7 +7,9 @@
     "payout-advice-api": "../simulator.html",
     "transaction-flow": "../simulator.html",
     "amount-validation": "../money-flow.html#amount-validation",
-    "calculation-and-payout": "../money-flow.html"
+    "calculation-and-payout": "../money-flow.html",
+    "split-modes": "../split-modes.html",
+    "use-cases": "../split-modes.html"
   },
   "split-payout/docs/stories.html": {
     "sp-6-be-create-session-with-split-payout": "../simulator.html",
