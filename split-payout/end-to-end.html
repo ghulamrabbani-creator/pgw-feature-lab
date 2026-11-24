@@ -1,0 +1,436 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>End-to-end view · Split Payout · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+/* control bar */
+.ctrl { position: sticky; top: 52px; z-index: 6; background: rgba(248,250,252,.96); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; margin: 8px 0 22px; display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: flex-end; }
+.ctrl .g { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ctrl .g > span { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+.seg { display: inline-flex; flex-wrap: wrap; background: #F1F5F9; border: 1px solid var(--border); border-radius: 9px; padding: 3px; gap: 3px; }
+.seg button { font: 500 13px var(--sans); color: var(--text-2); background: transparent; border: 0; border-radius: 6px; padding: 6px 11px; cursor: pointer; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(15,23,42,.14); }
+.seg button:disabled { opacity: .35; cursor: not-allowed; }
+.ctrl .note { order: 9; flex-basis: 100%; font-size: 12px; color: var(--warn-fg); min-height: 0; }
+.ctrl .note:empty { display: none; }
+.ctrl .reset { margin-left: auto; align-self: center; font: 500 12px var(--sans); background: none; border: 0; color: var(--link); cursor: pointer; text-decoration: underline; padding: 0; justify-self: start; }
+/* flows */
+.fh { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 0 0 6px; }
+.fh h2 { margin: 0; font-size: 20px; color: var(--ink); font-weight: 600; }
+.fh .start { font-size: 13px; color: var(--text-2); background: #F1F5F9; border: 1px solid var(--border); border-radius: 7px; padding: 4px 10px; }
+.fdesc { font-size: 14px; color: var(--text-2); margin: 0 0 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--text-2); margin: 0 0 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 20px; height: 13px; border-radius: 4px; display: inline-block; border: 1.5px solid var(--border-2); background: #fff; }
+.sw.act { border-style: dashed; } .sw.money { border-color: var(--money); background: var(--money-bg); } .sw.held { border-color: #B45309; background: #FFF7ED; }
+.sw.fail { border-color: #B91C1C; background: #FEF2F2; } .sw.wait { border: 1.5px dashed #D97706; background: var(--warn-bg); } .sw.rel { border-color: #475569; background: #F1F5F9; }
+.lane-wrap { position: relative; overflow-x: auto; padding-bottom: 4px; }
+.lanes { position: relative; display: grid; }
+.lane-label { grid-column: 1; display: flex; align-items: center; font: 500 12px var(--mono); color: var(--muted); padding: 0 10px 0 0; border-top: 1px solid var(--border); text-transform: uppercase; letter-spacing: .03em; }
+.lane-bg { grid-column: 2 / -1; border-top: 1px solid var(--border); }
+.lane-bg.alt, .lane-label.alt { background: #F8FAFC; }
+.phase { grid-row: 1; font: 500 11px var(--mono); color: var(--ink); text-align: center; padding: 6px 4px; border-bottom: 2px solid var(--ink); margin: 0 4px 6px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card { position: relative; z-index: 2; margin: 8px 5px; padding: 8px 9px; border-radius: 9px; background: #fff; border: 1.5px solid var(--border-2); font: 12.5px/1.35 var(--sans); color: var(--text); text-align: left; cursor: pointer; transition: box-shadow .2s, border-color .2s, opacity .2s; min-width: 0; }
+.card .n { display: block; font: 500 10.5px var(--mono); color: var(--muted); margin-bottom: 2px; }
+.card .sub { display: block; font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
+.card.act { border-style: dashed; }
+.card.money { border-color: var(--money); background: var(--money-bg); } .card.money .n { color: var(--money); }
+.card.held { border-color: #B45309; background: #FFF7ED; } .card.held .n { color: #B45309; }
+.card.fail { border-color: #B91C1C; background: #FEF2F2; } .card.fail .n { color: #B91C1C; }
+.card.wait { border: 1.5px dashed #D97706; background: var(--warn-bg); } .card.wait .n { color: var(--warn-fg); }
+.card.rel { border-color: #475569; background: #F1F5F9; }
+.card.link { border: 1.5px dashed var(--link); background: #EFF6FF; color: #1E3A8A; }
+.card:hover { box-shadow: 0 2px 8px rgba(15,23,42,.10); }
+.card[aria-current="step"] { box-shadow: 0 0 0 3px rgba(15,23,42,.18); border-color: var(--ink); }
+.card.chg { animation: chg 1.4s ease-out; }
+@keyframes chg { 0% { box-shadow: 0 0 0 4px rgba(29,78,216,.55); } 100% { box-shadow: 0 0 0 0 rgba(29,78,216,0); } }
+@media (prefers-reduced-motion: reduce) { .card.chg { animation: none; outline: 2px solid var(--link); } }
+svg.links { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: visible; }
+svg.links path { fill: none; stroke: #94A3B8; stroke-width: 1.5; }
+svg.links path.on { stroke: var(--ink); stroke-width: 2; }
+.scrollhint { font: 12px var(--mono); color: var(--muted); margin: 6px 0 0; display: none; }
+/* detail */
+.nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 16px 0 12px; }
+.btn { font: 500 14px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--ink); border-radius: 8px; padding: 7px 13px; cursor: pointer; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+.pos { font: 12px var(--mono); color: var(--muted); }
+.detail { border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; }
+.detail h3 { margin: 0 0 4px; font-size: 18px; color: var(--ink); font-weight: 600; }
+.detail .by { font: 500 12px var(--mono); color: var(--muted); margin: 0 0 10px; }
+.detail p { margin: 0 0 10px; font-size: 15px; }
+.detail ul { margin: 0 0 10px; padding-left: 20px; font-size: 14px; display: grid; gap: 3px; }
+.detail pre { margin: 0 0 8px; background: var(--code-bg); color: #E2E8F0; border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.55; overflow-x: auto; }
+.detail pre .k { color: #93C5FD; } .detail pre .s { color: var(--code-fg); font-weight: 500; } .detail pre .c { color: #64748B; }
+.detail .cap { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; margin: 0 0 6px; }
+.detail .lk { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; margin-top: 8px; }
+.detail .lk a.try { font-weight: 500; color: #fff; background: var(--ink); padding: 3px 10px; border-radius: 6px; text-decoration: none; }
+.detail .flag { font-size: 13px; color: var(--warn-fg); background: var(--warn-bg); padding: 6px 10px; border-radius: 6px; margin: 0 0 10px; }
+.empty { color: var(--muted); font-size: 14px; }
+/* mobile list */
+.vlist { display: none; }
+/* flow canvases break out to the browser width; text stays on the page grid */
+.bleed { width: min(calc(100vw - 72px), 1880px); margin-left: calc((100% - min(calc(100vw - 72px), 1880px)) / 2); }
+@media (max-width: 860px) {
+  .ctrl { position: static; }
+  .bleed { width: auto; margin-left: 0; }
+  .lane-wrap { display: none; }
+  .vlist { display: grid; gap: 8px; }
+  .vlist .card { margin: 0; }
+  .vlist .card .lane { font: 500 10.5px var(--mono); color: var(--muted); text-transform: uppercase; margin-left: 6px; }
+  .vlist .ph { font: 500 11px var(--mono); color: var(--ink); text-transform: uppercase; letter-spacing: .04em; border-bottom: 2px solid var(--ink); padding: 10px 0 4px; }
+  .detail { grid-template-columns: minmax(0, 1fr); }
+}
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Split Payout</a> / End-to-end view</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual · split payout</p>
+<h1 class="page">End-to-end view</h1>
+<p class="lead">One order from start to payout, across the customer, the partner, PGW, APEX and the vendors. Change the settings below and both flows redraw: the split mode, when the split is sent, who bears the transfer fees, and what goes wrong on the way.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects product doc v1.6 and PGW stories v0.5</span>
+<a href="docs/product.html#transaction-flow">Read the requirement →</a>
+<a href="docs/stories.html#sp-6-be-create-session-with-split-payout">Stories: SP-6 →</a>
+<a href="docs/stories.html#sp-8-be-pgw-split-payout-api">SP-8 →</a>
+</div>
+<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split, with an ID from APEX. Field names in the payloads are the stories' proposals (the stories call the vendor ID <code>partnerId</code>). APEX advice fields are drafts until the Emcrey spec (P3). Order amount AED 1,000 in every example.</div>
+
+<div class="ctrl bleed" id="ctrl" role="group" aria-label="Simulation settings"></div>
+
+<section class="panel bleed" id="flowA" aria-label="Flow A">
+<div class="fh"><h2>A. From Create Session to payout</h2><span class="start" id="aStart"></span></div>
+<p class="fdesc" id="aDesc"></p>
+<div class="legend">
+<span><i class="sw act"></i>Action by the customer or partner</span><span><i class="sw"></i>PGW or APEX processing</span><span><i class="sw held"></i>Held at APEX</span>
+<span><i class="sw money"></i>Money moves</span><span><i class="sw fail"></i>Rejected</span><span><i class="sw wait"></i>Waiting or retry</span><span><i class="sw rel"></i>Released to the partner</span>
+</div>
+<div class="lane-wrap" id="aWrap"><div class="lanes" id="aLanes"></div></div>
+<p class="scrollhint" id="aHint">Scroll sideways to see the whole flow →</p>
+<div class="vlist" id="aList"></div>
+<div class="nav"><button class="btn" data-f="A" data-go="-1">← Previous</button><button class="btn primary" data-f="A" data-go="1">Next step →</button><span class="pos" id="aPos"></span></div>
+<div class="detail" id="aDetail" aria-live="polite"></div>
+</section>
+
+<div style="height:26px"></div>
+<section class="panel bleed" id="flowB" aria-label="Flow B">
+<div class="fh"><h2>B. From a Payout Advice API call to payout</h2>
+<div class="seg" role="group" aria-label="Payout Advice API action" id="bAct"><button type="button" data-b="NEW">NEW: send a deferred split</button><button type="button" data-b="UPDATE">UPDATE: correct a split</button></div>
+<span class="start" id="bStart"></span></div>
+<p class="fdesc" id="bDesc"></p>
+<div class="lane-wrap" id="bWrap"><div class="lanes" id="bLanes"></div></div>
+<p class="scrollhint" id="bHint">Scroll sideways to see the whole flow →</p>
+<div class="vlist" id="bList"></div>
+<div class="nav"><button class="btn" data-f="B" data-go="-1">← Previous</button><button class="btn primary" data-f="B" data-go="1">Next step →</button><span class="pos" id="bPos"></span></div>
+<div class="detail" id="bDetail" aria-live="polite"></div>
+</section>
+</main>
+<footer class="lab-footer">Illustrative explanation of the product document and stories. The documents are the requirement; where they differ, the documents win.</footer>
+
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const ST = 'docs/stories.html#', PD = 'docs/product.html#';
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const json = o => esc(JSON.stringify(o, null, 2))
+    .replace(/&quot;([A-Za-z]+)&quot;:/g, (m, k) => `<span class="${/^(split|deferred|partnerId|value|Action|SplitRules|PartnerID|Percentage|Amount|action|splitAdvice)/.test(k) ? 's' : 'k'}">"${k}"</span>:`)
+    .replace(/&quot;(\.\.\.[^&]*)&quot;/g, '<span class="c">$1</span>');
+  const f2 = n => n.toFixed(2);
+  const LANES = ['Customer', 'Partner', 'PGW', 'APEX', 'Vendors'];
+  const L = { C: 0, P: 1, G: 2, X: 3, V: 4 };
+
+  // ---------------- settings ----------------
+  const DEF = { m: 'DYNAMIC', t: 'AMOUNT', s: 'with', f: 'partner', a: 'up', v: 'pass', b: 'NEW' };
+  const O = Object.assign({}, DEF);
+  const CTRL = [
+    ['m', 'Split mode', [['DYNAMIC', 'Dynamic'], ['FIXED', 'Fixed'], ['PROFILE', 'Profile']]],
+    ['t', 'Split type', [['AMOUNT', 'Amount'], ['PERCENTAGE', 'Percentage']]],
+    ['s', 'Split sent', [['with', 'With the order'], ['deferred', 'Later (deferredSplit)']]],
+    ['f', 'Transfer fees borne by', [['partner', 'Partner'], ['vendor', 'Vendors']]],
+    ['a', 'APEX real-time call', [['up', 'Reached'], ['down', 'Not reachable']]],
+    ['v', 'Amount validation', [['pass', 'Passes'], ['fixed', 'Fails, corrected'], ['released', 'Fails, not corrected']]]
+  ];
+  function ctrlHtml() {
+    $('ctrl').innerHTML = CTRL.map(([k, t, opts]) => `<div class="g"><span>${t}</span><div class="seg" role="group" aria-label="${t}">${opts.map(([v, l]) =>
+      `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${O[k] === v}" ${k === 's' && v === 'deferred' && O.m === 'FIXED' ? 'disabled title="A Fixed MID sends no split fields"' : ''}>${l}</button>`).join('')}</div></div>`).join('') +
+      `<div class="note" id="cnote">${O.m === 'FIXED' ? 'Fixed mode: PGW applies the template to every order, so the split is always with the order. The type is the template’s type. The Payout Advice API is not available (flow B).' : O.m === 'PROFILE' ? 'Profile mode: the partner sends a profile ID; the type is the profile’s type (examples: PRF-INSURER-B for amount, PRF-INSURER-A for percentage).' : ''}</div><button type="button" class="reset" id="reset">Reset to the default</button>`;
+    document.querySelectorAll('[data-k]').forEach(b => b.onclick = () => { O[b.dataset.k] = b.dataset.v; if (O.m === 'FIXED') O.s = 'with'; update(); });
+    $('reset').onclick = () => { Object.assign(O, DEF); update(); };
+    document.querySelectorAll('[data-b]').forEach(b => b.setAttribute('aria-pressed', b.dataset.b === O.b));
+  }
+  document.querySelectorAll('[data-b]').forEach(b => b.onclick = () => { O.b = b.dataset.b; update(); });
+
+  // ---------------- example data ----------------
+  function split() {
+    const pct = O.t === 'PERCENTAGE';
+    if (O.m === 'FIXED') return { type: O.t, legs: pct ? [['P000301', 60], ['P000302', 30]] : [['P000301', 600], ['P000302', 300]] };
+    if (O.m === 'PROFILE') return pct ? { type: 'PERCENTAGE', profile: 'PRF-INSURER-A', legs: [['P000401', 90], ['P000403', 5]] } : { type: 'AMOUNT', profile: 'PRF-INSURER-B', legs: [['P000402', 500], ['P000403', 25]] };
+    return { type: O.t, legs: pct ? [['P000301', 50], ['P000302', 30]] : [['P000301', 500], ['P000302', 300]] };
+  }
+  const deferred = () => O.s === 'deferred' && O.m !== 'FIXED';
+  function sessionReq() {
+    const sp = split(), r = { amount: 1000.00, currency: 'AED', paymentOperation: 'Pay', merchantReferenceId: 'ORD-1001' };
+    if (deferred()) r.deferredSplit = true;
+    else if (O.m === 'DYNAMIC') { r.splitPayoutType = sp.type; r.splitPayoutTransaction = sp.legs.map(([p, v]) => ({ partnerId: p, value: v })); }
+    else if (O.m === 'PROFILE') r.splitPayoutProfileId = sp.profile;
+    r['...'] = '... other Create Session fields';
+    return r;
+  }
+  function orderRec() {
+    const sp = split(), d = deferred();
+    const o = { splitPayout: true, deferredSplit: d, splitPayoutType: d ? null : sp.type };
+    if (O.m === 'PROFILE' && !d) o.splitPayoutProfileId = sp.profile;
+    o.splitPayoutTransaction = d ? [] : sp.legs.map(([p, v]) => ({ partnerId: p, value: v }));
+    return o;
+  }
+  function adviceBody(action, smaller) {
+    const sp = split(), pct = sp.type === 'PERCENTAGE';
+    const legs = smaller ? sp.legs.map(([p, v], i) => [p, i === 0 ? Math.round(v * 0.8 * 100) / 100 : v]) : sp.legs;
+    return { Action: action, Merchant: '9000123', TransactionReference: 'IS-000417', SplitRules: legs.map(([p, v]) => pct ? { PartnerID: p, Percentage: v } : { PartnerID: p, Amount: v }) };
+  }
+  function apiReq(action, smaller) {
+    const sp = split(), r = { action, orderId: 'a1b2c3d4-0001' };
+    if (action === 'UPDATE') r.splitAdviceId = 'ADV-1';
+    if (O.m === 'PROFILE') r.splitPayoutProfileId = sp.profile;
+    else { const legs = smaller ? sp.legs.map(([p, v], i) => [p, i === 0 ? Math.round(v * 0.8 * 100) / 100 : v]) : sp.legs; r.splitPayoutType = sp.type; r.splitPayoutTransaction = legs.map(([p, v]) => ({ partnerId: p, value: v })); }
+    return r;
+  }
+  const legsText = () => { const sp = split(); return sp.legs.map(([p, v]) => `${p} ${sp.type === 'PERCENTAGE' ? v + '%' : f2(v)}`).join(', '); };
+
+  // ---------------- shared step builders ----------------
+  const S = (o) => o; // step: {id, lane, kind, title, sub, col?, par?, d: {by, p, list, pre, preCap, flag, src[[label, href]], try}}
+  function payoutSteps(prefix) {
+    const pct = split().type === 'PERCENTAGE', vb = O.f === 'vendor';
+    return [
+      S({ id: prefix + 'pay', lane: L.X, kind: 'money', title: 'Pay out on P', sub: 'vendors, then the residual', d: { by: 'APEX, on the scheduled payout date (P)',
+        p: 'APEX calculates each vendor’s payout and the partner’s residual, makes a domestic transfer to each vendor’s IBAN, and settles the residual. No manual finance step.',
+        list: [ ...(pct ? ['Converts each percentage to an amount on the gross order amount (AED 1,000), rounded to 2 decimals. Rounding differences go to the residual.'] : []),
+          'Partner commission (if set for a vendor) is deducted from that vendor’s leg and kept by the partner.',
+          vb ? 'Vendors bear the transfer fee: each vendor’s fee comes off its own payout. The fee on the partner’s own payout stays with the partner.' : 'The partner bears the transfer fees: the fee for every vendor payout and for its own payout comes off the residual.',
+          'Advice status becomes PROCESSED. No further updates.'],
+        src: [['Product doc 6.6', PD + 'calculation-and-payout'], ['4.2 worked example', PD + 'worked-example']], also: [['See the numbers in Money flow', 'money-flow.html']] } }),
+      S({ id: prefix + 'ven', lane: L.V, kind: 'money', title: 'Vendors receive their payouts', sub: vb ? 'leg − commission − fee' : 'leg − commission', d: { by: 'Vendors',
+        p: `Each vendor receives its leg (${legsText()}) minus any partner commission${vb ? ' and its own transfer fee' : ''}. Each vendor gets a payout report: amount received against each transaction reference and any fee deducted.`,
+        list: ['Vendors have no portal access. Geidea talks to the partner only.', 'A failed transfer follows the existing exception process: retry, then an exception record shown in the split payout report.'],
+        src: [['Product doc 6.7 reporting', PD + 'reporting'], ['4.3 outcomes', PD + 'outcomes']] } }),
+      S({ id: prefix + 'res', lane: L.P, kind: 'money', par: true, title: 'Partner receives the residual', sub: vb ? 'after MDR, own fee' : 'after MDR, all fees', d: { by: 'Partner',
+        p: `Residual = net (order amount − MDR − VAT on MDR) − the vendor legs + partner commissions − ${vb ? 'the fee on its own payout' : 'all transfer fees'}. The split payout report shows, per transaction: amount, MDR, each vendor payout, commissions, fees, residual and advice status.`,
+        src: [['Product doc 4.2', PD + 'worked-example'], ['6.7 reporting', PD + 'reporting']], also: [['Money flow', 'money-flow.html']] } })
+    ];
+  }
+  function releaseSteps(prefix, hasAdvice) {
+    return [
+      S({ id: prefix + 'pdue', lane: L.X, kind: 'held', title: 'P: no valid advice', sub: 'still held', d: { by: 'APEX', p: 'The scheduled payout date passes with no PROCESSED advice. The transaction stays held. The N-day timer runs on the transaction, not on an advice.', src: [['Product doc 6.3', PD + 'hold-of-flagged-transactions']] } }),
+      S({ id: prefix + 'rel', lane: L.X, kind: 'rel', title: 'P + N: release', sub: 'exception report', d: { by: 'APEX', p: `APEX releases the transaction to the partner after Geidea’s MDR${hasAdvice ? ' and sets the advice to RELEASED' : ''}. It lists the transaction in the exception report for Operations and Finance. N is set per partner MID and can be 0.`, src: [['Product doc 6.3', PD + 'hold-of-flagged-transactions']], also: [['Advice lifecycle: released', 'advice-lifecycle.html#sc=released']] } }),
+      S({ id: prefix + 'rp', lane: L.P, kind: 'rel', title: 'Partner receives the full amount', sub: 'after MDR', d: { by: 'Partner', p: 'The partner receives the whole transaction after MDR, as for a normal sale. Final: no further updates to the advice.', src: [['Product doc 4.3', PD + 'outcomes']] } }),
+      S({ id: prefix + 'rv', lane: L.V, kind: 'rel', par: true, title: 'Vendors not paid through Geidea', sub: 'partner settles them', d: { by: 'Vendors', p: 'No payout is made to the vendors for this transaction. Settling with them is between the partner and its vendors.', src: [['Product doc 4.3', PD + 'outcomes']] } })
+    ];
+  }
+  function validationSteps(prefix, afterUpdateInB) {
+    const pct = split().type === 'PERCENTAGE';
+    const ok = S({ id: prefix + 'val', lane: L.X, kind: 'sys', title: 'Amount validation', sub: 'Rule 1, Rule 2: pass', d: { by: 'APEX, scheduled once pricing is known',
+      p: 'APEX checks the amounts against the real fees.' + (pct ? ' Percentages are first converted to amounts on the gross order amount.' : ''),
+      list: ['Rule 1: partner residual not negative (net − legs + commissions − fees borne by the partner ≥ 0).', 'Rule 2: every leg above zero after commission and its fee (if the vendor bears it).', 'Single payout: a transaction is never paid out twice.'],
+      src: [['Product doc 6.5', PD + 'amount-validation']], also: [['Money flow: amount validation', 'money-flow.html#amount-validation']] } });
+    if (O.v === 'pass') return [ok];
+    const fail = S({ id: prefix + 'valx', lane: L.X, kind: 'fail', title: 'Amount validation fails', sub: 'Rule 1 · REJECTED', d: { by: 'APEX',
+      p: 'Rule 1 fails: once MDR, VAT and fees come off, the partner’s residual would be negative. APEX rejects the whole advice with a reason code. Nothing is paid to vendors; the transaction stays held.',
+      flag: 'Open point: the stories do not say whether PGW learns of this rejection. The PGW record still shows ACCEPTED from the real-time call.',
+      src: [['Product doc 6.5', PD + 'amount-validation']], also: [['What can go wrong: Rule 1', 'what-can-go-wrong.html#amt-rule1']] } });
+    const rep = S({ id: prefix + 'rep', lane: L.P, kind: 'act', title: 'Reads the reason', sub: 'split payout report', d: { by: 'Partner', p: 'The rejection and its reason code reach the partner through the APEX split payout report. This is the partner’s channel for the outcome of its advices.', src: [['Product doc 6.7', PD + 'reporting']] } });
+    if (O.v === 'released') return [fail, rep, ...releaseSteps(prefix, true)];
+    if (afterUpdateInB) return [fail, rep, S({ id: prefix + 'again', lane: L.P, kind: 'link', title: 'Sends another UPDATE', sub: 'repeat flow B', d: { by: 'Partner', p: 'The partner corrects the split again with UPDATE and the latest advice ID, before P + N. Flow B starts again.', src: [['Story SP-8', ST + 'sp-8-be-pgw-split-payout-api']] } })];
+    return [fail, rep,
+      S({ id: prefix + 'upd', lane: L.P, kind: 'link', title: 'Sends UPDATE, smaller split', sub: 'Payout Advice API, see flow B', go: 'UPDATE', d: { by: 'Partner', p: 'Before P + N, the partner sends the complete corrected split with UPDATE and the latest advice ID. Flow B with UPDATE shows each step of this call.', pre: apiReq('UPDATE', true), preCap: 'Payout Advice API request', src: [['Story SP-8', ST + 'sp-8-be-pgw-split-payout-api']], also: [['Show it in flow B', '#flowB']] } }),
+      S({ id: prefix + 'u', lane: L.G, kind: 'sys', title: 'Checks, forwards U', sub: 'SP-8 2.1–2.6', d: { by: 'PGW', p: 'PGW checks the call (2.5: the advice ID is the latest) and forwards it to APEX as action U.', pre: adviceBody('U', true), preCap: 'Advice to APEX (draft)', src: [['Story SP-8 section 2', ST + 'checks'], ['SP-7 section 1', ST + 'when-pgw-sends-an-advice']] } }),
+      S({ id: prefix + 'uc', lane: L.X, kind: 'sys', title: 'U accepted', sub: 'REJECTED → CREATED', d: { by: 'APEX', p: 'U is allowed while the advice is CREATED, REJECTED or PENDING_MATCH. Structural checks pass; the advice is CREATED again.', src: [['Product doc 6.4', PD + 'real-time-split-advice-api']] } }),
+      Object.assign({}, ok, { id: prefix + 'val2', sub: 'passes this time' })];
+  }
+  function sendSteps(prefix, action, fromApi) {
+    const body = fromApi ? adviceBody(action) : adviceBody('A');
+    if (O.a === 'up') return [
+      S({ id: prefix + 'adv', lane: L.G, kind: 'sys', title: `Send advice ${action}`, sub: 'real time · ACCEPTED', d: { by: 'PGW', p: fromApi ? `PGW forwards the accepted ${action === 'A' ? 'NEW' : 'UPDATE'} to the APEX Split Advice API in real time and returns the result to the partner.` : 'Once the payment succeeds, PGW sends the split to the APEX Split Advice API as action A.',
+        pre: body, preCap: 'Advice to APEX (APEX draft, P3)', list: ['PGW keeps the advice status: pending, sent, APEX response, included in the day-end file.'],
+        src: [['Story SP-7', ST + 'sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3'], ['Product doc 7.5', PD + 'forwarding-advices-to-apex']] } }),
+      S({ id: prefix + 'cr', lane: L.X, kind: 'sys', title: 'Structural checks', sub: 'advice CREATED', d: { by: 'APEX', p: 'APEX checks in the call and answers: split on for the MID, every vendor found, active and linked to the MID, MID matches the transaction, transaction flagged, one of percentage or amount per rule' + (action === 'U' ? ', U only while CREATED, REJECTED or PENDING_MATCH.' : ', A only when no advice exists.'),
+        list: ['If the transaction has not reached APEX yet, the advice is parked as PENDING_MATCH and linked when it arrives.'], src: [['Product doc 6.4', PD + 'real-time-split-advice-api']], also: [['What can go wrong: APEX checks', 'what-can-go-wrong.html#stage-apex'], ['Advice lifecycle', 'advice-lifecycle.html#statuses']] } }),
+      S({ id: prefix + 'eod', lane: L.G, kind: 'sys', title: 'Day-end file', sub: 'after midnight', d: { by: 'PGW, after the Ecomm cut-off (midnight, UAE time)', p: `The day-end file carries every advice created or updated that day, in its latest state. This advice is in it as action ${action}. APEX finds the same split it received over the API: no action.`,
+        list: ['Trailer with the record count; an empty file with count 0 on days with no advices.'], src: [['Story SP-9', ST + 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3'], ['Product doc 6.4', PD + 'day-end-split-advice-file']] } })
+    ];
+    return [
+      S({ id: prefix + 'advx', lane: L.G, kind: 'wait', title: `Send advice ${action}: timeout`, sub: 'PENDING · retry', d: { by: 'PGW', p: 'APEX cannot be reached. PGW keeps the advice PENDING and retries (count and interval: PGW engineering). ' + (fromApi ? 'The API response returns splitAdviceStatus PENDING.' : 'The payment result does not change.'),
+        pre: body, preCap: 'Advice PGW keeps sending (draft)', src: [['Story SP-7 section 4', ST + 'errors-and-retry']], also: [['Try it', 'simulator.html#try=apex-down']] } }),
+      S({ id: prefix + 'hold2', lane: L.X, kind: 'held', title: 'No advice yet', sub: 'still held', d: { by: 'APEX', p: 'The transaction is flagged, so APEX keeps holding it while no advice has arrived.', src: [['Product doc 7.3', PD + 'payout-advice-api']] } }),
+      S({ id: prefix + 'eod', lane: L.G, kind: 'sys', title: 'Day-end file', sub: 'carries the advice', d: { by: 'PGW, after midnight', p: `The day-end file is the backup channel. It carries the advice (action ${action}) in its latest state, PENDING included.`, src: [['Story SP-9', ST + 'sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3']] } }),
+      S({ id: prefix + 'new', lane: L.X, kind: 'sys', title: 'Only in the file', sub: 'processed as new · CREATED', d: { by: 'APEX', p: 'The advice is in the file but was never received over the API, so APEX processes it as new. This is how an API failure is covered.', src: [['Product doc 6.4', PD + 'day-end-split-advice-file']], also: [['What can go wrong: day-end file', 'what-can-go-wrong.html#stage-file']] } })
+    ];
+  }
+
+  // ---------------- flow A ----------------
+  function flowA() {
+    const sp = split(), d = deferred();
+    const row = O.m === 'DYNAMIC' ? (d ? '2.4' : '2.3') : O.m === 'FIXED' ? '2.6' : (d ? '2.9' : '2.8');
+    const s1sub = d ? 'deferredSplit = true' : O.m === 'DYNAMIC' ? `${sp.type} legs` : O.m === 'PROFILE' ? sp.profile : 'no split fields';
+    const steps = [
+      S({ id: 'a1', lane: L.P, kind: 'act', title: 'Create Session', sub: s1sub, ph: 'Order', d: { by: 'Partner → PGW (HPP, Direct API, token CIT/MIT)',
+        p: d ? 'The partner does not know the split yet. It creates the order with deferredSplit = true and will send the split later.' : O.m === 'DYNAMIC' ? 'The partner sends the split with the order: the split type and one leg per vendor.' : O.m === 'PROFILE' ? 'The partner sends the ID of one of its profiles. Each profile holds a predefined split.' : 'A Fixed MID sends no split fields. PGW applies the template configured on the MID.',
+        pre: sessionReq(), preCap: 'POST /payment-intent/api/v2/direct/session', src: [['Story SP-6 section 1', ST + 'new-request-fields-create-session'], ['Product doc 7.2', PD + 'order-creation-request']], tryH: 'simulator.html#cfg=' + O.m.toLowerCase(), tryT: 'Try it in the simulator' } }),
+      S({ id: 'a2', lane: L.G, kind: 'sys', title: 'Check and store the split', sub: `row ${row} · checks 3.1–3.9`, d: { by: 'PGW, before payment',
+        p: (O.m === 'FIXED' ? 'PGW copies the Fixed template legs to the order and checks the total against this order (3.6). ' : O.m === 'PROFILE' && !d ? 'PGW copies the profile’s legs to the order and checks them. ' : d ? 'PGW stores deferredSplit = true and no legs. ' : 'PGW checks the legs and stores them on the order. ') + 'Any failure rejects the session (HTTP 400) and no payment is taken.',
+        list: ['3.1 split fields match the MID and mode', '3.2 Pay only · 3.3 AED only', '3.4 vendor IDs known, once each · 3.5 max 10 legs', '3.6 total ≤ order amount or 100% · 3.7 values above 0, 2 decimals', '3.8 profile ID known · 3.9 not split detail and deferredSplit together'],
+        pre: orderRec(), preCap: 'Stored on the order', src: [['Story SP-6 sections 2–4', ST + 'what-pgw-does-with-each-request'], ['checks', ST + 'checks-before-payment']], also: [['What can go wrong: Create Session', 'what-can-go-wrong.html#stage-cs']] } }),
+      S({ id: 'a3', lane: L.C, kind: 'act', title: 'Pays', sub: 'card, wallet', d: { by: 'Customer', p: 'The customer pays as today. PGW authorises through the existing route (MPGS or CyberSource) and confirms the result to the partner. Split payout changes nothing for the customer.', src: [['Product doc 7.7', PD + 'transaction-flow']] } }),
+      S({ id: 'a4', lane: L.G, kind: 'sys', title: 'Federate the sale', sub: 'splitPayout = Y', d: { by: 'PGW → APEX (createTransaction, real time and day-end transaction file)',
+        p: 'A successful Pay on a split order goes to APEX with the new split flag. PTLF carries the same value in field 49 (waits on P4).', pre: { '...': '... existing createTransaction fields, unchanged', splitPayout: 'Y' }, preCap: 'createTransaction', src: [['Story SP-6 section 6', ST + 'split-flag-to-apex'], ['Product doc 7.4', PD + 'split-flag-in-federation']], tryH: 'simulator.html#s4', tryT: 'See it in the simulator' } }),
+      S({ id: 'a5', lane: L.X, kind: 'held', title: 'Hold the transaction', sub: 'until a valid advice', d: { by: 'APEX', p: 'APEX holds a flagged transaction from payout until a valid advice is PROCESSED for it. Unflagged transactions of the same MID settle as normal. If no valid advice is processed within N days of the scheduled payout date, APEX releases it to the partner.', src: [['Product doc 6.3', PD + 'hold-of-flagged-transactions']] } })
+    ];
+    if (d) {
+      steps.push(S({ id: 'a6w', lane: L.G, kind: 'wait', title: 'No advice yet', sub: 'waits for the split', d: { by: 'PGW', p: 'With deferredSplit and no legs, PGW sends nothing to APEX until the partner calls the Payout Advice API. APEX keeps holding the transaction.', src: [['Story SP-7 section 1', ST + 'when-pgw-sends-an-advice']] } }));
+      steps.push(S({ id: 'a7l', lane: L.P, kind: 'link', title: 'Sends the split later', sub: 'continues in flow B (NEW)', go: 'NEW', d: { by: 'Partner', p: 'The partner sends the complete split with the Payout Advice API, action NEW, before P + N. Flow B shows each step.', src: [['Story SP-8', ST + 'sp-8-be-pgw-split-payout-api'], ['Product doc 7.3', PD + 'payout-advice-api']], also: [['Show it in flow B', '#flowB']] } }));
+      return steps;
+    }
+    steps.push(...sendSteps('a', 'A', false), ...validationSteps('a', false));
+    if (O.v !== 'released') steps.push(...payoutSteps('a'));
+    return steps;
+  }
+  // ---------------- flow B ----------------
+  function flowB() {
+    const act = O.b, A_ = act === 'NEW' ? 'A' : 'U';
+    if (O.m === 'FIXED') return [
+      S({ id: 'b1', lane: L.P, kind: 'act', title: `Payout Advice API ${act}`, sub: 'Fixed MID', d: { by: 'Partner → PGW', p: 'A Fixed MID gets its split from the template on every order.', pre: Object.assign(apiReq(act), { splitPayoutType: split().type }), preCap: 'POST (path: PGW engineering)', src: [['Story SP-8 section 1', ST + 'request']] } }),
+      S({ id: 'b2x', lane: L.G, kind: 'fail', title: 'Rejected · HTTP 400', sub: 'check 2.1', d: { by: 'PGW', p: 'Check 2.1 fails: "Not allowed for Fixed split." Nothing changes on the order. To change a Fixed split, Geidea changes the template.', src: [['Story SP-8 section 2', ST + 'checks']], tryH: 'simulator.html#try=api-fixed', tryT: 'Try it' } })];
+    const steps = [
+      S({ id: 'b1', lane: L.P, kind: 'act', title: `Payout Advice API ${act}`, sub: act === 'NEW' ? 'complete split' : 'latest advice ID', d: { by: 'Partner → PGW (a separate merchant API)',
+        p: act === 'NEW' ? 'The partner sends the complete split for a paid order it created with deferredSplit.' : 'The partner replaces the whole split, for example after APEX rejected it. It must send the latest advice ID, so an older retried request cannot undo a newer correction.',
+        pre: apiReq(act, act === 'UPDATE'), preCap: 'POST /pgw/api/v1/direct/splitPayout (name and path: PGW engineering)', src: [['Story SP-8 section 1', ST + 'request'], ['Product doc 7.3', PD + 'payout-advice-api']], tryH: 'simulator.html#s4b', tryT: 'Try it in the simulator' } }),
+      S({ id: 'b2', lane: L.G, kind: 'sys', title: 'Check the call', sub: 'SP-8 2.1–2.6', d: { by: 'PGW', p: 'Any failure rejects the call (HTTP 400) with a message; nothing changes on the order and the transaction stays held.',
+        list: ['2.1 split on; mode Dynamic or Profile', '2.2 order exists, belongs to the MID, Pay succeeded', '2.3 order has splitPayout = true', act === 'NEW' ? '2.4 NEW: order created with deferredSplit, no advice yet' : '2.5 UPDATE: advice ID is the latest', '2.6 the split passes SP-6 checks 3.4 to 3.8'],
+        src: [['Story SP-8 section 2', ST + 'checks']], also: [['What can go wrong: Payout Advice API', 'what-can-go-wrong.html#stage-api']] } }),
+      ...sendSteps('b', A_, true),
+      ...validationSteps('b', act === 'UPDATE')
+    ];
+    if (O.v === 'pass' || (O.v === 'fixed' && act === 'NEW')) steps.push(...payoutSteps('b'));
+    return steps;
+  }
+
+  // ---------------- render ----------------
+  const FL = { A: { wrap: 'aWrap', lanes: 'aLanes', list: 'aList', det: 'aDetail', pos: 'aPos', hint: 'aHint', cur: 0, steps: [], prev: {}, build: flowA },
+               B: { wrap: 'bWrap', lanes: 'bLanes', list: 'bList', det: 'bDetail', pos: 'bPos', hint: 'bHint', cur: 0, steps: [], prev: {}, build: flowB } };
+  function layout(steps) { let c = 0; steps.forEach((s, i) => { if (!(s.par && i > 0)) c++; s.col = c; }); return c; }
+  function cardHtml(s, i, list) {
+    const cls = ['card', s.kind === 'sys' ? '' : s.kind].join(' ');
+    return `<button type="button" class="${cls}" data-i="${i}" data-id="${s.id}"><span class="n">${String(i + 1).padStart(2, '0')}${list ? `<span class="lane">${LANES[s.lane]}</span>` : ''}</span>${s.title}${s.sub ? `<span class="sub">${s.sub}</span>` : ''}</button>`;
+  }
+  const PH = id => /pay$|ven$|res$|rel$|rp$|rv$|pdue$/.test(id) ? 'Payout'
+    : /val|valx|rep|upd|u$|uc$|again/.test(id) ? 'Validation'
+    : /^a[1-4]$/.test(id) ? 'Order and payment'
+    : /^b[12]x?$/.test(id) ? 'Payout Advice API'
+    : id[0] === 'b' ? 'Advice to APEX' : 'Hold and advice';
+  function render(k) {
+    const F = FL[k], steps = F.build(); F.steps = steps;
+    steps.forEach(st => st.ph = PH(st.id));
+    const cols = layout(steps);
+    const lanesUsed = k === 'B' ? [1, 2, 3, 4] : [0, 1, 2, 3, 4];
+    const g = $(F.lanes);
+    g.style.gridTemplateColumns = `96px repeat(${cols}, minmax(100px, 1fr))`;
+    g.style.minWidth = (96 + cols * 100) + 'px';
+    g.style.gridTemplateRows = `auto repeat(${lanesUsed.length}, minmax(72px, auto))`;
+    let h = '<svg class="links" aria-hidden="true"></svg><div style="grid-row:1;grid-column:1"></div>';
+    // phase headers: consecutive runs of the same phase
+    const runs = []; steps.forEach(st => { const last = runs[runs.length - 1]; if (last && last[0] === st.ph) last[2] = st.col; else runs.push([st.ph, st.col, st.col]); });
+    runs.forEach(([t, a, b]) => { h += `<div class="phase" style="grid-column:${a + 1} / ${b + 2}" title="${t}">${t}</div>`; });
+    lanesUsed.forEach((l, r) => { const alt = r % 2 ? ' alt' : ''; h += `<div class="lane-label${alt}" style="grid-row:${r + 2}">${LANES[l]}</div><div class="lane-bg${alt}" style="grid-row:${r + 2}"></div>`; });
+    g.innerHTML = h;
+    steps.forEach((s, i) => { const w = document.createElement('div'); w.innerHTML = cardHtml(s, i, false); const c = w.firstChild; c.style.gridRow = lanesUsed.indexOf(s.lane) + 2; c.style.gridColumn = s.col + 1; g.appendChild(c); });
+    // mobile list
+    $(F.list).innerHTML = steps.map((s, i) => cardHtml(s, i, true)).join('');
+    // change flash
+    const now = {}; steps.forEach(s => now[s.id] = s.title + '|' + s.sub + '|' + s.kind);
+    const first = !Object.keys(F.prev).length;
+    if (!first) document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => { if (F.prev[c.dataset.id] !== now[c.dataset.id]) c.classList.add('chg'); });
+    F.prev = now;
+    document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => c.onclick = () => { const s = F.steps[+c.dataset.i]; if (s.go) { O.b = s.go; update(); setTimeout(() => $('flowB').scrollIntoView({ block: 'start' }), 30); } go(k, +c.dataset.i); });
+    F.cur = Math.min(F.cur, steps.length - 1);
+    requestAnimationFrame(() => { draw(k); go(k, F.cur); });
+  }
+  function draw(k) {
+    const F = FL[k], g = $(F.lanes); if (!g.offsetParent) return;
+    const svg = g.querySelector('svg'), G = g.getBoundingClientRect();
+    svg.setAttribute('width', G.width); svg.setAttribute('height', G.height);
+    const cards = [...g.querySelectorAll('.card')];
+    const byCol = {}; F.steps.forEach((s, i) => (byCol[s.col] = byCol[s.col] || []).push(i));
+    const edges = [];
+    Object.keys(byCol).map(Number).sort((a, b) => a - b).forEach(c => { if (byCol[c - 1]) { const from = byCol[c - 1].filter(i => !F.steps[i].par || byCol[c - 1].length === 1).slice(0, 1); byCol[c].forEach(t => from.forEach(f => edges.push([f, t]))); } });
+    svg.innerHTML = '<defs><marker id="ah' + k + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#94A3B8"/></marker><marker id="ahk' + k + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0F172A"/></marker></defs>' +
+      edges.map(([a, b]) => {
+        const A = cards[a].getBoundingClientRect(), B = cards[b].getBoundingClientRect();
+        const x1 = A.right - G.left, y1 = A.top + A.height / 2 - G.top, x2 = B.left - G.left, y2 = B.top + B.height / 2 - G.top;
+        const p = Math.abs(y1 - y2) < 4 ? `M${x1},${y1} L${x2 - 2},${y2}` : `M${x1},${y1} L${(x1 + x2) / 2},${y1} L${(x1 + x2) / 2},${y2} L${x2 - 2},${y2}`;
+        return `<path data-t="${b}" d="${p}" marker-end="url(#ah${k})"/>`;
+      }).join('');
+    const wrap = $(F.wrap); $(F.hint).style.display = wrap.scrollWidth > wrap.clientWidth + 2 ? 'block' : 'none';
+    mark(k);
+  }
+  function mark(k) {
+    const F = FL[k];
+    document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => { if (+c.dataset.i === F.cur) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current'); });
+    $(F.lanes).querySelectorAll('svg path[data-t]').forEach(p => { const on = +p.dataset.t === F.cur; p.classList.toggle('on', on); p.setAttribute('marker-end', `url(#${on ? 'ahk' : 'ah'}${k})`); });
+  }
+  function go(k, i) {
+    const F = FL[k]; F.cur = Math.max(0, Math.min(F.steps.length - 1, i));
+    const s = F.steps[F.cur], d = s.d;
+    const links = [];
+    if (d.tryH) links.push(`<a class="try" href="${d.tryH}">${d.tryT}</a>`);
+    (d.src || []).forEach(([t, h]) => links.push(`<a href="${h}">${t}</a>`));
+    (d.also || []).forEach(([t, h]) => links.push(`<a href="${h}" ${h === '#flowB' ? `data-tob="${s.go || ''}"` : ''}>${t}</a>`));
+    $(F.det).innerHTML = `<div><h3>${F.cur + 1}. ${s.title}</h3><p class="by">${d.by}</p>${d.flag ? `<div class="flag">${d.flag}</div>` : ''}<p>${d.p}</p>${d.list ? `<ul>${d.list.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}<div class="lk">${links.join('')}</div></div>
+      <div>${d.pre ? `<p class="cap">${d.preCap || ''}</p><pre>${json(d.pre)}</pre>` : '<p class="empty">No payload at this step.</p>'}</div>`;
+    $(F.det).querySelectorAll('[data-tob]').forEach(a => a.onclick = e => { e.preventDefault(); if (a.dataset.tob) { O.b = a.dataset.tob; update(); } $('flowB').scrollIntoView({ block: 'start' }); });
+    $(F.pos).textContent = `Step ${F.cur + 1} of ${F.steps.length}`;
+    document.querySelectorAll(`[data-f="${k}"]`).forEach(b => b.disabled = (+b.dataset.go < 0 && F.cur === 0) || (+b.dataset.go > 0 && F.cur === F.steps.length - 1));
+    mark(k);
+  }
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => go(b.dataset.f, FL[b.dataset.f].cur + +b.dataset.go));
+
+  function descs() {
+    const sp = split(), d = deferred();
+    $('aStart').textContent = `${O.m[0] + O.m.slice(1).toLowerCase()} MID · ${sp.type.toLowerCase()} split${O.m === 'PROFILE' ? ' (' + sp.profile + ')' : ''}${d ? ' · sent later' : ''}`;
+    $('aDesc').textContent = d ? 'The partner creates the order without the split. PGW flags the transaction, APEX holds it, and the flow continues when the partner sends the split (flow B).'
+      : `The split (${legsText()}) travels with the order. ` + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: 'APEX rejects the amounts; the partner corrects them with UPDATE.', released: 'APEX rejects the amounts; the partner does not correct them in time.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
+    $('bStart').textContent = O.m === 'FIXED' ? 'Not available for a Fixed MID' : O.b === 'NEW' ? 'Starts with: a paid order created with deferredSplit, held at APEX, no advice' : 'Starts with: a paid split order whose advice APEX rejected (or that the partner wants to change)';
+    $('bDesc').textContent = O.m === 'FIXED' ? 'PGW rejects the call at check 2.1.' : (O.b === 'NEW' ? 'The partner sends the split after payment. ' : 'The partner replaces the whole split. ') + ({ pass: 'APEX accepts it and pays on the payout date.', fixed: O.b === 'NEW' ? 'APEX rejects the amounts first; the partner then corrects them with UPDATE (flow B with UPDATE).' : 'APEX rejects the amounts again; the partner sends another UPDATE.', released: 'APEX rejects the amounts and the partner does not correct them in time.' }[O.v]) + (O.a === 'down' ? ' The real-time call to APEX fails; the day-end file delivers the advice.' : '');
+  }
+  function update() {
+    ctrlHtml(); descs(); render('A'); render('B');
+    const q = Object.entries(O).map(([k, v]) => `${k}=${String(v).toLowerCase()}`).join('&');
+    history.replaceState(null, '', '#' + q);
+  }
+  // read hash state
+  function readHash() {
+    Object.assign(O, DEF);
+    (location.hash.slice(1).split('&')).forEach(kv => { const [k, v] = kv.split('='); if (!(k in O) || !v) return; const opt = k === 'b' ? ['NEW', 'UPDATE'] : (CTRL.find(c => c[0] === k) || [, , []])[2].map(o => o[0]); const hit = opt.find(o => o.toLowerCase() === v.toLowerCase()); if (hit) O[k] = hit; });
+    if (O.m === 'FIXED') O.s = 'with';
+  }
+  readHash();
+  addEventListener('hashchange', () => { readHash(); update(); });
+  addEventListener('resize', () => { draw('A'); draw('B'); });
+  document.fonts && document.fonts.ready.then(() => { draw('A'); draw('B'); });
+  update();
+  window.__e2e = { O, FL, update, flowA, flowB };
+})();
+</script>
+</body>
+</html>

@@ -15,6 +15,10 @@
     "order-creation-request": "../simulator.html",
     "payout-advice-api": [
       [
+        "End-to-end view: flow B",
+        "../end-to-end.html#s=deferred&b=new"
+      ],
+      [
         "Simulator: Payout Advice API",
         "../simulator.html#s4b"
       ],
@@ -23,7 +27,16 @@
         "../what-can-go-wrong.html#stage-api"
       ]
     ],
-    "transaction-flow": "../simulator.html",
+    "transaction-flow": [
+      [
+        "End-to-end view",
+        "../end-to-end.html"
+      ],
+      [
+        "Simulator",
+        "../simulator.html"
+      ]
+    ],
     "amount-validation": [
       [
         "Money flow: amount validation",
@@ -84,10 +97,20 @@
         "What can go wrong: refunds and chargebacks",
         "../what-can-go-wrong.html#after-refund"
       ]
+    ],
+    "solution-at-a-glance": [
+      [
+        "End-to-end view",
+        "../end-to-end.html"
+      ]
     ]
   },
   "split-payout/docs/stories.html": {
     "story-map": [
+      [
+        "End-to-end view",
+        "../end-to-end.html"
+      ],
       [
         "Onboarding",
         "../onboarding.html"
@@ -191,6 +214,10 @@
     ],
     "sp-6-be-create-session-with-split-payout": [
       [
+        "End-to-end view",
+        "../end-to-end.html"
+      ],
+      [
         "Simulator: Create Session",
         "../simulator.html#s2"
       ],
@@ -235,6 +262,10 @@
     ],
     "sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3": [
       [
+        "End-to-end view: APEX not reachable",
+        "../end-to-end.html#a=down"
+      ],
+      [
         "Simulator: advice to APEX",
         "../simulator.html#s4"
       ],
@@ -263,6 +294,10 @@
     ],
     "sp-8-be-pgw-split-payout-api": [
       [
+        "End-to-end view: deferred split",
+        "../end-to-end.html#s=deferred&b=new"
+      ],
+      [
         "Simulator: Payout Advice API",
         "../simulator.html#s4b"
       ],
@@ -282,6 +317,10 @@
       ]
     ],
     "sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3": [
+      [
+        "End-to-end view",
+        "../end-to-end.html#a=down"
+      ],
       [
         "Simulator: day-end file",
         "../simulator.html#s5"
