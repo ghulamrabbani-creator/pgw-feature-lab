@@ -25,7 +25,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offs
 .lens-lbl{font:12px var(--mono);padding:0 8px}
 .lens-sw button{font:500 13px var(--body);border:0;border-radius:999px;padding:6px 12px;cursor:pointer;background:transparent;transition:background .2s,color .2s}
 .lens-note{margin:0;padding:8px 24px;text-align:center;font-size:14px}
-.hero .inner{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:48px;align-items:center;padding-top:56px;padding-bottom:56px}
+.hero .inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center;padding-top:56px;padding-bottom:56px}
 .hero h1{margin:0 0 16px}
 .eyebrow{font:13px var(--mono);margin:0 0 10px}
 .lead{font-size:18px;max-width:640px;margin:0 0 24px}
@@ -103,7 +103,7 @@ h1,h2,h3{font-family:var(--head);font-weight:700;letter-spacing:-.015em}
 .hero h1{font-size:44px;line-height:1.1}
 .eyebrow{color:var(--accent);display:inline-block;background:#EFF6FF;padding:2px 10px;border-radius:999px}
 .lead{color:var(--text-2)}.hero-stats{color:var(--text-2)}
-.hero-stats li{background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 14px}.hero-stats{gap:10px}
+.hero-stats li{background:#fff;border:1px solid var(--border);border-radius:10px;padding:6px 12px}.hero-stats{gap:10px}
 .hero-stats b{font-family:var(--head);color:var(--ink)}
 .btn{background:var(--accent);color:#fff;border-radius:10px;border:1px solid var(--accent)}.btn:hover{background:#1E40AF}
 .btn.ghost{background:#fff;color:var(--ink);border-color:var(--border)}.btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
@@ -132,33 +132,26 @@ td{border-top:1px solid var(--border)}td.d{color:var(--text-2)}
 .ftr{color:var(--text-2)}
 </style>
 </head>
-<body data-lens="all" class="opt-workbench">
+<body class="opt-workbench">
 <header class="hdr"><div class="inner">
 <a class="brand" href="../"><span>pgw/</span>Feature Lab</a>
-<nav class="nav" aria-label="Sections"><a href="#live">Features</a><a href="#coming">Coming</a><a href="#read">How to read</a><a href="#new">What's new</a></nav>
-<div class="lens-sw" role="group" aria-label="Audience lens">
-<span class="lens-lbl">Lens</span>
-<button type="button" data-lens="all" aria-pressed="true">All</button>
-<button type="button" data-lens="e" aria-pressed="false">Engineering</button>
-<button type="button" data-lens="b" aria-pressed="false">Business &amp; Ops</button>
-</div>
+<nav class="nav" aria-label="Sections"><a href="#solutioned">Solutioning complete</a><a href="#coming">Coming to the Lab</a></nav>
 </div></header>
-<p class="lens-note" id="lens-note" aria-live="polite" hidden></p>
 <main>
 <section class="hero"><div class="inner">
 <div class="hero-copy">
 <p class="eyebrow">payment gateway · new features</p>
 <h1>How new PGW features work, end to end</h1>
 <p class="lead">Each feature has its documents and visual pages: flows, simulators and scenarios that show the configuration, the calls between systems and what can go wrong. The documents are the reference; the visual pages illustrate them.</p>
-<ul class="hero-stats"><li><b>2</b> features live</li><li><b>10</b> visual pages</li><li><b>4</b> documents</li><li><b>3</b> coming</li></ul>
-<p class="hero-cta"><a class="btn" href="#live">See the features</a><a class="btn ghost" href="#read">How to read this Lab</a></p>
+<ul class="hero-stats"><li><b>2</b> solutioning complete</li><li><b>10</b> visual pages</li><li><b>4</b> documents</li><li><b>3</b> coming</li></ul>
+<p class="hero-cta"><a class="btn" href="#solutioned">See the features</a><a class="btn ghost" href="#coming">Coming next</a></p>
 </div>
 <figure class="hero-vis"><img src="../assets/img/hero-workbench.webp" width="1344" height="768" alt="Isometric workbench with blue, green and orange pipes running through modular blocks." loading="eager"><figcaption>Illustration.</figcaption></figure>
 </div></section>
 
-<section class="sec" id="live"><div class="inner">
-<h2>Live features</h2>
-<p class="sec-lead">Use the lens at the top to highlight the best entry points for your role. Nothing is hidden.</p>
+<section class="sec" id="solutioned"><div class="inner">
+<h2>Solutioning complete</h2>
+<p class="sec-lead">Features with their solution documents written. Each has a hub with the documents and the visual pages.</p>
 <div class="feats"><article class="feat" id="f-split-payout">
 <div class="feat-head">
 <div><p class="feat-meta">MVP · in build</p><h3><a href="../split-payout/">Split Payout</a></h3></div>
@@ -167,8 +160,8 @@ td{border-top:1px solid var(--border)}td.d{color:var(--text-2)}
 <p class="feat-line">One partner order, paid out to the partner and its vendors from one transaction.</p>
 <p class="feat-count">7 visual pages · 2 documents</p>
 <div class="feat-cols">
-<div><h4>Documents</h4><ul class="eps"><li class="ep" data-aud="eb"><a href="../split-payout/docs/product.html">Product document</a><span class="ver">v1.6</span><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="e"><a href="../split-payout/docs/stories.html">PGW dev stories</a><span class="ver">v0.5</span><span class="auds"><span class="aud aud-e">Eng</span></span></li></ul></div>
-<div><h4>Visual pages</h4><ul class="eps"><li class="ep" data-aud="eb"><a href="../split-payout/end-to-end.html">End-to-end view</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="b"><a href="../split-payout/money-flow.html">Money flow</a><span class="auds"><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="b"><a href="../split-payout/onboarding.html">Onboarding</a><span class="auds"><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="eb"><a href="../split-payout/split-modes.html">Split modes</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="e"><a href="../split-payout/simulator.html">Config &amp; Payment Simulator</a><span class="auds"><span class="aud aud-e">Eng</span></span></li><li class="ep" data-aud="e"><a href="../split-payout/advice-lifecycle.html">Advice lifecycle</a><span class="auds"><span class="aud aud-e">Eng</span></span></li><li class="ep" data-aud="eb"><a href="../split-payout/what-can-go-wrong.html">What can go wrong</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li></ul></div>
+<div><h4>Documents</h4><ul class="eps"><li class="ep"><a href="../split-payout/docs/product.html">Product document</a><span class="ver">v1.6</span></li><li class="ep"><a href="../split-payout/docs/stories.html">PGW dev stories</a><span class="ver">v0.5</span></li></ul></div>
+<div><h4>Visual pages</h4><ul class="eps"><li class="ep"><a href="../split-payout/end-to-end.html">End-to-end view</a></li><li class="ep"><a href="../split-payout/money-flow.html">Money flow</a></li><li class="ep"><a href="../split-payout/onboarding.html">Onboarding</a></li><li class="ep"><a href="../split-payout/split-modes.html">Split modes</a></li><li class="ep"><a href="../split-payout/simulator.html">Config &amp; Payment Simulator</a></li><li class="ep"><a href="../split-payout/advice-lifecycle.html">Advice lifecycle</a></li><li class="ep"><a href="../split-payout/what-can-go-wrong.html">What can go wrong</a></li></ul></div>
 </div>
 <div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>PGW</li><li>APEX</li><li>MA</li><li>Merchant Portal</li></ul>
 <a class="open" href="../split-payout/">Open Split Payout hub <svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg></a></div>
@@ -181,8 +174,8 @@ td{border-top:1px solid var(--border)}td.d{color:var(--text-2)}
 <p class="feat-line">The customer pays on HPP in their own currency; the merchant stays in AED.</p>
 <p class="feat-count">3 visual pages · 2 documents (drafts)</p>
 <div class="feat-cols">
-<div><h4>Documents</h4><ul class="eps"><li class="ep" data-aud="eb"><a href="../mcp/docs/requirements.html">Solution requirements</a><span class="ver">v3.0</span><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="e"><a href="../mcp/docs/stories.html">PGW dev stories</a><span class="ver">v0.1</span><span class="auds"><span class="aud aud-e">Eng</span></span></li></ul></div>
-<div><h4>Visual pages</h4><ul class="eps"><li class="ep" data-aud="eb"><a href="../mcp/end-to-end.html">End-to-end view</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="eb"><a href="../mcp/hpp-simulator.html">HPP simulator</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="e"><a href="../mcp/calculator.html">Calculator</a><span class="auds"><span class="aud aud-e">Eng</span></span></li></ul><p class="planned">Planned: Order model, Rate file lifecycle, What can go wrong. Parked: Federation and enrichment.</p></div>
+<div><h4>Documents</h4><ul class="eps"><li class="ep"><a href="../mcp/docs/requirements.html">Solution requirements</a><span class="ver">v3.0</span></li><li class="ep"><a href="../mcp/docs/stories.html">PGW dev stories</a><span class="ver">v0.1</span></li></ul></div>
+<div><h4>Visual pages</h4><ul class="eps"><li class="ep"><a href="../mcp/end-to-end.html">End-to-end view</a></li><li class="ep"><a href="../mcp/hpp-simulator.html">HPP simulator</a></li><li class="ep"><a href="../mcp/calculator.html">Calculator</a></li></ul><p class="planned">Planned: Order model, Rate file lifecycle, What can go wrong. Parked: Federation and enrichment.</p></div>
 </div>
 <div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>PGW</li><li>HPP</li><li>MA</li><li>APEX</li><li>Planet</li></ul>
 <a class="open" href="../mcp/">Open MCP hub <svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg></a></div>
@@ -209,42 +202,7 @@ td{border-top:1px solid var(--border)}td.d{color:var(--text-2)}
 </article></div>
 </div></section>
 
-<section class="sec" id="read"><div class="inner">
-<h2>How to read this Lab</h2>
-<ol class="lenses"><li class="lens" data-aud="eb"><h3>Visual flows</h3><p>Swimlanes, money flows and lifecycles. Switch the settings and the flow redraws.</p><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="lens" data-aud="e"><h3>Simulators</h3><p>Try a scenario and see each check, decision and record. Marked Illustrative; numbers are fictional.</p><span class="auds"><span class="aud aud-e">Eng</span></span></li><li class="lens" data-aud="eb"><h3>Documents and stories</h3><p>The reference. Published from the final .docx; headings carry buttons to the matching visual page.</p><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li></ol>
-<h3 class="legend-t">Status legend</h3>
-<p class="sec-lead">Every state has a colour, an icon, a word and a border style, so it reads without colour too.</p>
-<ul class="legend"><li><span class="st st-pass"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7" /></svg>Pass / money moving</span></li><li><span class="st st-released"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg>Released / kept by Geidea</span></li><li><span class="st st-held"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 3.5v9M10.5 3.5v9" /></svg>Held at APEX</span></li><li><span class="st st-rejected"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l8 8M12 4l-8 8" /></svg>Rejected</span></li><li><span class="st st-undef"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 6a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.4M8 12.6v.2" /></svg>Not defined / waiting</span></li></ul>
-</div></section>
-
-<section class="sec" id="new"><div class="inner">
-<h2>What's new</h2>
-<div class="tbl"><table><thead><tr><th>Date</th><th>Feature</th><th>Update</th></tr></thead><tbody><tr><td class="d">25-Nov-2026</td><td class="f">MCP</td><td><a href="../mcp/docs/requirements.html">Solution requirements v3.0 and PGW stories v0.1 published, with buttons to the visual pages</a></td></tr><tr><td class="d">25-Nov-2026</td><td class="f">MCP</td><td><a href="../mcp/calculator.html">Calculator: quote rounded up, refund planner with the last-cent rule</a></td></tr><tr><td class="d">25-Nov-2026</td><td class="f">MCP</td><td><a href="../mcp/end-to-end.html">End-to-end view: rate file, HPP offer, payment, clearing, settlement and refunds in one swimlane</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">MCP</td><td><a href="../mcp/hpp-simulator.html">Section opened: hub page and HPP simulator</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">Split Payout</td><td><a href="../split-payout/advice-lifecycle.html">Rule of 24-Nov: an UPDATE is accepted on the transaction date only</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">Split Payout</td><td><a href="../split-payout/end-to-end.html">Updates reach APEX only through the day-end file (APEX alignment of 23-Nov)</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">Split Payout</td><td><a href="../split-payout/end-to-end.html">End-to-end view, Advice lifecycle and What can go wrong added; story and page links both ways</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">Split Payout</td><td><a href="../split-payout/onboarding.html">Onboarding swimlane and Split modes added</a></td></tr></tbody></table></div>
-</div></section>
 </main>
 <footer class="ftr"><div class="inner">Pages marked Illustrative use fictional numbers. The published documents are the reference.</div></footer>
-<script>
-(function () {
-  var btns = document.querySelectorAll('.lens-sw button');
-  var note = document.getElementById('lens-note');
-  var names = { e: 'Engineering', b: 'Business & Ops' };
-  function apply(l) {
-    document.body.setAttribute('data-lens', l);
-    btns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.lens === l ? 'true' : 'false'); });
-    document.querySelectorAll('[data-aud]').forEach(function (el) {
-      el.classList.toggle('hit', l !== 'all' && el.dataset.aud.indexOf(l) > -1);
-      el.classList.toggle('dim', l !== 'all' && el.dataset.aud.indexOf(l) === -1);
-    });
-    note.hidden = l === 'all';
-    note.textContent = l === 'all' ? '' : 'Highlighting entry points for ' + names[l] + '. Everything else stays available.';
-    try { localStorage.setItem('lab-lens', l); } catch (e) {}
-  }
-  btns.forEach(function (b) { b.addEventListener('click', function () { apply(b.dataset.lens); }); });
-  var saved = 'all';
-  try { saved = localStorage.getItem('lab-lens') || 'all'; } catch (e) {}
-  apply(['all', 'e', 'b'].indexOf(saved) > -1 ? saved : 'all');
-  window.__home = { apply: apply };
-})();
-</script>
 </body>
 </html>

@@ -120,8 +120,8 @@ def aud_tags(aud):
 
 
 def entry(label, href, aud, extra=""):
-    return (f'<li class="ep" data-aud="{aud}"><a href="{esc(href)}">{esc(label)}</a>'
-            f'{extra}<span class="auds">{aud_tags(aud)}</span></li>')
+    return (f'<li class="ep"><a href="{esc(href)}">{esc(label)}</a>'
+            f'{extra}</li>')
 
 
 def feature_card(f):
@@ -165,30 +165,23 @@ def body(hero_visual, numbered):
                    for d, f, u, h in NEWS)
     return f"""<header class="hdr"><div class="inner">
 <a class="brand" href="../"><span>pgw/</span>Feature Lab</a>
-<nav class="nav" aria-label="Sections"><a href="#live">Features</a><a href="#coming">Coming</a><a href="#read">How to read</a><a href="#new">What's new</a></nav>
-<div class="lens-sw" role="group" aria-label="Audience lens">
-<span class="lens-lbl">Lens</span>
-<button type="button" data-lens="all" aria-pressed="true">All</button>
-<button type="button" data-lens="e" aria-pressed="false">Engineering</button>
-<button type="button" data-lens="b" aria-pressed="false">Business &amp; Ops</button>
-</div>
+<nav class="nav" aria-label="Sections"><a href="#solutioned">Solutioning complete</a><a href="#coming">Coming to the Lab</a></nav>
 </div></header>
-<p class="lens-note" id="lens-note" aria-live="polite" hidden></p>
 <main>
 <section class="hero"><div class="inner">
 <div class="hero-copy">
 <p class="eyebrow">payment gateway · new features</p>
 <h1>How new PGW features work, end to end</h1>
 <p class="lead">Each feature has its documents and visual pages: flows, simulators and scenarios that show the configuration, the calls between systems and what can go wrong. The documents are the reference; the visual pages illustrate them.</p>
-<ul class="hero-stats"><li><b>2</b> features live</li><li><b>10</b> visual pages</li><li><b>4</b> documents</li><li><b>3</b> coming</li></ul>
-<p class="hero-cta"><a class="btn" href="#live">See the features</a><a class="btn ghost" href="#read">How to read this Lab</a></p>
+<ul class="hero-stats"><li><b>2</b> solutioning complete</li><li><b>10</b> visual pages</li><li><b>4</b> documents</li><li><b>3</b> coming</li></ul>
+<p class="hero-cta"><a class="btn" href="#solutioned">See the features</a><a class="btn ghost" href="#coming">Coming next</a></p>
 </div>
 <figure class="hero-vis">{hero_visual}</figure>
 </div></section>
 
-<section class="sec" id="live"><div class="inner">
-<h2>{n(1)}Live features</h2>
-<p class="sec-lead">Use the lens at the top to highlight the best entry points for your role. Nothing is hidden.</p>
+<section class="sec" id="solutioned"><div class="inner">
+<h2>{n(1)}Solutioning complete</h2>
+<p class="sec-lead">Features with their solution documents written. Each has a hub with the documents and the visual pages.</p>
 <div class="feats">{live}</div>
 </div></section>
 
@@ -198,43 +191,8 @@ def body(hero_visual, numbered):
 <div class="soons">{coming}</div>
 </div></section>
 
-<section class="sec" id="read"><div class="inner">
-<h2>{n(3)}How to read this Lab</h2>
-<ol class="lenses">{lenses}</ol>
-<h3 class="legend-t">Status legend</h3>
-<p class="sec-lead">Every state has a colour, an icon, a word and a border style, so it reads without colour too.</p>
-<ul class="legend">{states}</ul>
-</div></section>
-
-<section class="sec" id="new"><div class="inner">
-<h2>{n(4)}What's new</h2>
-<div class="tbl"><table><thead><tr><th>Date</th><th>Feature</th><th>Update</th></tr></thead><tbody>{news}</tbody></table></div>
-</div></section>
 </main>
-<footer class="ftr"><div class="inner">Pages marked Illustrative use fictional numbers. The published documents are the reference.</div></footer>
-<script>
-(function () {{
-  var btns = document.querySelectorAll('.lens-sw button');
-  var note = document.getElementById('lens-note');
-  var names = {{ e: 'Engineering', b: 'Business & Ops' }};
-  function apply(l) {{
-    document.body.setAttribute('data-lens', l);
-    btns.forEach(function (b) {{ b.setAttribute('aria-pressed', b.dataset.lens === l ? 'true' : 'false'); }});
-    document.querySelectorAll('[data-aud]').forEach(function (el) {{
-      el.classList.toggle('hit', l !== 'all' && el.dataset.aud.indexOf(l) > -1);
-      el.classList.toggle('dim', l !== 'all' && el.dataset.aud.indexOf(l) === -1);
-    }});
-    note.hidden = l === 'all';
-    note.textContent = l === 'all' ? '' : 'Highlighting entry points for ' + names[l] + '. Everything else stays available.';
-    try {{ localStorage.setItem('lab-lens', l); }} catch (e) {{}}
-  }}
-  btns.forEach(function (b) {{ b.addEventListener('click', function () {{ apply(b.dataset.lens); }}); }});
-  var saved = 'all';
-  try {{ saved = localStorage.getItem('lab-lens') || 'all'; }} catch (e) {{}}
-  apply(['all', 'e', 'b'].indexOf(saved) > -1 ? saved : 'all');
-  window.__home = {{ apply: apply }};
-}})();
-</script>"""
+<footer class="ftr"><div class="inner">Pages marked Illustrative use fictional numbers. The published documents are the reference.</div></footer>"""
 
 
 # ------------------------------------------------------------ shared CSS
@@ -256,7 +214,7 @@ a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offs
 .lens-lbl{font:12px var(--mono);padding:0 8px}
 .lens-sw button{font:500 13px var(--body);border:0;border-radius:999px;padding:6px 12px;cursor:pointer;background:transparent;transition:background .2s,color .2s}
 .lens-note{margin:0;padding:8px 24px;text-align:center;font-size:14px}
-.hero .inner{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:48px;align-items:center;padding-top:56px;padding-bottom:56px}
+.hero .inner{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center;padding-top:56px;padding-bottom:56px}
 .hero h1{margin:0 0 16px}
 .eyebrow{font:13px var(--mono);margin:0 0 10px}
 .lead{font-size:18px;max-width:640px;margin:0 0 24px}
@@ -436,7 +394,7 @@ h1,h2,h3{font-family:var(--head);font-weight:700;letter-spacing:-.015em}
 .hero h1{font-size:44px;line-height:1.1}
 .eyebrow{color:var(--accent);display:inline-block;background:#EFF6FF;padding:2px 10px;border-radius:999px}
 .lead{color:var(--text-2)}.hero-stats{color:var(--text-2)}
-.hero-stats li{background:#fff;border:1px solid var(--border);border-radius:10px;padding:8px 14px}.hero-stats{gap:10px}
+.hero-stats li{background:#fff;border:1px solid var(--border);border-radius:10px;padding:6px 12px}.hero-stats{gap:10px}
 .hero-stats b{font-family:var(--head);color:var(--ink)}
 .btn{background:var(--accent);color:#fff;border-radius:10px;border:1px solid var(--accent)}.btn:hover{background:#1E40AF}
 .btn.ghost{background:#fff;color:var(--ink);border-color:var(--border)}.btn.ghost:hover{border-color:var(--accent);color:var(--accent)}
@@ -516,7 +474,7 @@ def page(key):
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?{t['fonts']}&display=swap">
 <style>{BASE_CSS}{t['css']}</style>
 </head>
-<body data-lens="all" class="opt-{key}">
+<body class="opt-{key}">
 {body(HERO[t['hero']], t['numbered'])}
 </body>
 </html>
