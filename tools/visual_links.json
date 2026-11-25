@@ -340,5 +340,127 @@
         "../what-can-go-wrong.html#cs-profile-none"
       ]
     ]
+  },
+  "mcp/docs/requirements.html": {
+    "how-the-customer-experiences-this": [
+      [
+        "HPP simulator",
+        "../hpp-simulator.html#try=gb-card"
+      ]
+    ],
+    "the-three-currencies": [
+      [
+        "End-to-end view",
+        "../end-to-end.html"
+      ]
+    ],
+    "how-it-works": [
+      [
+        "End-to-end view",
+        "../end-to-end.html"
+      ]
+    ],
+    "pgw-pgw-engineering-team": [
+      [
+        "HPP simulator",
+        "../hpp-simulator.html"
+      ],
+      [
+        "End-to-end view",
+        "../end-to-end.html"
+      ]
+    ],
+    "end-to-end-flow": [
+      [
+        "End-to-end view: purchase and refunds",
+        "../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial"
+      ]
+    ]
+  },
+  "mcp/docs/stories.html": {
+    "s1-febe-mcp-configuration": [
+      [
+        "Simulator: merchant set-up",
+        "../hpp-simulator.html#try=mcp-off"
+      ]
+    ],
+    "s2-be-planet-rate-file-load-and-cache": [
+      [
+        "Simulator: yesterday's rates",
+        "../hpp-simulator.html#try=rate-yday"
+      ],
+      [
+        "Simulator: no valid file",
+        "../hpp-simulator.html#try=rate-none"
+      ],
+      [
+        "End-to-end: no valid file",
+        "../end-to-end.html#loc=gb&rf=none&pay=aed&m=card&r=none"
+      ]
+    ],
+    "s3-be-customer-country-from-ip-maxmind": [
+      [
+        "Simulator: no country found",
+        "../hpp-simulator.html#try=geo-miss"
+      ],
+      [
+        "Simulator: customer in the UAE",
+        "../hpp-simulator.html#try=uae"
+      ]
+    ],
+    "s4-febe-hpp-currency-offer-and-selection": [
+      [
+        "Simulator: GBP offered",
+        "../hpp-simulator.html#try=gb-card"
+      ],
+      [
+        "Simulator: rounding up",
+        "../hpp-simulator.html#try=rounding"
+      ],
+      [
+        "Simulator: Tabby",
+        "../hpp-simulator.html#try=apm"
+      ],
+      [
+        "End-to-end view",
+        "../end-to-end.html"
+      ]
+    ],
+    "s5-be-mcp-payment-and-transaction-record": [
+      [
+        "Simulator: Apple Pay",
+        "../hpp-simulator.html#try=wallet"
+      ],
+      [
+        "Simulator: wallet mismatch",
+        "../hpp-simulator.html#try=wallet-mismatch"
+      ],
+      [
+        "End-to-end view",
+        "../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=wallet&r=none"
+      ]
+    ],
+    "s6-be-mcp-refunds": [
+      [
+        "End-to-end: refunds AED 60 + 40",
+        "../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial"
+      ]
+    ],
+    "s7-be-merchant-facing-outputs-in-aed": [
+      [
+        "Simulator: after Pay",
+        "../hpp-simulator.html#try=wallet"
+      ],
+      [
+        "End-to-end view",
+        "../end-to-end.html"
+      ]
+    ],
+    "s8-be-federation-to-apex-parked-waiting-on-p4": [
+      [
+        "End-to-end: federation (parked)",
+        "../end-to-end.html"
+      ]
+    ]
   }
 }

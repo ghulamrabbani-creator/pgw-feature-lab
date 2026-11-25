@@ -1,0 +1,781 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Solution requirements · PGW Feature Lab</title>
+<link rel="stylesheet" href="../../assets/lab.css">
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="../">MCP</a> / Solution requirements</nav>
+</div></header>
+<div class="doc-layout">
+<aside class="toc" aria-label="Contents"><p>contents</p><ol>
+<li class="l1"><a href="#objective">1. Objective</a></li>
+<li class="l1"><a href="#how-the-merchant-experiences-this">2. How the merchant experiences this</a></li>
+<li class="l1"><a href="#how-the-customer-experiences-this">3. How the customer experiences this</a></li>
+<li class="l1"><a href="#the-three-currencies">4. The three currencies</a></li>
+<li class="l1"><a href="#scope">5. Scope</a></li>
+<li class="l2"><a href="#in-scope">5.1 In scope</a></li>
+<li class="l2"><a href="#out-of-scope">5.2 Out of scope</a></li>
+<li class="l2"><a href="#phase-2">5.3 Phase 2</a></li>
+<li class="l1"><a href="#solution-approach">6. Solution approach</a></li>
+<li class="l2"><a href="#how-it-works">6.1 How it works</a></li>
+<li class="l2"><a href="#systems-and-their-roles">6.2 Systems and their roles</a></li>
+<li class="l2"><a href="#design-principles">6.3 Design principles</a></li>
+<li class="l1"><a href="#scheme-position-and-known-risks">7. Scheme position and known risks</a></li>
+<li class="l1"><a href="#requirements">8. Requirements</a></li>
+<li class="l2"><a href="#pgw-pgw-engineering-team">8.1 PGW: PGW engineering team</a></li>
+<li class="l2"><a href="#ma-merchant-portal-backoffice-derya-gungor-emir-ipekci">8.2 MA (Merchant Portal Backoffice): Derya Gungor, Emir Ipekci</a></li>
+<li class="l2"><a href="#mpgs-and-cybersource-technical-integration-team">8.3 MPGS and CyberSource: technical integration team</a></li>
+<li class="l2"><a href="#apex-arulraj-panchamoorthy-spoc-talha-ahmed-parked">8.4 APEX: Arulraj Panchamoorthy (SPOC), Talha Ahmed — parked</a></li>
+<li class="l2"><a href="#postilion-musaad-haider-parked">8.5 Postilion: Musaad Haider — parked</a></li>
+<li class="l2"><a href="#planet-payment-jose-albarran-sierra">8.6 Planet Payment: Jose Albarran Sierra</a></li>
+<li class="l2"><a href="#operations-owner-to-confirm">8.7 Operations: owner to confirm</a></li>
+<li class="l2"><a href="#merchant-portal-badr-elhosseiny">8.8 Merchant Portal: Badr Elhosseiny</a></li>
+<li class="l2"><a href="#reporting-operations-finance-to-provide">8.9 Reporting: Operations &amp; Finance to provide</a></li>
+<li class="l1"><a href="#end-to-end-flow">9. End-to-end flow</a></li>
+<li class="l1"><a href="#open-items">10. Open items</a></li>
+</ol></aside>
+<main>
+<div class="doc-meta"><span class="tag">v3.0</span><span class="tag grey">25-Nov-2026</span><span class="tag grey">Source: MCP - Solution Requirements v3.0 (25-Nov-2026).docx</span></div>
+<article class="doc">
+<p>Version 3.0 · 25-Nov-2026 · Prepared by Ghulam Rabbani (Product)</p>
+<h1 id="objective">1. Objective</h1>
+<p>A customer on Geidea’s hosted payment page (HPP) is offered the price
+in the currency of the country they are in, and can pay in that
+currency. The merchant keeps pricing, reporting and settlement in its
+own order currency (AED). Geidea earns an FX markup on every converted
+payment. Planet Payment provides the rates and holds the markup, as it
+does for POS DCC today.</p>
+<p>This document sets out what each Geidea system and team must deliver.
+It is organized by system. The PGW dev stories (MCP – PGW Dev Stories)
+give the PGW requirements at build level.</p>
+<h1 id="how-the-merchant-experiences-this">2. How the merchant
+experiences this</h1>
+<p>Nothing changes for the merchant. It creates orders in AED, sees AED
+in every API response, webhook, report and portal screen, and is settled
+in its settlement currency as today. The merchant is not told that the
+customer paid in another currency. This is the design boundary that
+every requirement below respects.</p>
+<h1 id="how-the-customer-experiences-this">3. How the customer
+experiences this</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=gb-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>HPP simulator</a></div>
+<ol type="1">
+<li>The customer opens the payment page from the merchant’s site, an SDK
+that shows Geidea HPP, or a Pay-by-Link.</li>
+<li>PGW finds the customer’s country from the IP address. If the
+merchant offers that country’s currency, the HPP shows the total in that
+currency, the order amount in AED and the exchange rate.</li>
+<li>The customer can keep the proposed currency, choose another currency
+the merchant offers, or go back to AED.</li>
+<li>Card, Apple Pay, Google Pay and Samsung Pay are paid in the chosen
+currency. Tabby and Tamara are available in AED only.</li>
+<li>The confirmation shows the amount paid and the AED order
+amount.</li>
+</ol>
+<p>When PGW does not propose a currency (location not found, the
+country’s currency is not offered, or the customer is in the UAE), the
+HPP shows AED only, with no currency selector, as today.</p>
+<h1 id="the-three-currencies">4. The three currencies</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../end-to-end.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end view</a></div>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Currency</th>
+<th>What it is</th>
+<th>Who sees it</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Order currency</td>
+<td>AED. What the merchant priced the order in.</td>
+<td>Merchant, Merchant Portal, merchant reports. APEX main amount and
+currency fields.</td>
+</tr>
+<tr class="even">
+<td>Transaction currency</td>
+<td>The currency the customer pays in. The scheme authorizes and clears
+in it. APEX calls it the cardholder currency.</td>
+<td>Customer, PGW, MPGS/CyberSource, Postilion, scheme, Planet. APEX
+cardholder fields (internal). Never the merchant.</td>
+</tr>
+<tr class="odd">
+<td>Settlement currency</td>
+<td>What the merchant is paid out in. Not changed by MCP.</td>
+<td>Merchant (as today).</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Worked example used throughout:</strong> order AED 100.00.
+The customer is in the UK and pays GBP 21.37 at Planet’s rate AED → GBP
+0.2137000 (markup included). The merchant is settled in SAR.</p>
+<h1 id="scope">5. Scope</h1>
+<h2 id="in-scope">5.1 In scope</h2>
+<ul>
+<li>Any AED order paid on Geidea HPP: orders created by API (Create
+Session), by an SDK that shows Geidea HPP, or by Pay-by-Link. Includes
+saved-card payments that the customer starts on HPP.</li>
+<li>Card payments, including Apple Pay, Google Pay and Samsung Pay.</li>
+<li>Sale (<code>paymentOperation</code> = <code>Pay</code>). Full refund
+and partial refunds, including several partial refunds on one
+transaction.</li>
+<li>UAE merchants on Geidea’s ecommerce gateway, on MPGS and
+CyberSource.</li>
+<li>Order currency AED at launch. The solution supports other order
+currencies through configuration, with no code change.</li>
+</ul>
+<h2 id="out-of-scope">5.2 Out of scope</h2>
+<ul>
+<li>Orders in another currency (merchants with
+<code>ENABLE_MULTI_CURRENCY</code>). They are processed as today,
+without MCP.</li>
+<li>Tabby, Tamara and other alternative payment methods. HPP shows
+“Available in AED only” under them.</li>
+<li>Flows with no HPP: Direct API where the merchant collects the card
+details, recurring and merchant-initiated payments.</li>
+<li>Authorization and capture (<code>PreAuthorize</code>), including
+partial captures.</li>
+<li>Merchant rebate on the markup.</li>
+<li>VPN and proxy users. A wrong location is an accepted risk.</li>
+</ul>
+<h2 id="phase-2">5.3 Phase 2</h2>
+<ul>
+<li>Zero and three-decimal currencies (JPY, KWD, BHD, OMR). They need
+PGW changes to amount handling, display, rounding and refunds, and
+enablement on APEX, Postilion and Planet. Their country mappings (JP,
+KW, BH, OM) stay inactive in MVP. Every interface format in MVP states
+the number of decimals, so Phase 2 needs no format change.</li>
+</ul>
+<h1 id="solution-approach">6. Solution approach</h1>
+<h2 id="how-it-works">6.1 How it works</h2>
+<div class="visual-links" data-auto><a class="visual-link" href="../end-to-end.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end view</a></div>
+<ol type="1">
+<li><strong>Planet</strong> publishes a daily rate file over SFTP. The
+rates include the markup. <strong>PGW</strong> loads, checks and caches
+the file.</li>
+<li>The merchant creates an AED order. The customer opens
+<strong>HPP</strong>.</li>
+<li><strong>PGW</strong> looks up the customer’s IP in the
+<strong>MaxMind GeoIP2</strong> database that PGW holds, and gets the
+country. PGW maps the country to a currency.</li>
+<li>If MCP is on for the merchant and the merchant offers that currency,
+<strong>PGW</strong> takes the rate from the cached file and shows the
+converted amount. The rates are fixed for the payment session.</li>
+<li>The customer pays. <strong>PGW</strong> authorizes in the chosen
+currency through <strong>MPGS</strong> or <strong>CyberSource</strong>
+and stores the rate on the transaction.</li>
+<li><strong>PGW</strong> federates the transaction to
+<strong>APEX</strong> with the AED order amount in the main fields and
+the transaction amount, currency and rate in the new cardholder fields
+(section 8.4).</li>
+<li>The scheme file reaches <strong>Postilion</strong> in the
+transaction currency. Postilion clears in that currency. PGW’s
+enrichment file gives Postilion the AED view, so the PTLF to APEX
+matches the federation (section 8.5).</li>
+<li><strong>APEX</strong> prices and pays out the merchant from the AED
+amount, as today.</li>
+<li><strong>APEX</strong> includes the MCP transactions in the Daily
+Transaction File (DTF) to <strong>Planet</strong>, as for DCC. Planet
+accounts for the markup (section 8.6).</li>
+<li>A refund is made in AED by the merchant. <strong>PGW</strong>
+converts it at the rate stored on the original transaction.</li>
+</ol>
+<h2 id="systems-and-their-roles">6.2 Systems and their roles</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>System</th>
+<th>Role in MCP</th>
+<th>Change</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>PGW</td>
+<td>Configuration, rate file, geolocation, HPP currency offer, payment,
+refunds, merchant outputs, federation to APEX, enrichment file</td>
+<td>Main build</td>
+</tr>
+<tr class="even">
+<td>MA (Merchant Portal Backoffice)</td>
+<td>Hosts the PGW configuration screen with the new MCP settings. Built
+by the PGW team.</td>
+<td>Screen in PGW configuration</td>
+</tr>
+<tr class="odd">
+<td>APEX</td>
+<td>Holds AED in the main fields and the transaction currency in new
+cardholder fields; flags MCP; produces the DTF to Planet</td>
+<td>New fields (parked, section 8.4); MCP rows in the DTF</td>
+</tr>
+<tr class="even">
+<td>Postilion</td>
+<td>Clears in the transaction currency as today; builds the PTLF with
+the AED view from the enrichment file</td>
+<td>Enrichment processing (parked, section 8.5)</td>
+</tr>
+<tr class="odd">
+<td>MPGS, CyberSource</td>
+<td>Authorize and clear in the transaction currency</td>
+<td>No change. Already set up for the full ISO currency list.</td>
+</tr>
+<tr class="even">
+<td>Merchant Portal</td>
+<td>Shows what APEX returns: order and settlement currency</td>
+<td>No change</td>
+</tr>
+<tr class="odd">
+<td>Planet Payment (external)</td>
+<td>Daily rate file with markup; MCP merchant registration; DTF
+processing, reports and markup share</td>
+<td>Existing DCC rails, MCP product type</td>
+</tr>
+<tr class="even">
+<td>MaxMind (external)</td>
+<td>GeoIP2 database: IP address to country</td>
+<td>New subscription (approved)</td>
+</tr>
+<tr class="odd">
+<td>MW, TMS, Direct Debit Backend, DDS, GSDK, Noon, Lean</td>
+<td>Not involved</td>
+<td>No change</td>
+</tr>
+</tbody>
+</table>
+<p>Business functions: Operations (merchant enablement with Planet),
+FinOps (reporting), Risk &amp; Compliance (scheme position, section
+7).</p>
+<h2 id="design-principles">6.3 Design principles</h2>
+<ul>
+<li><strong>The merchant world stays in AED.</strong> No merchant-facing
+output carries the transaction currency, the rate or an MCP flag.</li>
+<li><strong>One conversion, at PGW.</strong> PGW converts once and
+stores the result. No downstream system recalculates an amount.</li>
+<li><strong>Location decides the offer.</strong> MCP is offered only
+when the customer’s location gives a currency the merchant offers. The
+customer can then switch between the offered currencies and AED.</li>
+<li><strong>Rates come from a cached file.</strong> No rate is fetched
+during a payment session.</li>
+<li><strong>Refunds use the original rate.</strong> Never a newer
+rate.</li>
+</ul>
+<h1 id="scheme-position-and-known-risks">7. Scheme position and known
+risks</h1>
+<ul>
+<li><strong>Outside DCC.</strong> Visa’s DCC rules apply when the
+currency is derived from the card (BIN). In MCP the currency comes from
+the customer’s IP location, the AED amount is shown next to it, and the
+customer can switch back to AED. The scheme clears in the currency the
+customer chose. Planet processes and reports these transactions as MCP
+(DTF Product Indicator <code>2</code>, “Shop in Your Currency”),
+separate from DCC.</li>
+<li><strong>Double markup (accepted).</strong> A customer whose card is
+in AED may be shown a foreign currency while abroad. Both amounts are
+shown and the customer can switch to AED. No further disclosure is
+shown.</li>
+<li><strong>No rounding drift.</strong> Amounts are stored once by PGW
+and copied downstream.</li>
+<li><strong>Rate file availability.</strong> When no valid rate file is
+cached, MCP is suspended and HPP shows AED only (section 8.1).</li>
+</ul>
+<p>For Risk &amp; Compliance to assess: the IP-based offer as outside
+DCC obligations; the HPP display (section 8.1, HPP).</p>
+<h1 id="requirements">8. Requirements</h1>
+<h2 id="pgw-pgw-engineering-team">8.1 PGW: PGW engineering team</h2>
+<div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>HPP simulator</a><a class="visual-link" href="../end-to-end.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end view</a></div>
+<p>Build-level detail is in the PGW dev stories S1 to S7.</p>
+<p><strong>Merchant configuration (S1)</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Setting</th>
+<th>Level</th>
+<th>Purpose</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MCP toggle (name to be set by PGW, for example
+<code>ENABLE_DYNAMIC_MCP</code>)</td>
+<td>Per MID, Live and Test</td>
+<td>Turns MCP on for the merchant</td>
+</tr>
+<tr class="even">
+<td>MCP currencies</td>
+<td>Per MID</td>
+<td>The transaction currencies the merchant offers, chosen from the MCP
+currency list</td>
+</tr>
+<tr class="odd">
+<td>MCP currency list</td>
+<td>System</td>
+<td>Currencies MCP can offer. A currency is listed only if APEX supports
+it and Planet’s rate file carries it. 2-decimal currencies only in MVP.
+Set before go-live: see below.</td>
+</tr>
+<tr class="even">
+<td>Country-to-currency map</td>
+<td>System</td>
+<td>ISO country code → currency (GB → GBP, FR → EUR…). Phase 2 countries
+inactive.</td>
+</tr>
+<tr class="odd">
+<td>MCP order currencies</td>
+<td>System</td>
+<td>Order currencies MCP applies to. <code>AED</code> at launch.</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>The MCP toggle must have a name that is clearly different from
+<code>ENABLE_MULTI_CURRENCY</code> and
+<code>ENABLE_MULTI_CURRENCY_SETTLEMENT</code>, which mean other
+things.</li>
+<li>No markup is set in PGW. Markup is held at Planet and is included in
+the rates.</li>
+<li><strong>MCP currency list at go-live.</strong> Before production,
+Product gets the latest list of currencies APEX supports, agrees the
+list with Business and Commercial, and asks the PGW team to configure
+it. The list is configuration, so later changes need no code
+change.</li>
+<li>The PGW integration team switches MCP on only after Operations
+confirms the merchant is registered with Planet for MCP (section
+8.7).</li>
+</ul>
+<p><strong>Rate file (S2)</strong> - Receive Planet’s daily rate file
+over SFTP, PGP-encrypted as for DCC files. Layout: Planet MAS template
+194 (Visa and Mastercard sections). Until the SFTP feed is live, load
+Planet’s sample file. - Check each file on load: header and trailer
+records, record counts, hash totals, base and target currencies, rates
+above zero and within a configurable change limit from the previous
+file. A file that fails is not used, and Operations is alerted. - Quote
+from the <strong>Visa section</strong>. Rate direction: units of
+transaction currency for 1 unit of order currency (AED → GBP 0.2137000).
+Converted amount = order amount × rate. - Each rate has a validity
+window (48 hours in Planet’s sample, so daily files overlap). Use the
+rate from the latest loaded file that is valid at the time of the quote.
+- If no valid rate exists for a currency, that currency is not offered.
+If no valid file exists, MCP is suspended for all merchants and
+Operations is alerted. - Keep every loaded file for audit.</p>
+<p><strong>Geolocation (S3)</strong> - Look up the customer’s IP address
+in the MaxMind GeoIP2 database held by PGW, before HPP shows the amount.
+No external call during the session. - Refresh the database as MaxMind
+publishes updates. - No country found: no MCP for the session. The
+payment is a regular AED payment.</p>
+<p><strong>HPP (S4)</strong> - MCP is offered only when all of these are
+true: the order currency is an MCP order currency (AED),
+<code>paymentOperation</code> = <code>Pay</code>, the MCP toggle is on,
+a valid rate file is cached, the IP gives a country, the country maps to
+an active currency, the merchant offers that currency, and the file has
+a valid rate for it. - Then HPP shows: the total in the proposed
+currency, the order amount in AED and the rate (“1 AED = 0.2137 GBP”),
+and a currency selector. The selector lists AED and every currency the
+merchant offers that has a valid rate. - When MCP is not offered, HPP
+shows AED only, with no selector. A customer in the UAE gets no
+selector. - The rates are taken once when HPP first loads and are fixed
+for the session. Switching currency re-prices from these rates. - The
+converted amount is <strong>rounded up</strong> to the currency’s minor
+unit. Example: AED 99.99 × 0.2137000 = GBP 21.367863 → GBP 21.37. - The
+selector and the amounts are shown above the wallet buttons. Wallet
+buttons use the currency and amount on screen. - Tabby and Tamara are
+available only when the selected currency is AED, with “Available in AED
+only” under them. - The confirmation shows the amount paid and the AED
+order amount, for example “GBP 21.37 (AED 100.00)”. The same applies to
+the email receipt that PGW sends for a Pay-by-Link payment when the
+customer has an email address.</p>
+<p><strong>Payment and the transaction record (S5)</strong> - Authorize
+in the chosen currency through MPGS or CyberSource. - Keep the order
+currency and amount and the transaction currency and amount as separate
+fields. - New fields on each transaction (purchase and refund):
+<code>mcpBaseAmount</code> and <code>mcpBaseCurrency</code> (the AED
+amount of this transaction), the MCP flag (true only when a conversion
+was applied), the rate, and the rate’s source (file and rate ID). - New
+field on the order: MCP offered flag (<code>Y</code> when HPP proposed a
+converted currency). Internal to PGW, kept for later conversion-rate
+tracking. Building that tracking is not part of this project. - Order
+totals (paid, refunded, remaining) are computed from
+<code>mcpBaseAmount</code>, never by adding amounts in different
+currencies. - Wallets: the amount and currency in the wallet token must
+equal the quote on HPP. If not, PGW rejects the payment.</p>
+<p><strong>Refunds (S6)</strong> - The merchant refunds in AED. For an
+MCP transaction PGW converts the refund at the rate stored on the
+original transaction and refunds in the transaction currency. - A
+non-final refund is converted and <strong>rounded down</strong> to the
+minor unit. The refund that brings the AED refunds to the full amount is
+set to: original transaction amount minus all earlier refunds in the
+transaction currency (last-cent rule). - A refund that converts to less
+than one minor unit is rejected with a generic message (“Refund amount
+is below the minimum refundable amount”), which does not show the
+transaction currency. The final refund is never rejected for this
+reason.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Refund (AED)</th>
+<th>× 0.2137000</th>
+<th>Refund (GBP)</th>
+<th>Rule</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>60.00</td>
+<td>12.822000</td>
+<td>12.82</td>
+<td>Rounded down</td>
+</tr>
+<tr class="even">
+<td>40.00 (final)</td>
+<td>—</td>
+<td>8.55</td>
+<td>21.37 − 12.82</td>
+</tr>
+<tr class="odd">
+<td><strong>100.00</strong></td>
+<td></td>
+<td><strong>21.37</strong></td>
+<td>Equals the original</td>
+</tr>
+</tbody>
+</table>
+<p>Second example: refunds of AED 33.33, 33.33 and 33.34 give GBP 7.12,
+7.12 and 7.13 (total 21.37). Converting each one would give 7.12 + 7.12
++ 7.12 = 21.36.</p>
+<p><strong>Merchant-facing outputs (S7)</strong> - In the callback
+(webhook), order inquiry, pay and refund responses, and Pay-by-Link
+inquiry, <code>transaction.amount</code> and
+<code>transaction.currency</code> of an MCP transaction carry the AED
+values. The rate, the MCP flag and the MCP offered flag are not
+returned. There is no setting to return them.</p>
+<p><strong>Federation and enrichment (S8, S9):</strong> see sections 8.4
+and 8.5.</p>
+<h2 id="ma-merchant-portal-backoffice-derya-gungor-emir-ipekci">8.2 MA
+(Merchant Portal Backoffice): Derya Gungor, Emir Ipekci</h2>
+<ul>
+<li>The MCP settings sit in the PGW configuration screen in MA. The PGW
+team builds them, as for other PGW settings. No MA team build.</li>
+</ul>
+<h2 id="mpgs-and-cybersource-technical-integration-team">8.3 MPGS and
+CyberSource: technical integration team</h2>
+<ul>
+<li>No change. PGW sends the transaction currency and amount as for any
+non-AED payment. MPGS and CyberSource are already set up for the full
+list of ISO currencies.</li>
+</ul>
+<h2 id="apex-arulraj-panchamoorthy-spoc-talha-ahmed-parked">8.4 APEX:
+Arulraj Panchamoorthy (SPOC), Talha Ahmed — parked</h2>
+<p>Agreed approach (Arul, 23-Nov-2026). The exact field names and
+formats are awaited from APEX. The PGW federation story (S8) waits on
+them.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Today</th>
+<th>For an MCP transaction</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>amount</code></td>
+<td>Transaction amount</td>
+<td>Order amount (AED 100.00)</td>
+</tr>
+<tr class="even">
+<td><code>transactionCurrency</code></td>
+<td>Transaction currency</td>
+<td>Order currency (AED)</td>
+</tr>
+<tr class="odd">
+<td><code>settlementAmount</code>, <code>settlementCurrency</code>,
+<code>exchangeRate</code></td>
+<td>Settlement view</td>
+<td>No change</td>
+</tr>
+<tr class="even">
+<td>Cardholder Amount (new)</td>
+<td>—</td>
+<td>Transaction amount (21.37)</td>
+</tr>
+<tr class="odd">
+<td>Cardholder Currency (new)</td>
+<td>—</td>
+<td>Transaction currency (GBP)</td>
+</tr>
+<tr class="even">
+<td>Transaction Identifier (new)</td>
+<td>—</td>
+<td><code>Y</code> for MCP</td>
+</tr>
+<tr class="odd">
+<td>Cardholder ConvRate (new)</td>
+<td>—</td>
+<td>Rate order → transaction currency (0.2137000)</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Required outcomes</strong> - The same fields come from the
+PGW federation and from the Postilion PTLF, so the two records match. -
+Refunds carry the same fields: the refund’s converted amount and the
+original rate. - Chargebacks arrive in the transaction currency. APEX
+matches them to the original by transaction reference (ARN or RRN), not
+by amount and currency, and uses the cardholder fields to apply them in
+AED. Partial chargebacks must never total more than the original AED
+amount. - A transaction flagged MCP in the PGW federation whose PTLF row
+does not carry the MCP fields, or the reverse, goes to an exception
+visible to Operations daily. - Merchant pricing, payout, refunds,
+merchant APIs and the Merchant Portal continue on the AED fields with no
+change. - <strong>DTF to Planet.</strong> APEX produces the DTF, as for
+DCC. MCP transactions (purchases and refunds) are included with field 22
+Product Indicator = <code>2</code> and field 20 = the applied rate as a
+decimal, subject to Planet’s confirmation (section 8.6).</p>
+<p><strong>Required to be confirmed</strong> - Field keys for the API
+and the PTLF; currency format (alpha <code>GBP</code> or numeric
+<code>826</code>); amount format and decimals; rate decimals (Planet
+uses 7); value of the identifier for non-MCP transactions. - Rounding
+for partial chargebacks (AED = transaction amount ÷ rate). - Exception
+handling for MCP mismatches.</p>
+<h2 id="postilion-musaad-haider-parked">8.5 Postilion: Musaad Haider —
+parked</h2>
+<p>The enrichment file format and its data set are being finalized. The
+PGW enrichment story (S9) waits on this.</p>
+<p><strong>Required outcomes</strong> - Clearing is unchanged: Postilion
+receives the DCF/TC33 in the transaction currency and clears in it. -
+For each MCP leg (purchase, refund, partial refund), PGW sends an
+enrichment record. Approach under discussion: reuse Postilion’s existing
+enrichment-file processing for PayGlocal transactions, with PGW
+supplying (a) the matching key (PGW order ID, RRN, authorization code),
+(b) the order view (AED amount and currency) and the transaction view
+(amount and currency), (c) the rate and the MCP flag. - Postilion builds
+the PTLF row for APEX with the order view in
+<code>amount</code>/<code>transactionCurrency</code> and the transaction
+view and rate in the new cardholder fields, copied with no
+recalculation. - Non-MCP ecommerce, POS, and POS DCC with Planet are
+unchanged.</p>
+<p><strong>Required to be confirmed</strong> - The enrichment layout
+(columns, positions, decimals), and that MCP records are processed
+before the matching DCF/TC33. - Matching on PGW order ID + RRN +
+authorization code for MPGS-routed transactions as well as
+CyberSource.</p>
+<h2 id="planet-payment-jose-albarran-sierra">8.6 Planet Payment: Jose
+Albarran Sierra</h2>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Item</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Daily rate file (template 194) over SFTP: connection, folder, PGP
+keys, file naming, publishing time</td>
+<td>Asked 13-Nov</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Rate validity: confirm the 48-hour window, and that the latest file
+applies where two files are valid</td>
+<td>Asked 13-Nov</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Rate file covers every currency pair Geidea offers</td>
+<td>Asked 13-Nov</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>DTF v1.10 for MCP rows: field 22 Product Indicator = <code>2</code>;
+field 20 = applied rate as a decimal; card number and markup fields</td>
+<td>Asked 13-Nov</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Merchant registration: existing bulk load file with field 47 Product
+Type = <code>MCP</code>, same acquirer set-up as DCC</td>
+<td>Confirmed 13-Nov</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Markup per currency pair held at Planet; Planet guarantees the
+rate</td>
+<td>Confirmed</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li>APEX produces the DTF and includes the MCP rows (section 8.4).</li>
+</ul>
+<h2 id="operations-owner-to-confirm">8.7 Operations: owner to
+confirm</h2>
+<ul>
+<li><strong>Merchant enablement with Planet.</strong> For each merchant
+approved for MCP, register the merchant with Planet through the existing
+DCC enablement process (bulk load file, field 47 Product Type =
+<code>MCP</code>). The department that runs this process for DCC is to
+be identified and to agree to run it for MCP.</li>
+<li><strong>PGW enablement.</strong> After Planet confirms, ask the PGW
+integration team to switch MCP on and set the merchant’s MCP
+currencies.</li>
+<li>Act on alerts when a rate file fails or MCP is suspended.</li>
+<li>Markup changes for a merchant go through Planet and take effect from
+the rate file.</li>
+</ul>
+<h2 id="merchant-portal-badr-elhosseiny">8.8 Merchant Portal: Badr
+Elhosseiny</h2>
+<ul>
+<li>No change. The portal shows what APEX returns: order currency and
+settlement currency. To validate in UAT with an MCP transaction.</li>
+</ul>
+<h2 id="reporting-operations-finance-to-provide">8.9 Reporting:
+Operations &amp; Finance to provide</h2>
+<p>Merchant reports need no change. Internal reporting is defined by
+Operations &amp; Finance (FinOps: Sherly Sadanandan), then built by
+APEX. Areas: MCP activity (both currencies, rate, flag), markup revenue
+from Planet’s reports, Planet invoice reconciliation, scheme funding in
+the transaction currency, refunds and chargebacks with both currencies,
+exceptions (MCP mismatches, rate file failures).</p>
+<h1 id="end-to-end-flow">9. End-to-end flow</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end view: purchase and refunds</a></div>
+<pre><code>Daily
+  Planet  -&gt; PGW       Rate file (template 194, markup included). PGW checks and caches it.
+
+Purchase: order AED 100.00, customer in the UK pays GBP 21.37, merchant settled in SAR
+  Merchant -&gt; PGW      Create Session, AED 100.00
+  Customer -&gt; HPP      Opens the payment page
+  PGW                  IP -&gt; MaxMind -&gt; GB -&gt; GBP; GBP on for the merchant; rate 0.2137000 (Visa section)
+  HPP -&gt; Customer      GBP 21.37, AED 100.00, 1 AED = 0.2137 GBP, currency selector
+  Customer -&gt; HPP      Pays in GBP (card or wallet)
+  PGW -&gt; MPGS/CYBS     Authorize GBP 21.37 -&gt; approved
+  PGW -&gt; Merchant      Callback: AED 100.00
+  PGW -&gt; APEX          Federation: AED 100.00 in main fields; GBP 21.37, rate, MCP flag in cardholder fields
+  PGW -&gt; Postilion     Enrichment record (day end)
+  Scheme -&gt; Postilion  DCF/TC33 in GBP 21.37; Postilion clears in GBP
+  Postilion -&gt; APEX    PTLF: same convention as the federation
+  APEX                 Prices on AED 100.00, pays the merchant in SAR
+  APEX -&gt; Planet       DTF with the MCP row (Product Indicator 2)
+
+Refund: merchant refunds AED 60.00, then AED 40.00
+  Merchant -&gt; PGW      Refund AED 60.00 -&gt; PGW refunds GBP 12.82 (stored rate, rounded down)
+  Merchant -&gt; PGW      Refund AED 40.00 -&gt; PGW refunds GBP 8.55 (last-cent rule)
+  PGW -&gt; APEX          Each refund federated in AED, with its GBP amount and the original rate</code></pre>
+<h1 id="open-items">10. Open items</h1>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Item</th>
+<th>Section</th>
+<th>Team</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>APEX field keys and formats for the four cardholder fields;
+partial-chargeback rounding; MCP mismatch exception; MCP rows in the
+DTF</td>
+<td>8.4</td>
+<td>APEX</td>
+<td>Arulraj Panchamoorthy</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Enrichment file layout and data set; processing before the DCF/TC33;
+MPGS matching</td>
+<td>8.5</td>
+<td>Postilion, PGW</td>
+<td>Musaad Haider, Ghulam Rabbani</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Rate file SFTP delivery, validity, currency coverage; DTF fields for
+MCP</td>
+<td>8.6</td>
+<td>Planet</td>
+<td>Jose Albarran Sierra</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>Department that runs merchant enablement with Planet for DCC, and
+its agreement to do it for MCP</td>
+<td>8.7</td>
+<td>Operations</td>
+<td>To identify</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td>Final name of the MCP toggle</td>
+<td>8.1</td>
+<td>PGW</td>
+<td>PGW engineering team</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td>Internal MCP reporting requirements</td>
+<td>8.9</td>
+<td>Operations &amp; Finance</td>
+<td>Sherly Sadanandan</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td>Phase 2: 0 and 3-decimal currencies on PGW, APEX, Postilion and
+Planet</td>
+<td>5.3</td>
+<td>All</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+
+</article>
+</main>
+</div>
+<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+</body>
+</html>

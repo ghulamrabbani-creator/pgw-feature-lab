@@ -36,8 +36,8 @@
 
 <h2 class="section-title">Documents</h2>
 <div class="rows">
-<div class="row plan"><div class="grow"><div class="t">Solution requirements</div><div class="d">v3.0 draft, 25-Nov-2026, under review. Published here once final.</div></div><span class="tag grey">draft · under review</span></div>
-<div class="row plan"><div class="grow"><div class="t">PGW dev stories</div><div class="d">v0.1 draft, 25-Nov-2026: S1 to S7 written; S8 (APEX federation) and S9 (enrichment file) parked</div></div><span class="tag grey">draft · under review</span></div>
+<a class="row" href="docs/requirements.html"><div class="grow"><div class="t">Solution requirements</div><div class="d">What each Geidea system and team delivers for MCP</div></div><span class="tag">v3.0 · 25-Nov-2026</span></a>
+<a class="row" href="docs/stories.html"><div class="grow"><div class="t">PGW dev stories</div><div class="d">S1 to S7 written; S8 (APEX federation) and S9 (enrichment file) parked</div></div><span class="tag">v0.1 · 25-Nov-2026</span></a>
 <div class="row plan"><div class="grow"><div class="t">Interface notes</div><div class="d">APEX fields, enrichment record, Planet rate file and DTF</div></div><span class="tag grey">in preparation</span></div>
 </div>
 
@@ -50,6 +50,19 @@
 <div class="row plan"><div class="grow"><div class="t">Rate file lifecycle</div><div class="d">Daily load, checks, validity overlap, MCP suspended</div></div><span class="tag grey">planned</span></div>
 <div class="row plan"><div class="grow"><div class="t">What can go wrong</div><div class="d">Geolocation miss, missing rate file, wallet mismatch, record mismatches, refunds below minimum</div></div><span class="tag grey">planned</span></div>
 <div class="row plan"><div class="grow"><div class="t">Federation and enrichment</div><div class="d">The same purchase and refunds as sent to APEX in real time and to Postilion in the enrichment file</div></div><span class="tag warn">parked: APEX field names, enrichment format</span></div>
+</div>
+
+<h2 class="section-title" id="stories">Stories and where to see them</h2>
+<div class="rows">
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s1-febe-mcp-configuration">S1</a> · Configuration</div><div class="d"><a href="hpp-simulator.html#try=mcp-off">Simulator 1</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s2-be-planet-rate-file-load-and-cache">S2</a> · Planet rate file</div><div class="d"><a href="hpp-simulator.html#try=rate-yday">Simulator 4</a> · <a href="end-to-end.html#loc=gb&rf=none&pay=aed&m=card&r=none">End-to-end</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s3-be-customer-country-from-ip-maxmind">S3</a> · Country from IP</div><div class="d"><a href="hpp-simulator.html#try=geo-miss">Simulator 3</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · HPP offer and selection</div><div class="d"><a href="hpp-simulator.html#try=gb-card">Simulator</a> · <a href="end-to-end.html">End-to-end</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · Payment and record</div><div class="d"><a href="hpp-simulator.html#try=wallet">Simulator 7</a> · <a href="end-to-end.html">End-to-end</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s6-be-mcp-refunds">S6</a> · Refunds</div><div class="d"><a href="end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial">End-to-end</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s7-be-merchant-facing-outputs-in-aed">S7</a> · Merchant outputs in AED</div><div class="d"><a href="hpp-simulator.html#try=gb-card">Simulator 7</a> · <a href="end-to-end.html">End-to-end</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s8-be-federation-to-apex-parked-waiting-on-p4">S8</a> · Federation to APEX (parked)</div><div class="d"><a href="end-to-end.html">End-to-end</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s9-be-enrichment-file-to-postilion-parked-waiting-on-p5">S9</a> · Enrichment file (parked)</div><div class="d"><a href="end-to-end.html">End-to-end</a></div></div></div>
 </div>
 </main>
 </body>

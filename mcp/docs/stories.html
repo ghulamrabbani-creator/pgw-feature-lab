@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PGW dev stories · PGW Feature Lab</title>
+<link rel="stylesheet" href="../../assets/lab.css">
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="../">MCP</a> / PGW dev stories</nav>
+</div></header>
+<div class="doc-layout">
+<aside class="toc" aria-label="Contents"><p>contents</p><ol>
+<li class="l1"><a href="#story-map">Story map</a></li>
+<li class="l1"><a href="#prerequisites-not-pgw-work">Prerequisites (not PGW work)</a></li>
+<li class="l1"><a href="#rules-for-every-story">Rules for every story</a></li>
+<li class="l1"><a href="#s1-febe-mcp-configuration">S1 — FE/BE – MCP configuration</a></li>
+<li class="l2"><a href="#background">Background</a></li>
+<li class="l2"><a href="#goal">Goal</a></li>
+<li class="l2"><a href="#story-summary">Story summary</a></li>
+<li class="l2"><a href="#requirements">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria">Acceptance criteria</a></li>
+<li class="l1"><a href="#s2-be-planet-rate-file-load-and-cache">S2 — BE – Planet rate file load and cache</a></li>
+<li class="l2"><a href="#background-1">Background</a></li>
+<li class="l2"><a href="#goal-1">Goal</a></li>
+<li class="l2"><a href="#story-summary-1">Story summary</a></li>
+<li class="l2"><a href="#requirements-1">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-1">Acceptance criteria</a></li>
+<li class="l1"><a href="#s3-be-customer-country-from-ip-maxmind">S3 — BE – Customer country from IP (MaxMind)</a></li>
+<li class="l2"><a href="#background-2">Background</a></li>
+<li class="l2"><a href="#goal-2">Goal</a></li>
+<li class="l2"><a href="#story-summary-2">Story summary</a></li>
+<li class="l2"><a href="#requirements-2">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-2">Acceptance criteria</a></li>
+<li class="l1"><a href="#s4-febe-hpp-currency-offer-and-selection">S4 — FE/BE – HPP currency offer and selection</a></li>
+<li class="l2"><a href="#background-3">Background</a></li>
+<li class="l2"><a href="#goal-3">Goal</a></li>
+<li class="l2"><a href="#story-summary-3">Story summary</a></li>
+<li class="l2"><a href="#requirements-3">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-3">Acceptance criteria</a></li>
+<li class="l1"><a href="#s5-be-mcp-payment-and-transaction-record">S5 — BE – MCP payment and transaction record</a></li>
+<li class="l2"><a href="#background-4">Background</a></li>
+<li class="l2"><a href="#goal-4">Goal</a></li>
+<li class="l2"><a href="#story-summary-4">Story summary</a></li>
+<li class="l2"><a href="#requirements-4">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-4">Acceptance criteria</a></li>
+<li class="l1"><a href="#s6-be-mcp-refunds">S6 — BE – MCP refunds</a></li>
+<li class="l2"><a href="#background-5">Background</a></li>
+<li class="l2"><a href="#goal-5">Goal</a></li>
+<li class="l2"><a href="#story-summary-5">Story summary</a></li>
+<li class="l2"><a href="#requirements-5">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-5">Acceptance criteria</a></li>
+<li class="l1"><a href="#s7-be-merchant-facing-outputs-in-aed">S7 — BE – Merchant-facing outputs in AED</a></li>
+<li class="l2"><a href="#background-6">Background</a></li>
+<li class="l2"><a href="#goal-6">Goal</a></li>
+<li class="l2"><a href="#story-summary-6">Story summary</a></li>
+<li class="l2"><a href="#requirements-6">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-6">Acceptance criteria</a></li>
+<li class="l1"><a href="#s8-be-federation-to-apex-parked-waiting-on-p4">S8 — BE – Federation to APEX (parked: waiting on P4)</a></li>
+<li class="l2"><a href="#background-7">Background</a></li>
+<li class="l2"><a href="#story-summary-7">Story summary</a></li>
+<li class="l2"><a href="#requirements-to-complete-when-p4-is-received">Requirements (to complete when P4 is received)</a></li>
+<li class="l2"><a href="#acceptance-criteria-7">Acceptance criteria</a></li>
+<li class="l1"><a href="#s9-be-enrichment-file-to-postilion-parked-waiting-on-p5">S9 — BE – Enrichment file to Postilion (parked: waiting on P5)</a></li>
+<li class="l2"><a href="#background-8">Background</a></li>
+<li class="l2"><a href="#story-summary-8">Story summary</a></li>
+<li class="l2"><a href="#requirements-to-complete-when-p5-is-received">Requirements (to complete when P5 is received)</a></li>
+<li class="l2"><a href="#acceptance-criteria-8">Acceptance criteria</a></li>
+<li class="l1"><a href="#open-points">Open points</a></li>
+</ol></aside>
+<main>
+<div class="doc-meta"><span class="tag">v0.1</span><span class="tag grey">25-Nov-2026</span><span class="tag grey">Source: MCP - PGW Dev Stories v0.1 (25-Nov-2026).docx</span></div>
+<article class="doc">
+<p>Version 0.1 draft · 25-Nov-2026 · Prepared by Ghulam Rabbani
+(Product) Team: PGW engineering Reference: MCP – Solution Requirements
+v3.0 (25-Nov-2026)</p>
+<p>These stories are the requirement. Each story can be read alone. A
+story refers to another story only for work that must be built
+first.</p>
+<h1 id="story-map">Story map</h1>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Story</th>
+<th>What it delivers</th>
+<th>Depends on</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>S1</td>
+<td>FE/BE – MCP configuration</td>
+<td>MCP toggle and currency list per MID in PGW configuration. System
+lists: MCP currencies, country-to-currency map, MCP order
+currencies.</td>
+<td>—</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>S2</td>
+<td>BE – Planet rate file load and cache</td>
+<td>PGW receives, checks and caches Planet’s daily rate file. Rate
+lookup for HPP. MCP suspended when no valid file.</td>
+<td>—</td>
+<td>Written. Build on Planet’s sample file until SFTP is live (P3).</td>
+</tr>
+<tr class="odd">
+<td>S3</td>
+<td>BE – Customer country from IP (MaxMind)</td>
+<td>MaxMind GeoIP2 database in PGW. IP address to country.</td>
+<td>P2</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>S4</td>
+<td>FE/BE – HPP currency offer and selection</td>
+<td>HPP proposes the customer’s currency, shows both amounts and the
+rate, lets the customer switch. APMs AED only.</td>
+<td>S1, S2, S3</td>
+<td>Written</td>
+</tr>
+<tr class="odd">
+<td>S5</td>
+<td>BE – MCP payment and transaction record</td>
+<td>Payment in the chosen currency. MCP fields on the order and
+transaction. Wallet check. Order totals.</td>
+<td>S4</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>S6</td>
+<td>BE – MCP refunds</td>
+<td>Refund in AED converted at the stored rate. Last-cent rule. Minimum
+refund.</td>
+<td>S5</td>
+<td>Written</td>
+</tr>
+<tr class="odd">
+<td>S7</td>
+<td>BE – Merchant-facing outputs in AED</td>
+<td>Callback, order inquiry, pay and refund responses, Pay-by-Link
+inquiry show AED only.</td>
+<td>S5</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>S8</td>
+<td>BE – Federation to APEX</td>
+<td>MCP fields in createTransaction.</td>
+<td>S5, P4</td>
+<td>Parked: waiting on APEX field names</td>
+</tr>
+<tr class="odd">
+<td>S9</td>
+<td>BE – Enrichment file to Postilion</td>
+<td>MCP records in the enrichment file.</td>
+<td>S5, P5</td>
+<td>Parked: waiting on the file format</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Build order:</strong> S1, S2 and S3 in parallel → S4 → S5 →
+S6, S7. S8 after P4. S9 after P5.</p>
+<h1 id="prerequisites-not-pgw-work">Prerequisites (not PGW work)</h1>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Item</th>
+<th>Needed for</th>
+<th>Owner</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P1</td>
+<td>The merchant is registered with Planet for MCP (bulk load file,
+field 47 Product Type = <code>MCP</code>). Operations confirms before
+the PGW team switches MCP on.</td>
+<td>Before a MID is set up (S1)</td>
+<td>Operations (department to identify)</td>
+</tr>
+<tr class="even">
+<td>P2</td>
+<td>MaxMind GeoIP2 subscription (monthly first) and evaluation of the IP
+database.</td>
+<td>S3</td>
+<td>Ghulam Rabbani, PGW engineering</td>
+</tr>
+<tr class="odd">
+<td>P3</td>
+<td>Planet rate file delivery: SFTP connection, folder, PGP keys, file
+name, publishing time.</td>
+<td>S2 (live feed)</td>
+<td>Planet (Jose Albarran Sierra), PGW</td>
+</tr>
+<tr class="even">
+<td>P4</td>
+<td>APEX field names and formats for the cardholder fields.</td>
+<td>S8</td>
+<td>Arulraj Panchamoorthy</td>
+</tr>
+<tr class="odd">
+<td>P5</td>
+<td>Enrichment file format and data set for MCP.</td>
+<td>S9</td>
+<td>Ghulam Rabbani with Musaad Haider</td>
+</tr>
+<tr class="even">
+<td>P6</td>
+<td>MCP currency list for production: latest APEX-supported list, agreed
+with Business and Commercial, given to the PGW team to configure.</td>
+<td>S1 (go-live)</td>
+<td>Ghulam Rabbani</td>
+</tr>
+</tbody>
+</table>
+<h1 id="rules-for-every-story">Rules for every story</h1>
+<ol type="1">
+<li><strong>Terms.</strong> <em>Order currency</em> = the currency the
+merchant created the order in (AED). <em>Transaction currency</em> = the
+currency the customer pays in; the scheme authorizes and clears in it.
+<em>Rate</em> = Planet’s rate from the order currency to the transaction
+currency, markup included. <em>MCP transaction</em> = a transaction
+where PGW converted the amount.</li>
+<li><strong>Field names.</strong> PGW field names are
+<code>camelCase</code>. New names in these stories are proposals, except
+<code>mcpBaseAmount</code> and <code>mcpBaseCurrency</code> (agreed).
+PGW engineering can rename them. Keep the meaning.</li>
+<li>The PGW backend applies every rule, also when the screen already
+blocks the action.</li>
+<li>Identify the merchant by MID in every API and in all
+documentation.</li>
+<li>New fields in merchant APIs are additions. Do not change or remove
+existing fields.</li>
+<li>Times are UAE time (UTC+4). Rate validity times in Planet’s file are
+UTC.</li>
+<li><strong>Amounts.</strong> Calculate with exact decimals, never
+floating point. Every amount is stored with the number of decimals of
+its currency (2 in MVP).</li>
+<li>The merchant never sees the transaction currency, the rate or an MCP
+flag (S7).</li>
+</ol>
+<h1 id="s1-febe-mcp-configuration">S1 — FE/BE – MCP configuration</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=mcp-off"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: merchant set-up</a></div>
+<h2 id="background">Background</h2>
+<p>The PGW integration team sets merchant settings in the Backoffice:
+Merchants → Impersonate merchant → Payment Gateway → Configuration. The
+settings are stored on the MID’s PAYMENT_GATEWAY product instance, in
+its <code>data</code> object. The screen saves with the existing product
+instance update
+(<code>PATCH /product/api/v1/productInstance/{productInstanceId}</code>,
+JSON-Patch <code>replace</code> on <code>data/&lt;key&gt;</code>). Live
+and Test instances are separate.</p>
+<p>The Gateway Settings tab already has
+<code>ENABLE_MULTI_CURRENCY</code> (<code>isMulticurrencyEnabled</code>,
+<code>currencies</code>). That setting lets a merchant create orders in
+other currencies. MCP is a different setting: it lets the customer pay
+in another currency. The two must stay separate.</p>
+<h2 id="goal">Goal</h2>
+<ol type="1">
+<li>The PGW integration team can turn MCP on for a MID and choose the
+currencies the merchant offers.</li>
+<li>PGW holds three system lists that MCP reads: MCP currencies, the
+country-to-currency map and MCP order currencies.</li>
+</ol>
+<h2 id="story-summary">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S1</td>
+</tr>
+<tr class="even">
+<td>Users</td>
+<td>PGW integration team (Backoffice)</td>
+</tr>
+<tr class="odd">
+<td>Fields written</td>
+<td><code>isDynamicMcpEnabled</code>,
+<code>dynamicMcpCurrencies</code></td>
+</tr>
+<tr class="even">
+<td>Save</td>
+<td>Existing product instance update</td>
+</tr>
+<tr class="odd">
+<td>Depends on</td>
+<td>— . Before a MID is set up: P1.</td>
+</tr>
+<tr class="even">
+<td>Followed by</td>
+<td>S4</td>
+</tr>
+<tr class="odd">
+<td>Out of scope</td>
+<td>Markup (held at Planet). Merchant portal login (no access).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements">Requirements</h2>
+<h3 id="settings-in-data-live-and-test-separately">1. Settings in
+<code>data</code> (Live and Test separately)</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Type</th>
+<th>Default</th>
+<th>Values</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isDynamicMcpEnabled</code></td>
+<td>Boolean</td>
+<td><code>false</code></td>
+<td><code>true</code> = MCP on for this MID</td>
+</tr>
+<tr class="even">
+<td><code>dynamicMcpCurrencies</code></td>
+<td>Array of String</td>
+<td><code>[]</code></td>
+<td>ISO 4217 alpha codes, each from the MCP currency list (section
+2)</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Existing MIDs: add both fields with the defaults.</li>
+<li>The existing product instance search returns the fields. The
+existing update accepts them.</li>
+</ol>
+<h3 id="system-lists-configuration-not-per-mid">2. System lists
+(configuration, not per MID)</h3>
+<p>Store as configuration. Do not write the values in code.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>List</th>
+<th>Content</th>
+<th>Initial value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MCP currency list</td>
+<td>Currencies MCP can offer: currency code, numeric code, decimals,
+active</td>
+<td>2-decimal currencies that APEX supports and Planet’s file carries.
+For build and test: GBP, EUR, INR, USD, SAR. Production list from
+P6.</td>
+</tr>
+<tr class="even">
+<td>Country-to-currency map</td>
+<td>ISO 3166 alpha-2 country → currency code, active flag</td>
+<td>From the Feature Brief: GB → GBP, US → USD, SA → SAR, QA → QAR, IN →
+INR, CN → CNY, RU → RUB, CH → CHF, AU → AUD, CA → CAD, SG → SGD,
+Eurozone countries → EUR. JP, KW, BH, OM inactive (Phase 2).</td>
+</tr>
+<tr class="odd">
+<td>MCP order currencies</td>
+<td>Order currencies MCP applies to</td>
+<td><code>AED</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="screen">3. Screen</h3>
+<ol type="1">
+<li>Add the section <em>Dynamic multi-currency pricing</em> in PGW
+configuration (tab position: PGW engineering, next to Gateway
+Settings).</li>
+<li>Toggle with label <em>Dynamic multi-currency pricing</em> and one
+line of text. Use a label that is clearly different from
+<code>ENABLE_MULTI_CURRENCY</code> and
+<code>ENABLE_MULTI_CURRENCY_SETTLEMENT</code>. Ship the label translated
+(not as a raw key).</li>
+<li>Under the toggle: a table with one row per active currency in the
+MCP currency list: currency code, decimals, an <em>Offered</em>
+toggle.</li>
+<li>When MCP is off, the currency table is disabled. The selected
+currencies stay stored.</li>
+<li>A note under the table: “No markup is set here. Markup is held at
+Planet and is included in the rates.”</li>
+<li><em>Discard Changes</em> and <em>Save changes</em> work as on the
+other tabs.</li>
+</ol>
+<h3 id="checks-on-save-changes">4. Checks on <em>Save changes</em></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Check</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4.1</td>
+<td>MCP on → at least one currency offered.</td>
+<td>Select at least one currency.</td>
+</tr>
+<tr class="even">
+<td>4.2</td>
+<td>Each currency is in the MCP currency list and active.</td>
+<td>{code} is not available for MCP.</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Any failure: do not save. Show the message and the banner “Changes
+not saved. Fix the highlighted fields.”</li>
+<li>No failure: save the changed fields.</li>
+</ol>
+<h3 id="effect-of-a-saved-change">5. Effect of a saved change</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Change</th>
+<th>Effect</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>MCP turned on</td>
+<td>Applies to HPP sessions opened after the save.</td>
+</tr>
+<tr class="even">
+<td>MCP turned off, or a currency removed</td>
+<td>New HPP sessions do not offer it. Payments already made and their
+refunds keep their stored rate (S6).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="acceptance-criteria">Acceptance criteria</h2>
+<ol type="1">
+<li>New MID: MCP off, no currencies.</li>
+<li>Turn MCP on, save with no currency: message 4.1.</li>
+<li>Turn MCP on, offer GBP and EUR, save, reload: values shown.</li>
+<li>Turn MCP off, save, reload: MCP off, GBP and EUR still selected and
+disabled.</li>
+<li>Change on Test: Live does not change.</li>
+<li>Remove INR from the MCP currency list in configuration: INR is not
+shown on the screen and a save with INR is rejected (4.2).</li>
+</ol>
+<h1 id="s2-be-planet-rate-file-load-and-cache">S2 — BE – Planet rate
+file load and cache</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=rate-yday"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: yesterday's rates</a><a class="visual-link" href="../hpp-simulator.html#try=rate-none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: no valid file</a><a class="visual-link" href="../end-to-end.html#loc=gb&rf=none&pay=aed&m=card&r=none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end: no valid file</a></div>
+<h2 id="background-1">Background</h2>
+<p>Planet publishes one rate file each day. The rates include the
+markup. PGW quotes every MCP amount from this file. No rate is fetched
+from Planet during a payment. Layout: Planet MAS template 194,
+comma-separated, with a Visa section and a Mastercard section. Each rate
+has its own validity window. In Planet’s sample the window is 48 hours,
+so two daily files overlap.</p>
+<p>Sample (from Planet):</p>
+<pre><code>PFH,20260214,01
+VILFH,HPLANET VISA,20260214,01
+VID,1023,$,840,2,€,978,2,0.9123456,2026-02-14T00:00:00.000Z,2026-02-15T23:59:59.000Z
+VID,1024,$,840,2,£,826,2,0.7890123,2026-02-14T00:00:00.000Z,2026-02-15T23:59:59.000Z
+VILFT,TPLANET VISA,1804,1.7013579,2
+MCLFH,HPLANET MASTERCARD,20260214,01
+MCD,1025,$,840,2,€,978,2,0.9121000,2026-02-14T00:00:00.000Z,2026-02-15T23:59:59.000Z
+MCLFT,TPLANET MASTERCARD,978,0.9121000,1
+PFT,TXN RATES,2782,2.6134579,3</code></pre>
+<h2 id="goal-1">Goal</h2>
+<ol type="1">
+<li>PGW loads each day’s file, checks it and caches it.</li>
+<li>PGW gives HPP the rate for an order currency and a transaction
+currency at a point in time.</li>
+<li>When no valid rate exists, MCP is not offered, and Operations is
+alerted.</li>
+</ol>
+<h2 id="story-summary-1">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S2</td>
+</tr>
+<tr class="even">
+<td>Source</td>
+<td>Planet, SFTP, PGP-encrypted (as for DCC files). Until P3: Planet’s
+sample file loaded by PGW.</td>
+</tr>
+<tr class="odd">
+<td>Depends on</td>
+<td>— . Live feed: P3.</td>
+</tr>
+<tr class="even">
+<td>Followed by</td>
+<td>S4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-1">Requirements</h2>
+<h3 id="records-template-194">1. Records (template 194)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Record</th>
+<th>Code</th>
+<th>Fields in order</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Physical file header</td>
+<td><code>PFH</code></td>
+<td><code>date</code> (YYYYMMDD), <code>version</code></td>
+</tr>
+<tr class="even">
+<td>Visa section header</td>
+<td><code>VILFH</code></td>
+<td><code>HRateKey</code> (<code>HPLANET VISA</code>),
+<code>date</code>, <code>version</code></td>
+</tr>
+<tr class="odd">
+<td>Visa detail</td>
+<td><code>VID</code></td>
+<td><code>rateId</code>, <code>baseCurr</code> (symbol),
+<code>baseCurr2</code> (ISO numeric), <code>baseMinorUnit</code>,
+<code>targetCurr</code> (symbol), <code>targetCurr2</code> (ISO
+numeric), <code>targetMinorUnit</code>, <code>rate</code>,
+<code>validFrom</code>, <code>validTo</code> (ISO 8601, UTC)</td>
+</tr>
+<tr class="even">
+<td>Visa section trailer</td>
+<td><code>VILFT</code></td>
+<td><code>TRateKey</code> (<code>TPLANET VISA</code>),
+<code>hashTotalTargetCurrCode</code>, <code>hashTotalExRate</code>,
+<code>recordCount</code></td>
+</tr>
+<tr class="odd">
+<td>Mastercard section</td>
+<td><code>MCLFH</code>, <code>MCD</code>, <code>MCLFT</code></td>
+<td>Same layout as Visa</td>
+</tr>
+<tr class="even">
+<td>Physical file trailer</td>
+<td><code>PFT</code></td>
+<td><code>txnRates</code> (<code>TXN RATES</code>),
+<code>hashTotalTargetCurrCode</code>, <code>hashTotalExRate</code>,
+<code>recordCount</code></td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Identify currencies by the numeric codes (<code>baseCurr2</code>,
+<code>targetCurr2</code>). The symbol fields are for display only.</li>
+<li><code>rate</code> = units of target currency for 1 unit of base
+currency. Converted amount = base amount × <code>rate</code>.</li>
+<li><strong>Quote from the Visa section
+(</strong><code>VID</code><strong>).</strong> Load the Mastercard
+section and keep it, but do not quote from it.</li>
+</ol>
+<h3 id="checks-on-load">2. Checks on load</h3>
+<p>Any failure: do not use the file, keep the previous cache, alert
+Operations with the file name and the failed check.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Check</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2.1</td>
+<td>The file decrypts and has <code>PFH</code> first and
+<code>PFT</code> last.</td>
+</tr>
+<tr class="even">
+<td>2.2</td>
+<td>Each section has its header and trailer.</td>
+</tr>
+<tr class="odd">
+<td>2.3</td>
+<td>Each section trailer <code>recordCount</code> = number of detail
+records in the section. <code>PFT</code> <code>recordCount</code> = all
+detail records.</td>
+</tr>
+<tr class="even">
+<td>2.4</td>
+<td><code>hashTotalTargetCurrCode</code> = sum of
+<code>targetCurr2</code> of the section (<code>PFT</code>: all
+sections).</td>
+</tr>
+<tr class="odd">
+<td>2.5</td>
+<td><code>hashTotalExRate</code> = sum of <code>rate</code> of the
+section (<code>PFT</code>: all sections).</td>
+</tr>
+<tr class="even">
+<td>2.6</td>
+<td>Each <code>rate</code> is above 0. <code>validFrom</code> is before
+<code>validTo</code>.</td>
+</tr>
+<tr class="odd">
+<td>2.7</td>
+<td>A rate changes from the same pair in the previous file by no more
+than the change limit (configuration, e.g. 10%).</td>
+</tr>
+<tr class="even">
+<td>2.8</td>
+<td>The file <code>date</code> and <code>version</code> have not been
+loaded before.</td>
+</tr>
+</tbody>
+</table>
+<p>Worked check on the sample: Visa <code>hashTotalTargetCurrCode</code>
+1804 = 978 + 826. <code>hashTotalExRate</code> 1.7013579 = 0.9123456 +
+0.7890123. <code>PFT</code> 2782 = 978 + 826 + 978, 3 records.</p>
+<h3 id="rate-lookup">3. Rate lookup</h3>
+<p>Input: order currency, transaction currency, time. Output:
+<code>rate</code>, <code>rateId</code>, file <code>date</code> and
+<code>version</code>, or “no rate”. 1. Take Visa detail records with
+<code>baseCurr2</code> = order currency and <code>targetCurr2</code> =
+transaction currency. 2. Keep the records where <code>validFrom</code> ≤
+time ≤ <code>validTo</code>. 3. From these, use the record from the
+latest loaded file (highest <code>date</code>, then
+<code>version</code>). 4. No record: “no rate”. HPP does not offer this
+currency (S4).</p>
+<p>Example: file 20261123 has GBP valid to 24-Nov 23:59:59 UTC. File
+20261124 has GBP valid to 25-Nov 23:59:59 UTC. At 24-Nov 10:00 UTC both
+are valid. PGW uses 20261124.</p>
+<h3 id="mcp-suspended">4. MCP suspended</h3>
+<ol type="1">
+<li>When no loaded file has any valid rate, MCP is suspended for all
+merchants. HPP shows AED only (S4).</li>
+<li>Alert Operations when MCP becomes suspended and when it
+resumes.</li>
+<li>Alert Operations when no new file has loaded by a set time each day
+(configuration).</li>
+</ol>
+<h3 id="storage">5. Storage</h3>
+<ol type="1">
+<li>Keep every received file and its load result (loaded / failed, with
+the check) for audit.</li>
+<li>The cache is shared by all PGW instances that serve HPP.</li>
+</ol>
+<h2 id="acceptance-criteria-1">Acceptance criteria</h2>
+<ol type="1">
+<li>Load Planet’s sample file: loaded. Lookup USD → GBP at
+2026-02-14T12:00Z returns 0.7890123, <code>rateId</code> 1024.</li>
+<li>Lookup USD → EUR returns the Visa rate 0.9123456, not the Mastercard
+rate 0.9121000.</li>
+<li>Change <code>VILFT</code> record count to 3: file fails (2.3),
+previous cache kept, Operations alerted.</li>
+<li>Change one rate by 50% against the previous file: file fails
+(2.7).</li>
+<li>Two valid files: the later file’s rate is returned.</li>
+<li>Lookup after <code>validTo</code> of every file: “no rate”. MCP
+suspended, Operations alerted.</li>
+<li>Load the same file twice: second load rejected (2.8).</li>
+</ol>
+<h1 id="s3-be-customer-country-from-ip-maxmind">S3 — BE – Customer
+country from IP (MaxMind)</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=geo-miss"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: no country found</a><a class="visual-link" href="../hpp-simulator.html#try=uae"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: customer in the UAE</a></div>
+<h2 id="background-2">Background</h2>
+<p>MCP proposes a currency from the customer’s location. PGW holds the
+MaxMind GeoIP2 downloadable database (approved 23-Nov-2026) and looks up
+the customer’s IP address in it. No external call is made during the
+payment session.</p>
+<h2 id="goal-2">Goal</h2>
+<p>PGW returns the customer’s country for an IP address, fast enough to
+run before HPP shows the amount.</p>
+<h2 id="story-summary-2">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S3</td>
+</tr>
+<tr class="even">
+<td>Source</td>
+<td>MaxMind GeoIP2 database, hosted by PGW</td>
+</tr>
+<tr class="odd">
+<td>Depends on</td>
+<td>P2</td>
+</tr>
+<tr class="even">
+<td>Followed by</td>
+<td>S4</td>
+</tr>
+<tr class="odd">
+<td>Out of scope</td>
+<td>VPN and proxy detection (accepted risk)</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-2">Requirements</h2>
+<ol type="1">
+<li>Input: the customer’s public IP address (IPv4 or IPv6) as received
+by HPP, after any Geidea load balancer.</li>
+<li>Output: ISO 3166 alpha-2 country code, or “not found”.</li>
+<li>Refresh the database as MaxMind publishes updates. Keep the current
+database in use until the new one loads correctly.</li>
+<li>Lookup error, empty result or a private address: “not found”.</li>
+<li>Alert Operations when the database has not refreshed within the
+expected period (configuration).</li>
+<li>Store the IP address used and the country found on the HPP session,
+for support.</li>
+</ol>
+<h2 id="acceptance-criteria-2">Acceptance criteria</h2>
+<ol type="1">
+<li>A known UK test address returns <code>GB</code>.</li>
+<li>A private address (e.g. 10.0.0.1) returns “not found”.</li>
+<li>The lookup works for IPv4 and IPv6.</li>
+<li>A failed database refresh keeps the previous database in use and
+raises an alert.</li>
+</ol>
+<h1 id="s4-febe-hpp-currency-offer-and-selection">S4 — FE/BE – HPP
+currency offer and selection</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=gb-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: GBP offered</a><a class="visual-link" href="../hpp-simulator.html#try=rounding"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: rounding up</a><a class="visual-link" href="../hpp-simulator.html#try=apm"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: Tabby</a><a class="visual-link" href="../end-to-end.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end view</a></div>
+<h2 id="background-3">Background</h2>
+<p>The customer pays on Geidea HPP. HPP opens from Create Session
+(<code>POST /payment-intent/api/v2/direct/session</code>), from an SDK
+that shows Geidea HPP, or from Pay-by-Link. MCP is decided when HPP
+loads. Flows that never show HPP (Direct API with card details from the
+merchant, recurring and merchant-initiated payments) are never MCP.</p>
+<p>MCP is offered strictly on location. When PGW does not propose a
+currency, HPP is the same as today: AED only, no selector.</p>
+<h2 id="goal-3">Goal</h2>
+<ol type="1">
+<li>When the customer’s location gives a currency the merchant offers,
+HPP shows the amount in that currency, the AED amount and the rate.</li>
+<li>The customer can switch between the offered currencies and AED.</li>
+<li>The quote stays fixed for the session.</li>
+</ol>
+<h2 id="story-summary-3">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S4</td>
+</tr>
+<tr class="even">
+<td>Reads</td>
+<td><code>isDynamicMcpEnabled</code>, <code>dynamicMcpCurrencies</code>
+(S1), system lists (S1), rate lookup (S2), country (S3)</td>
+</tr>
+<tr class="odd">
+<td>Session fields written</td>
+<td><code>mcpCountry</code>, <code>mcpProposedCurrency</code>,
+<code>mcpQuotes[]</code>, <code>isMcpOffered</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>S1, S2, S3</td>
+</tr>
+<tr class="odd">
+<td>Followed by</td>
+<td>S5</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-3">Requirements</h2>
+<h3 id="decide-the-offer-when-hpp-first-loads">1. Decide the offer (when
+HPP first loads)</h3>
+<p>PGW runs these checks in order. The first “no” stops the check: MCP
+is not offered and HPP shows AED only, with no selector.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Check</th>
+<th>Source</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1.1</td>
+<td>The order currency is in the MCP order currencies list
+(<code>AED</code>).</td>
+<td>S1</td>
+</tr>
+<tr class="even">
+<td>1.2</td>
+<td><code>paymentOperation</code> = <code>Pay</code>.</td>
+<td>Session</td>
+</tr>
+<tr class="odd">
+<td>1.3</td>
+<td><code>isDynamicMcpEnabled</code> = <code>true</code> for the MID and
+instance.</td>
+<td>S1</td>
+</tr>
+<tr class="even">
+<td>1.4</td>
+<td>MCP is not suspended (a valid rate file exists).</td>
+<td>S2</td>
+</tr>
+<tr class="odd">
+<td>1.5</td>
+<td>The customer’s IP gives a country.</td>
+<td>S3</td>
+</tr>
+<tr class="even">
+<td>1.6</td>
+<td>The country maps to an active currency, other than the order
+currency.</td>
+<td>S1</td>
+</tr>
+<tr class="odd">
+<td>1.7</td>
+<td>The currency is in <code>dynamicMcpCurrencies</code> of the
+MID.</td>
+<td>S1</td>
+</tr>
+<tr class="even">
+<td>1.8</td>
+<td>The rate lookup returns a rate for order currency → that
+currency.</td>
+<td>S2</td>
+</tr>
+</tbody>
+</table>
+<p>All “yes”: the mapped currency is the <strong>proposed
+currency</strong>. Set <code>isMcpOffered</code> =
+<code>true</code>.</p>
+<p><strong>Why 1.6 excludes the order currency.</strong> A customer in
+the UAE maps to AED. Nothing is converted, so MCP is not offered and HPP
+shows no selector.</p>
+<h3 id="quotes-fixed-for-the-session">2. Quotes (fixed for the
+session)</h3>
+<p>When MCP is offered, build one quote for each currency in
+<code>dynamicMcpCurrencies</code> that has a rate (S2 section 3), at the
+time HPP first loads:</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Quote field</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>currency</code></td>
+<td>Transaction currency</td>
+</tr>
+<tr class="even">
+<td><code>amount</code></td>
+<td>Order amount × <code>rate</code>, <strong>rounded up</strong> to the
+currency’s decimals</td>
+</tr>
+<tr class="odd">
+<td><code>rate</code></td>
+<td>From S2 (7 decimals)</td>
+</tr>
+<tr class="even">
+<td><code>rateId</code>, <code>rateFileDate</code>,
+<code>rateFileVersion</code></td>
+<td>From S2</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Store the quotes on the session (<code>mcpQuotes[]</code>). A reload
+of the same session uses the stored quotes. A newer rate file does not
+change them.</li>
+<li>Never recalculate an amount from a newer rate during the
+session.</li>
+</ol>
+<p><strong>Rounding up, examples (rate AED → GBP
+0.2137000):</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Order amount (AED)</th>
+<th>× rate</th>
+<th>Quote (GBP)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>100.00</td>
+<td>21.3700000</td>
+<td>21.37</td>
+</tr>
+<tr class="even">
+<td>99.99</td>
+<td>21.3678630</td>
+<td>21.37</td>
+</tr>
+<tr class="odd">
+<td>0.01</td>
+<td>0.0021370</td>
+<td>0.01</td>
+</tr>
+</tbody>
+</table>
+<h3 id="display">3. Display</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Element</th>
+<th>Content</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>3.1</td>
+<td>Total</td>
+<td>The quote amount and currency of the selected currency (first: the
+proposed currency), e.g. “GBP 21.37”.</td>
+</tr>
+<tr class="even">
+<td>3.2</td>
+<td>Order amount</td>
+<td>“Order amount AED 100.00”. Shown only when the selected currency is
+not AED.</td>
+</tr>
+<tr class="odd">
+<td>3.3</td>
+<td>Rate</td>
+<td>“Exchange rate 1 AED = 0.2137 GBP”. The rate as in the file,
+trailing zeros removed. Shown only when the selected currency is not
+AED.</td>
+</tr>
+<tr class="even">
+<td>3.4</td>
+<td>Currency selector</td>
+<td><em>Paying in</em>: AED and every currency with a quote. Shown only
+when MCP is offered.</td>
+</tr>
+<tr class="odd">
+<td>3.5</td>
+<td>Wallet buttons</td>
+<td>Apple Pay, Google Pay, Samsung Pay built with the selected currency
+and amount. Shown below 3.1 to 3.4.</td>
+</tr>
+<tr class="even">
+<td>3.6</td>
+<td>Tabby, Tamara</td>
+<td>Selectable only when the selected currency is AED. Show “Available
+in AED only” under them when MCP is offered.</td>
+</tr>
+<tr class="odd">
+<td>3.7</td>
+<td>Pay button</td>
+<td>“Pay GBP 21.37” (selected currency and amount).</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Changing the selector updates 3.1 to 3.7 from the stored quotes. AED
+shows the order amount.</li>
+<li>When the customer selects a non-AED currency while Tabby or Tamara
+is selected, select card.</li>
+<li>No further disclosure text about the conversion.</li>
+</ol>
+<h3 id="backend-checks-when-hpp-submits-the-payment">4. Backend checks
+when HPP submits the payment</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Check</th>
+<th>On failure</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4.1</td>
+<td>The submitted currency is AED or a currency in
+<code>mcpQuotes[]</code>.</td>
+<td>Reject. Message: “Currency not available. Reload the page.”</td>
+</tr>
+<tr class="even">
+<td>4.2</td>
+<td>The submitted amount equals the stored quote (or the order amount
+for AED).</td>
+<td>Reject. Same message.</td>
+</tr>
+<tr class="odd">
+<td>4.3</td>
+<td>Tabby or Tamara only with AED.</td>
+<td>Reject. Message: “This payment method is available in AED
+only.”</td>
+</tr>
+</tbody>
+</table>
+<p>PGW engineering sets the error codes.</p>
+<h2 id="acceptance-criteria-3">Acceptance criteria</h2>
+<ol type="1">
+<li>MID with MCP on, GBP offered. Customer IP in the UK, order AED
+100.00: HPP shows GBP 21.37, AED 100.00, “1 AED = 0.2137 GBP” and the
+selector. <code>isMcpOffered</code> = <code>true</code>.</li>
+<li>Same customer selects AED: total AED 100.00, no order amount line,
+no rate line. Tabby is selectable.</li>
+<li>Customer in the UAE: AED only, no selector.
+<code>isMcpOffered</code> = <code>false</code>.</li>
+<li>Customer in India, INR not offered by the MID: AED only, no
+selector.</li>
+<li>Customer in Japan: AED only, no selector (Phase 2 country).</li>
+<li>No country found: AED only, no selector.</li>
+<li>MCP suspended (no valid rate file): AED only, no selector.</li>
+<li>Order in USD, or <code>paymentOperation</code> =
+<code>PreAuthorize</code>: no MCP.</li>
+<li>Order AED 99.99, customer in the UK: GBP 21.37.</li>
+<li>A new rate file loads while the page is open, then the customer
+reloads: the amount does not change.</li>
+<li>A tampered submit with GBP 20.00: rejected (4.2).</li>
+<li>Pay-by-Link opened from the UK: same behaviour as 1.</li>
+</ol>
+<h1 id="s5-be-mcp-payment-and-transaction-record">S5 — BE – MCP payment
+and transaction record</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=wallet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: Apple Pay</a><a class="visual-link" href="../hpp-simulator.html#try=wallet-mismatch"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: wallet mismatch</a><a class="visual-link" href="../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=wallet&r=none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end view</a></div>
+<h2 id="background-4">Background</h2>
+<p>S4 gives a fixed quote. When the customer pays in a non-AED currency,
+PGW authorizes in that currency through MPGS or CyberSource, as for any
+non-AED payment. PGW must keep two views of the payment: the order view
+in AED, which the merchant and APEX use, and the transaction view in the
+paid currency, which the scheme uses.</p>
+<h2 id="goal-4">Goal</h2>
+<ol type="1">
+<li>PGW authorizes in the currency the customer chose, at the quoted
+amount.</li>
+<li>PGW stores both views and the rate on the transaction.</li>
+<li>Order totals stay in the order currency.</li>
+</ol>
+<h2 id="story-summary-4">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S5</td>
+</tr>
+<tr class="even">
+<td>Geidea endpoints</td>
+<td>HPP pay flow; <code>POST /pgw/api/v2/direct/pay</code>,
+<code>POST /pgw/api/v2/direct/pay/token</code></td>
+</tr>
+<tr class="odd">
+<td>Fields written</td>
+<td>Order: <code>isMcpOffered</code>. Transaction: <code>isMcp</code>,
+<code>mcpBaseAmount</code>, <code>mcpBaseCurrency</code>,
+<code>mcpRate</code>, <code>mcpRateId</code>,
+<code>mcpRateFileDate</code>, <code>mcpRateFileVersion</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>S4</td>
+</tr>
+<tr class="odd">
+<td>Followed by</td>
+<td>S6, S7, S8, S9</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-4">Requirements</h2>
+<h3 id="authorization">1. Authorization</h3>
+<ol type="1">
+<li>Send the selected currency and the quote amount to MPGS or
+CyberSource, as for any non-AED payment. No new processor fields. MPGS
+and CyberSource are set up for the full ISO currency list.</li>
+<li>AED selected: process as today.</li>
+<li>A declined payment can be retried in the same session with the same
+quote.</li>
+</ol>
+<h3 id="wallet-check">2. Wallet check</h3>
+<ol type="1">
+<li>For Apple Pay, Google Pay and Samsung Pay, compare the amount and
+currency in the wallet payment data with the quote of the selected
+currency.</li>
+<li>Different: reject the payment. Message: “Payment amount does not
+match. Try again.” Do not send it to the processor.</li>
+</ol>
+<h3 id="fields">3. Fields</h3>
+<p><strong>Order</strong> | Field | Type | Value | |—|—|—| |
+<code>amount</code>, <code>currency</code> | Existing | Order amount and
+currency (AED 100.00). Not changed by MCP. | | <code>isMcpOffered</code>
+| Boolean | From S4. Internal. Not sent to the merchant. |</p>
+<p><strong>Transaction (every transaction of the order: purchase and
+refund)</strong> | Field | Type | Value (purchase in the example) |
+|—|—|—| | <code>amount</code>, <code>currency</code> | Existing |
+Transaction view: 21.37 GBP | | <code>isMcp</code> | Boolean |
+<code>true</code> only when a conversion was applied to this transaction
+| | <code>mcpBaseAmount</code> | Decimal | Order view of this
+transaction: 100.00. For non-MCP transactions = <code>amount</code>. | |
+<code>mcpBaseCurrency</code> | String | <code>AED</code>. For non-MCP
+transactions = <code>currency</code>. | | <code>mcpRate</code> | Decimal
+(7) | 0.2137000. Empty when <code>isMcp</code> = <code>false</code>. | |
+<code>mcpRateId</code>, <code>mcpRateFileDate</code>,
+<code>mcpRateFileVersion</code> | String | From the quote. Empty when
+<code>isMcp</code> = <code>false</code>. |</p>
+<p><strong>Why</strong> <code>mcpBaseAmount</code> <strong>is filled for
+every transaction.</strong> Order totals, the merchant outputs (S7) and
+the federation (S8) read one field for all transactions.</p>
+<p><strong>Why the name is not</strong>
+<code>originalAmount</code><strong>.</strong> PGW already uses
+<code>originalAmount</code> for the amount before fees.</p>
+<h3 id="order-totals">4. Order totals</h3>
+<ol type="1">
+<li>Compute every order total (paid, refunded, remaining to refund) from
+<code>mcpBaseAmount</code>.</li>
+<li>Never add <code>amount</code> values of transactions in different
+currencies.</li>
+</ol>
+<p>Example: purchase <code>mcpBaseAmount</code> 100.00, refund
+<code>mcpBaseAmount</code> 60.00 → refunded AED 60.00, remaining AED
+40.00.</p>
+<h3 id="confirmation">5. Confirmation</h3>
+<ol type="1">
+<li>The HPP confirmation shows the paid amount and the AED order amount:
+“GBP 21.37 (AED 100.00)”.</li>
+<li>Pay-by-Link: PGW sends the customer an email receipt when the
+customer has an email address. For an MCP payment it shows the same:
+“GBP 21.37 (AED 100.00)”.</li>
+<li>AED payments: as today.</li>
+</ol>
+<h2 id="acceptance-criteria-4">Acceptance criteria</h2>
+<ol type="1">
+<li>Pay GBP 21.37 on an AED 100.00 order by card: processor receives GBP
+21.37. Transaction: <code>amount</code> 21.37, <code>currency</code>
+GBP, <code>isMcp</code> true, <code>mcpBaseAmount</code> 100.00,
+<code>mcpBaseCurrency</code> AED, <code>mcpRate</code> 0.2137000.</li>
+<li>Pay in AED on an MCP-offered session: <code>isMcp</code> false,
+<code>mcpBaseAmount</code> 100.00 AED. <code>isMcpOffered</code> true on
+the order.</li>
+<li>Apple Pay with GBP 21.37 in the token: approved. Token with GBP
+21.36: rejected before the processor.</li>
+<li>Decline, then retry in the same session: same quote and rate.</li>
+<li>Order inquiry totals are in AED.</li>
+<li>Confirmation shows “GBP 21.37 (AED 100.00)”.</li>
+<li>Pay-by-Link paid in GBP by a customer with an email address: the
+email receipt shows “GBP 21.37 (AED 100.00)”.</li>
+</ol>
+<h1 id="s6-be-mcp-refunds">S6 — BE – MCP refunds</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end: refunds AED 60 + 40</a></div>
+<h2 id="background-5">Background</h2>
+<p>The merchant refunds in AED with the existing refund API (refund v2,
+signed with
+<code>timestamp + merchantPublicKey + refundAmount + orderId</code>).
+For an MCP transaction the customer paid in another currency, so the
+refund must go to the processor in that currency. PGW converts it at the
+rate stored on the original transaction. Converting each partial refund
+on its own can leave a cent unrefunded. The last-cent rule closes the
+gap at PGW.</p>
+<h2 id="goal-5">Goal</h2>
+<ol type="1">
+<li>A refund of an MCP transaction is sent in the transaction currency
+at the stored rate.</li>
+<li>The refunds of a transaction never total more or less than the
+amount paid, in both currencies.</li>
+<li>A refund too small to convert is rejected, except the final
+one.</li>
+</ol>
+<h2 id="story-summary-5">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S6</td>
+</tr>
+<tr class="even">
+<td>Geidea endpoint</td>
+<td>Existing refund v2. <code>refundAmount</code> in the order currency.
+No new request fields.</td>
+</tr>
+<tr class="odd">
+<td>Fields written</td>
+<td>Refund transaction: <code>amount</code>, <code>currency</code>,
+<code>isMcp</code>, <code>mcpBaseAmount</code>,
+<code>mcpBaseCurrency</code>, <code>mcpRate</code>,
+<code>mcpRateId</code>, <code>mcpRateFileDate</code>,
+<code>mcpRateFileVersion</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>S5</td>
+</tr>
+<tr class="odd">
+<td>Out of scope</td>
+<td>Manual refunds by FinOps through Postilion. Void (as today).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-5">Requirements</h2>
+<h3 id="checks">1. Checks</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Check</th>
+<th>Message</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1.1</td>
+<td>Existing refund checks, on AED: <code>refundAmount</code> ≤ AED paid
+− AED already refunded (from <code>mcpBaseAmount</code>).</td>
+<td>Existing message</td>
+</tr>
+<tr class="even">
+<td>1.2</td>
+<td>The refund converts to at least one minor unit of the transaction
+currency (section 2), unless it is the final refund.</td>
+<td>Refund amount is below the minimum refundable amount.</td>
+</tr>
+</tbody>
+</table>
+<p>The message for 1.2 does not show the transaction currency.</p>
+<h3 id="conversion-original-purchase-ismcp-true">2. Conversion (original
+purchase <code>isMcp</code> = <code>true</code>)</h3>
+<ol type="1">
+<li><strong>Final refund:</strong> AED already refunded +
+<code>refundAmount</code> = AED paid. Refund amount in transaction
+currency = purchase <code>amount</code> − all earlier refunds’
+<code>amount</code>.</li>
+<li><strong>Other refunds:</strong> <code>refundAmount</code> × purchase
+<code>mcpRate</code>, <strong>rounded down</strong> to the currency’s
+decimals.</li>
+<li>Use the purchase <code>mcpRate</code>. Never look up a new
+rate.</li>
+<li>Send the refund to the processor in the transaction currency.</li>
+<li>Store on the refund transaction: <code>amount</code> and
+<code>currency</code> = converted amount and transaction currency;
+<code>mcpBaseAmount</code> = <code>refundAmount</code>;
+<code>mcpBaseCurrency</code> = AED; <code>isMcp</code> =
+<code>true</code>; rate fields copied from the purchase.</li>
+</ol>
+<p>Original purchase <code>isMcp</code> = <code>false</code>: refund as
+today.</p>
+<p><strong>Why round down.</strong> Each earlier refund then stays at or
+below its exact value, so the final refund is never negative.</p>
+<h3 id="examples-purchase-aed-100.00-gbp-21.37-rate-0.2137000">3.
+Examples (purchase AED 100.00 = GBP 21.37, rate 0.2137000)</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Refund (AED)</th>
+<th>Calculation</th>
+<th>Refund (GBP)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>60.00</td>
+<td>60.00 × 0.2137000 = 12.822 → round down</td>
+<td>12.82</td>
+</tr>
+<tr class="even">
+<td>40.00 (final)</td>
+<td>21.37 − 12.82</td>
+<td>8.55</td>
+</tr>
+<tr class="odd">
+<td><strong>Total 100.00</strong></td>
+<td></td>
+<td><strong>21.37</strong></td>
+</tr>
+</tbody>
+</table>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Refund (AED)</th>
+<th>Calculation</th>
+<th>Refund (GBP)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>33.33</td>
+<td>7.122621 → round down</td>
+<td>7.12</td>
+</tr>
+<tr class="even">
+<td>33.33</td>
+<td>7.122621 → round down</td>
+<td>7.12</td>
+</tr>
+<tr class="odd">
+<td>33.34 (final)</td>
+<td>21.37 − 7.12 − 7.12</td>
+<td>7.13</td>
+</tr>
+<tr class="even">
+<td><strong>Total 100.00</strong></td>
+<td></td>
+<td><strong>21.37</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Minimum refund: AED 0.04 × 0.2137000 = GBP 0.008548 → 0.00. Rejected
+(1.2), unless AED 0.04 is the final refund.</p>
+<h2 id="acceptance-criteria-5">Acceptance criteria</h2>
+<ol type="1">
+<li>Refund AED 60.00 then AED 40.00 on the example: processor receives
+GBP 12.82 then GBP 8.55. Order refunded total AED 100.00.</li>
+<li>Refund AED 33.33, 33.33, 33.34: GBP 7.12, 7.12, 7.13.</li>
+<li>Full refund AED 100.00 in one call: GBP 21.37.</li>
+<li>Refund AED 0.04 as a non-final refund: rejected (1.2). Message does
+not name GBP.</li>
+<li>Refund AED 0.04 as the final refund: accepted, GBP = remaining
+amount.</li>
+<li>A new rate file has loaded since the purchase: refund still uses
+0.2137000.</li>
+<li>Refund AED 100.01: rejected (1.1).</li>
+</ol>
+<h1 id="s7-be-merchant-facing-outputs-in-aed">S7 — BE – Merchant-facing
+outputs in AED</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=wallet"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: after Pay</a><a class="visual-link" href="../end-to-end.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end view</a></div>
+<h2 id="background-6">Background</h2>
+<p>The merchant must never see the conversion. Existing merchant
+integrations read <code>transaction.amount</code> and
+<code>transaction.currency</code>. These fields must stay in the
+payloads and carry the AED values for MCP transactions, so no merchant
+integration breaks.</p>
+<h2 id="goal-6">Goal</h2>
+<p>Every merchant-facing output shows an MCP transaction in AED, with no
+rate and no MCP flag.</p>
+<h2 id="story-summary-6">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S7</td>
+</tr>
+<tr class="even">
+<td>Outputs</td>
+<td>Callback to <code>callbackUrl</code>; order inquiry
+<code>GET /pgw/api/v1/direct/order/{orderId}</code> and
+<code>GET /pgw/api/v1/direct/order?MerchantReferenceId=</code>; pay
+responses (<code>/pgw/api/v2/direct/pay</code>,
+<code>/pay/token</code>); refund response; Pay-by-Link
+(<code>…/v1/direct/eInvoice</code>) inquiry</td>
+</tr>
+<tr class="odd">
+<td>Depends on</td>
+<td>S5</td>
+</tr>
+<tr class="even">
+<td>Out of scope</td>
+<td>Merchant Portal (shows APEX data, no change). Setting to send the
+conversion fields (none).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-6">Requirements</h2>
+<ol type="1">
+<li>For a transaction with <code>isMcp</code> = <code>true</code>, fill
+<code>amount</code> with <code>mcpBaseAmount</code> and
+<code>currency</code> with <code>mcpBaseCurrency</code> in every output
+listed above. This applies to purchases and refunds.</li>
+<li>Order totals in these outputs come from <code>mcpBaseAmount</code>
+(S5 section 4).</li>
+<li>Do not return <code>isMcp</code>, <code>isMcpOffered</code>,
+<code>mcpRate</code>, <code>mcpRateId</code>,
+<code>mcpRateFileDate</code>, <code>mcpRateFileVersion</code>,
+<code>mcpBaseAmount</code> or <code>mcpBaseCurrency</code>.</li>
+<li>Transactions with <code>isMcp</code> = <code>false</code>: no
+change.</li>
+</ol>
+<p>Example (purchase of the example, then refund AED 60.00):</p>
+<pre><code>&quot;transactions&quot;: [
+  { &quot;type&quot;: &quot;Pay&quot;,    &quot;amount&quot;: 100.00, &quot;currency&quot;: &quot;AED&quot;, &quot;status&quot;: &quot;Success&quot; },
+  { &quot;type&quot;: &quot;Refund&quot;, &quot;amount&quot;: 60.00,  &quot;currency&quot;: &quot;AED&quot;, &quot;status&quot;: &quot;Success&quot; }
+]</code></pre>
+<p>Field names other than <code>amount</code> and <code>currency</code>
+are as in today’s payload.</p>
+<h2 id="acceptance-criteria-6">Acceptance criteria</h2>
+<ol type="1">
+<li>MCP purchase GBP 21.37 / AED 100.00: callback and order inquiry show
+100.00 AED.</li>
+<li>Refund AED 60.00 (GBP 12.82 to the processor): refund response and
+inquiry show 60.00 AED.</li>
+<li>No output contains GBP, the rate or an MCP field.</li>
+<li>A non-MCP USD order (<code>ENABLE_MULTI_CURRENCY</code>):
+unchanged.</li>
+</ol>
+<h1 id="s8-be-federation-to-apex-parked-waiting-on-p4">S8 — BE –
+Federation to APEX (parked: waiting on P4)</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../end-to-end.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end: federation (parked)</a></div>
+<h2 id="background-7">Background</h2>
+<p>PGW federates each transaction to APEX in real time
+(createTransaction). APEX agreed (23-Nov-2026) to hold the order view in
+its main fields and the transaction view in four new cardholder fields.
+The exact field names and formats are awaited.</p>
+<h2 id="story-summary-7">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S8</td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>S5, P4</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-to-complete-when-p4-is-received">Requirements (to
+complete when P4 is received)</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>APEX field</th>
+<th>PGW source (MCP transaction)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>amount</code></td>
+<td><code>mcpBaseAmount</code></td>
+</tr>
+<tr class="even">
+<td><code>transactionCurrency</code></td>
+<td><code>mcpBaseCurrency</code></td>
+</tr>
+<tr class="odd">
+<td><code>settlementAmount</code>, <code>settlementCurrency</code>,
+<code>exchangeRate</code></td>
+<td>No change</td>
+</tr>
+<tr class="even">
+<td>Cardholder Amount (name from APEX)</td>
+<td><code>amount</code></td>
+</tr>
+<tr class="odd">
+<td>Cardholder Currency (name from APEX)</td>
+<td><code>currency</code></td>
+</tr>
+<tr class="even">
+<td>Transaction Identifier (name from APEX)</td>
+<td><code>Y</code> when <code>isMcp</code> = <code>true</code></td>
+</tr>
+<tr class="odd">
+<td>Cardholder ConvRate (name from APEX)</td>
+<td><code>mcpRate</code></td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Purchases and refunds carry the same fields. A refund sends its own
+converted amount and the purchase rate.</li>
+<li>Non-MCP transactions: as today.</li>
+<li>APEX produces the DTF to Planet from these records, as for DCC. No
+PGW file to Planet.</li>
+</ol>
+<h2 id="acceptance-criteria-7">Acceptance criteria</h2>
+<p>To be completed when P4 is received.</p>
+<h1 id="s9-be-enrichment-file-to-postilion-parked-waiting-on-p5">S9 — BE
+– Enrichment file to Postilion (parked: waiting on P5)</h1>
+<h2 id="background-8">Background</h2>
+<p>Postilion builds the PTLF to APEX from the scheme file, which is in
+the transaction currency. PGW’s enrichment file gives Postilion the AED
+view of each MCP leg, so the PTLF matches the PGW federation. The format
+and data set are being agreed with Postilion.</p>
+<h2 id="story-summary-8">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Item</th>
+<th>Value</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>S9</td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>S5, P5</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-to-complete-when-p5-is-received">Requirements (to
+complete when P5 is received)</h2>
+<ol type="1">
+<li>One record for each MCP leg (purchase, refund, partial refund) in
+the existing daily enrichment file.</li>
+<li>Data to supply: matching key (PGW order ID, RRN, authorization
+code), order view (<code>mcpBaseAmount</code>,
+<code>mcpBaseCurrency</code>), transaction view (<code>amount</code>,
+<code>currency</code>), <code>mcpRate</code>, MCP flag. Decimals stated
+for each amount.</li>
+</ol>
+<h2 id="acceptance-criteria-8">Acceptance criteria</h2>
+<p>To be completed when P5 is received.</p>
+<h1 id="open-points">Open points</h1>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Point</th>
+<th>Story</th>
+<th>Owner / status</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>Final name and position of the MCP toggle and section.</td>
+<td>S1</td>
+<td>PGW engineering</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td>Rate change limit for check 2.7 and the daily file deadline for the
+alert.</td>
+<td>S2</td>
+<td>Rabbani with Operations</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td>Planet: SFTP delivery details, rate validity and currency coverage
+(P3).</td>
+<td>S2</td>
+<td>Planet – asked 13-Nov</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td>MaxMind database refresh frequency under the subscription.</td>
+<td>S3</td>
+<td>PGW engineering</td>
+</tr>
+</tbody>
+</table>
+
+</article>
+</main>
+</div>
+<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+</body>
+</html>
