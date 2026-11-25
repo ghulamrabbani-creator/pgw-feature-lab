@@ -246,7 +246,7 @@
         "../simulator.html#s2"
       ],
       [
-        "What can go wrong: checks 3.1\u20133.9",
+        "What can go wrong: checks 3.1–3.9",
         "../what-can-go-wrong.html#stage-cs"
       ]
     ],
@@ -312,7 +312,7 @@
     ],
     "checks": [
       [
-        "What can go wrong: checks 2.1\u20132.6",
+        "What can go wrong: checks 2.1–2.6",
         "../what-can-go-wrong.html#stage-api"
       ]
     ],
@@ -442,6 +442,10 @@
     ],
     "s6-be-mcp-refunds": [
       [
+        "Calculator: refunds AED 60 + 40",
+        "../calculator.html#try=refund-60-40"
+      ],
+      [
         "End-to-end: refunds AED 60 + 40",
         "../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial"
       ]
@@ -460,6 +464,42 @@
       [
         "End-to-end: federation (parked)",
         "../end-to-end.html"
+      ]
+    ],
+    "quotes-fixed-for-the-session": [
+      [
+        "Calculator: rounding up",
+        "../calculator.html#try=round-up"
+      ]
+    ],
+    "checks": [
+      [
+        "Calculator: minimum refund",
+        "../calculator.html#try=min-nonfinal"
+      ],
+      [
+        "Calculator: refund too much",
+        "../calculator.html#try=over"
+      ]
+    ],
+    "conversion-original-purchase-ismcp-true": [
+      [
+        "Calculator: why round down",
+        "../calculator.html#try=nearest-fails"
+      ]
+    ],
+    "examples-purchase-aed-100.00-gbp-21.37-rate-0.2137000": [
+      [
+        "Calculator: 60 + 40",
+        "../calculator.html#try=refund-60-40"
+      ],
+      [
+        "Calculator: thirds",
+        "../calculator.html#try=thirds"
+      ],
+      [
+        "Calculator: AED 0.04 as final",
+        "../calculator.html#try=min-final"
       ]
     ]
   }

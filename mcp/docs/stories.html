@@ -916,6 +916,7 @@ the UAE maps to AED. Nothing is converted, so MCP is not offered and HPP
 shows no selector.</p>
 <h3 id="quotes-fixed-for-the-session">2. Quotes (fixed for the
 session)</h3>
+<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=round-up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: rounding up</a></div>
 <p>When MCP is offered, build one quote for each currency in
 <code>dynamicMcpCurrencies</code> that has a rate (S2 section 3), at the
 time HPP first loads:</p>
@@ -1250,7 +1251,7 @@ the order.</li>
 email receipt shows “GBP 21.37 (AED 100.00)”.</li>
 </ol>
 <h1 id="s6-be-mcp-refunds">S6 — BE – MCP refunds</h1>
-<div class="visual-links" data-auto><a class="visual-link" href="../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end: refunds AED 60 + 40</a></div>
+<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=refund-60-40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: refunds AED 60 + 40</a><a class="visual-link" href="../end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end: refunds AED 60 + 40</a></div>
 <h2 id="background-5">Background</h2>
 <p>The merchant refunds in AED with the existing refund API (refund v2,
 signed with
@@ -1311,6 +1312,7 @@ No new request fields.</td>
 </table>
 <h2 id="requirements-5">Requirements</h2>
 <h3 id="checks">1. Checks</h3>
+<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=min-nonfinal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: minimum refund</a><a class="visual-link" href="../calculator.html#try=over"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: refund too much</a></div>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1342,6 +1344,7 @@ currency (section 2), unless it is the final refund.</td>
 <p>The message for 1.2 does not show the transaction currency.</p>
 <h3 id="conversion-original-purchase-ismcp-true">2. Conversion (original
 purchase <code>isMcp</code> = <code>true</code>)</h3>
+<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=nearest-fails"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: why round down</a></div>
 <ol type="1">
 <li><strong>Final refund:</strong> AED already refunded +
 <code>refundAmount</code> = AED paid. Refund amount in transaction
@@ -1365,6 +1368,7 @@ today.</p>
 below its exact value, so the final refund is never negative.</p>
 <h3 id="examples-purchase-aed-100.00-gbp-21.37-rate-0.2137000">3.
 Examples (purchase AED 100.00 = GBP 21.37, rate 0.2137000)</h3>
+<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=refund-60-40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: 60 + 40</a><a class="visual-link" href="../calculator.html#try=thirds"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: thirds</a><a class="visual-link" href="../calculator.html#try=min-final"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: AED 0.04 as final</a></div>
 <table>
 <colgroup>
 <col style="width: 33%" />

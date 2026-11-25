@@ -1,0 +1,509 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Calculator · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.tries { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 20px; }
+.tries a { font: 500 13px var(--sans); text-decoration: none; border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 999px; padding: 5px 12px; }
+.tries a:hover { border-color: var(--money); color: var(--money); }
+.tries a.on { background: var(--money); border-color: var(--money); color: #fff; }
+.tries span { font: 11px var(--mono); color: var(--muted); align-self: center; margin-right: 4px; }
+.grid { display: grid; grid-template-columns: 360px minmax(0, 1fr); gap: 20px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; }
+.card > header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.card > header .num { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; font: 500 12px/24px var(--mono); text-align: center; flex: none; }
+.card > header h2 { margin: 0; font-size: 17px; font-weight: 600; color: var(--ink); }
+.card > header .who { font: 11px var(--mono); color: var(--muted); margin-left: auto; }
+.card > header .who a { color: inherit; }
+.card .in { padding: 16px 18px; }
+.f { margin-bottom: 14px; }
+.f label { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 4px; }
+.f input { width: 100%; font: 14px var(--mono); padding: 7px 9px; border: 1px solid var(--border-2); border-radius: 7px; background: #fff; color: var(--ink); }
+.f input.err { border-color: #B91C1C; background: #FEF2F2; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 13px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.chip:hover { background: #F1F5F9; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.chip:disabled { opacity: .45; cursor: not-allowed; background: #fff; }
+.hint { font-size: 13px; color: var(--text-2); margin: 6px 0 0; }
+.src { font: 11px var(--mono); color: var(--muted); margin-top: 10px; }
+.note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.note b { color: var(--warn-fg); }
+.info { font-size: 13px; background: #EFF6FF; border-left: 3px solid #1D4ED8; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.bad { font-size: 13px; background: #FEF2F2; border-left: 3px solid #B91C1C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.st { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
+.st.ok { background: var(--money-bg); color: var(--money); }
+.st.bad { background: #FEE2E2; color: #991B1B; }
+.st.grey { background: #F1F5F9; color: var(--muted); }
+.st.hold { background: var(--warn-bg); color: var(--warn-fg); }
+.btn { font: 500 14px var(--sans); border-radius: 8px; padding: 7px 12px; cursor: pointer; border: 1px solid var(--border-2); background: var(--card); color: var(--ink); }
+.btn:hover { background: #F1F5F9; }
+.btn.pri { background: var(--money); border-color: var(--money); color: #fff; }
+.btn.pri:hover { background: #0B6553; }
+
+/* Quote */
+.quote { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.qbox { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.qbox .k { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.qbox .v { font: 500 22px var(--mono); color: var(--ink); margin-top: 4px; word-break: break-all; }
+.qbox .v small { font-size: 13px; color: var(--muted); }
+.qbox.hl { border-color: var(--money); background: var(--money-bg); }
+.qbox.hl .v { color: var(--money); }
+.qbox .s { font-size: 12px; color: var(--text-2); margin-top: 4px; }
+.ruler { margin: 18px 0 4px; }
+.ruler .track { position: relative; height: 44px; border-bottom: 2px solid var(--ink); margin: 0 8%; }
+.ruler .tick { position: absolute; bottom: -8px; width: 2px; height: 14px; background: var(--ink); transform: translateX(-1px); }
+.ruler .tick span { position: absolute; top: 18px; left: 50%; transform: translateX(-50%); font: 12px var(--mono); color: var(--text-2); white-space: nowrap; }
+.ruler .tick.up { background: var(--money); height: 20px; bottom: -11px; }
+.ruler .tick.up span { color: var(--money); font-weight: 600; }
+.ruler .mark { position: absolute; bottom: 2px; transform: translateX(-50%); font: 11px var(--mono); color: #1D4ED8; white-space: nowrap; text-align: center; }
+.ruler .mark::after { content: ''; display: block; width: 10px; height: 10px; border-radius: 50%; background: #1D4ED8; margin: 3px auto 0; }
+.ruler .arrow { position: absolute; bottom: 6px; height: 2px; background: var(--money); }
+.ruler .lbls { height: 26px; }
+.disp { margin-top: 16px; display: flex; flex-wrap: wrap; gap: 8px 20px; font-size: 14px; }
+.disp code { background: #F1F5F9; padding: 2px 6px; border-radius: 4px; color: var(--ink); }
+
+/* Refunds */
+.radd { display: flex; flex-wrap: wrap; gap: 8px; align-items: end; margin-bottom: 14px; }
+.radd .f { margin: 0; flex: 0 1 180px; }
+.tw { overflow-x: auto; }
+table.rt { width: 100%; border-collapse: collapse; font-size: 13px; min-width: 760px; }
+table.rt th { text-align: left; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 8px; border-bottom: 1px solid var(--border-2); vertical-align: bottom; }
+table.rt td { padding: 9px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.rt td.m { font-family: var(--mono); white-space: nowrap; }
+table.rt td.m.big { font-weight: 600; color: var(--ink); }
+table.rt tr.purchase td { background: #F8FAFC; }
+table.rt tr.rej td { background: #FEF2F2; color: #7F1D1D; }
+table.rt tr.rej td.m.big { color: #B91C1C; text-decoration: line-through; }
+table.rt tr.final td { background: var(--money-bg); }
+table.rt .calc { font: 12px var(--mono); color: var(--text-2); }
+table.rt .calc b { color: var(--ink); }
+table.rt .x { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 4px; }
+table.rt .x:hover { color: #B91C1C; }
+table.rt td.alt { border-left: 2px dashed var(--border-2); }
+table.rt td.alt.neg { color: #B91C1C; font-weight: 600; }
+table.rt th.alt { border-left: 2px dashed var(--border-2); color: #92400E; }
+.bars { margin-top: 18px; display: grid; gap: 10px; }
+.bar .lbl { display: flex; justify-content: space-between; font: 12px var(--mono); color: var(--text-2); margin-bottom: 4px; }
+.bar .seg { display: flex; height: 26px; border-radius: 6px; overflow: hidden; background: #E2E8F0; }
+.bar .seg div { height: 100%; display: flex; align-items: center; justify-content: center; font: 500 11px var(--mono); color: #fff; overflow: hidden; white-space: nowrap; border-right: 2px solid #fff; min-width: 2px; }
+.bar .seg div.left { background: #E2E8F0; color: var(--muted); border-right: 0; }
+.sum { margin-top: 14px; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 14px; }
+.tgl { display: flex; gap: 8px; align-items: flex-start; font-size: 14px; margin-top: 14px; cursor: pointer; }
+.tgl input { margin-top: 4px; }
+
+/* Minimum */
+table.mt { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.mt th { text-align: left; font: 500 11px var(--mono); color: var(--muted); padding: 6px; border-bottom: 1px solid var(--border-2); }
+table.mt td { padding: 6px; border-bottom: 1px solid var(--border); font-family: var(--mono); }
+table.mt tr.sel td { background: var(--money-bg); color: var(--money); font-weight: 600; }
+.mrow { font: 13px var(--mono); background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 8px; line-height: 1.7; }
+
+@media (max-width: 1080px) { .grid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 640px) { .quote { grid-template-columns: minmax(0, 1fr); } .ruler .track { margin: 0 14%; } h1.page { font-size: 28px; } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">MCP</a> / Calculator</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">mcp · visual page</p>
+<h1 class="page">Calculator: the quote, refunds and the last cent</h1>
+<p class="lead">Enter an AED order and a rate. See the amount the customer pays, rounded up. Then refund it in parts and see how PGW converts each refund, why partial refunds round down, and how the final refund closes the gap.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects solution requirements v3.0 and PGW stories v0.1 (25-Nov-2026)</span>
+<a href="docs/requirements.html#pgw-pgw-engineering-team">Read the requirement →</a>
+<a href="docs/stories.html#quotes-fixed-for-the-session">Stories: S4 section 2 →</a>
+<a href="docs/stories.html#s6-be-mcp-refunds">S6 →</a>
+<a href="hpp-simulator.html#try=rounding">HPP simulator</a>
+<a href="end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial">End-to-end view</a>
+<a href="./">Back to MCP</a>
+</div>
+
+<div class="terms"><b>Terms.</b> <b>Order currency</b>: what the merchant priced in (AED). <b>Transaction currency</b>: what the customer pays in and what the scheme clears in. <b>Minor unit</b>: the smallest amount of a currency (GBP 0.01). <b>Rate</b>: AED → transaction currency, 7 decimals, from the Visa section of Planet's file, markup included. Rates on this page are dummy. Field names are from the PGW stories.</div>
+
+<div class="tries" id="tries"><span>Try</span></div>
+
+<div class="grid">
+<div class="col">
+<section class="card" id="s-in">
+<header><span class="num">1</span><h2>Order and rate</h2><span class="who">S4 section 2</span></header>
+<div class="in">
+<div class="f"><label for="aed">Order amount (AED)</label>
+<input id="aed" inputmode="decimal" value="100.00" autocomplete="off"></div>
+<div class="f"><label>Transaction currency</label>
+<div class="chips" id="curs"></div>
+<p class="hint">MVP currencies have 2 decimals. JPY is Phase 2.</p></div>
+<div class="f"><label for="rate">Rate: 1 AED = … (7 decimals)</label>
+<input id="rate" inputmode="decimal" value="0.2137000" autocomplete="off">
+<p class="hint">Filled from the dummy Visa rate when you pick a currency. Change it to test other rates.</p></div>
+<div id="inErr"></div>
+</div>
+</section>
+
+<section class="card" id="s-min">
+<header><span class="num">4</span><h2>Minimum refund</h2><span class="who"><a href="docs/stories.html#checks">S6 check 1.2</a></span></header>
+<div class="in">
+<p class="hint" style="margin-top:0">A refund that is not the final one must convert to at least one minor unit. The smallest AED refund that passes depends on the rate.</p>
+<div id="minOut"></div>
+<div id="minTable" style="margin-top:12px"></div>
+<p class="src">The rejection message does not show the transaction currency: “Refund amount is below the minimum refundable amount.”</p>
+</div>
+</section>
+</div>
+
+<div class="col">
+<section class="card" id="s-q">
+<header><span class="num">2</span><h2>The quote the customer pays</h2><span class="who"><a href="docs/stories.html#quotes-fixed-for-the-session">S4 section 2</a> · <a href="docs/stories.html#fields">S5 section 3</a></span></header>
+<div class="in">
+<div class="quote" id="quote"></div>
+<div class="ruler" id="ruler"></div>
+<div class="disp" id="disp"></div>
+<div class="info"><b>Rule.</b> Order amount × rate, rounded <b>up</b> to the currency's decimals (decided 24-Nov). The quote is fixed for the HPP session: a newer rate file does not change it.</div>
+</div>
+</section>
+
+<section class="card" id="s-r">
+<header><span class="num">3</span><h2>Refunds in AED, sent in the transaction currency</h2><span class="who"><a href="docs/stories.html#checks">S6 section 1</a> · <a href="docs/stories.html#conversion-original-purchase-ismcp-true">section 2</a></span></header>
+<div class="in">
+<div class="radd">
+<div class="f"><label for="rAmt">Refund amount (AED)</label><input id="rAmt" inputmode="decimal" placeholder="60.00" autocomplete="off"></div>
+<button class="btn pri" id="rAddBtn" type="button">Refund</button>
+<button class="btn" id="rRest" type="button">Refund the rest</button>
+<button class="btn" id="rClear" type="button">Clear refunds</button>
+</div>
+<div class="tw"><table class="rt" id="rt"></table></div>
+<div class="bars" id="bars"></div>
+<div class="sum" id="sum"></div>
+<label class="tgl"><input type="checkbox" id="newer"> <span>A newer rate file has loaded since the purchase (GBP 0.2141000 for the same pair)</span></label>
+<div id="newerOut"></div>
+<label class="tgl"><input type="checkbox" id="cmp"> <span>Compare: what if partial refunds were rounded to the nearest minor unit instead of down?</span></label>
+<div id="cmpOut"></div>
+<div class="info"><b>Rule.</b> Non-final refund: refund AED × purchase <code>mcpRate</code>, rounded <b>down</b>. Final refund (AED refunded reaches AED paid): purchase amount − all earlier refunds, in the transaction currency (last-cent rule). Never a new rate.</div>
+</div>
+</section>
+</div>
+</div>
+
+<div class="note" id="obs" style="margin-top:20px"></div>
+
+</main>
+<footer class="lab-footer">PGW Feature Lab · MCP · Calculator</footer>
+
+<script>
+(function () {
+'use strict';
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+
+/* Dummy Visa-section rates, AED-based, same as the HPP simulator. */
+const RATES = { GBP: '0.2137000', EUR: '0.2489000', INR: '23.1200000', USD: '0.2759000', SAR: '1.0345000' };
+const NEWER = { GBP: '0.2141000', EUR: '0.2492000', INR: '23.0800000', USD: '0.2759000', SAR: '1.0345000' };
+const CURS = ['GBP', 'EUR', 'INR', 'USD', 'SAR', 'JPY'];
+const SEG = ['#0E7C66', '#14B8A6', '#0F766E', '#2DD4BF', '#115E59', '#5EEAD4'];
+const E7 = 10000000n;
+
+/* ---------- exact arithmetic (BigInt) ---------- */
+// Amounts in minor units (2 decimals). Rate as integer × 1e7.
+// amountMinor × rate7 = exact transaction amount in units of 1e-7 minor.
+function parseFixed(str, dec) {
+  const s = String(str == null ? '' : str).trim().replace(/,/g, '');
+  const re = new RegExp('^\\d+(\\.\\d{1,' + dec + '})?$');
+  if (!re.test(s)) return null;
+  const [i, f = ''] = s.split('.');
+  const v = BigInt(i) * 10n ** BigInt(dec) + BigInt((f + '0'.repeat(dec)).slice(0, dec));
+  return v > 0n ? v : null;
+}
+const ceilDiv = (n, d) => (n + d - 1n) / d;
+const floorDiv = (n, d) => n / d;
+const nearDiv = (n, d) => (n + d / 2n) / d; // half up
+function fmtMinor(v) {
+  const neg = v < 0n; if (neg) v = -v;
+  const i = (v / 100n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  return (neg ? '−' : '') + i + '.' + (v % 100n).toString().padStart(2, '0');
+}
+function fmtExact(n) { // n in 1e-7 minor → major with up to 9 decimals, trailing zeros trimmed (min 2)
+  const neg = n < 0n; if (neg) n = -n;
+  const d = 1000000000n;
+  let f = (n % d).toString().padStart(9, '0').replace(/0+$/, '');
+  if (f.length < 2) f = f.padEnd(2, '0');
+  return (neg ? '−' : '') + (n / d).toString() + '.' + f;
+}
+function fmtRate(r7) { return (r7 / E7).toString() + '.' + (r7 % E7).toString().padStart(7, '0'); }
+function fmtRateShort(r7) { let s = fmtRate(r7).replace(/0+$/, ''); return s.endsWith('.') ? s.slice(0, -1) : s; }
+
+/* ---------- state ---------- */
+const st = { aed: '100.00', cur: 'GBP', rate: RATES.GBP, refunds: [], cmp: false, newer: false };
+
+/* ---------- core model (also exposed for tests) ---------- */
+function model() {
+  const aed = parseFixed(st.aed, 2), r7 = parseFixed(st.rate, 7);
+  if (aed == null || r7 == null) return { ok: false, aedOk: aed != null, rateOk: r7 != null };
+  const exact = aed * r7;
+  const q = ceilDiv(exact, E7), qDown = floorDiv(exact, E7), qNear = nearDiv(exact, E7);
+  const rows = [];
+  let rAed = 0n, rTxn = 0n, altTxn = 0n;
+  st.refunds.forEach((s, idx) => {
+    const req = parseFixed(s, 2);
+    const row = { idx, input: s, req };
+    if (req == null) { row.status = 'invalid'; rows.push(row); return; }
+    const remAed = aed - rAed;
+    if (req > remAed) { row.status = 'rej11'; row.remAed = remAed; rows.push(row); return; }
+    const final = rAed + req === aed;
+    const n = req * r7;
+    row.exact = n; row.final = final;
+    if (final) {
+      row.txn = q - rTxn;
+      row.alt = q - altTxn;
+    } else {
+      row.txn = floorDiv(n, E7);
+      row.alt = nearDiv(n, E7);
+      if (row.txn < 1n) { row.status = 'rej12'; rows.push(row); return; }
+    }
+    row.status = 'ok';
+    rAed += req; rTxn += row.txn; altTxn += row.alt;
+    row.afterAed = rAed; row.afterTxn = rTxn; row.afterAlt = altTxn;
+    rows.push(row);
+  });
+  const minAed = ceilDiv(E7, r7); // smallest AED minor that converts to ≥ 1 minor unit
+  return { ok: true, aed, r7, exact, q, qDown, qNear, rows, rAed, rTxn, altTxn, minAed,
+    altNeg: rows.some(r => r.status === 'ok' && r.alt < 0n), altOver: rows.some(r => r.status === 'ok' && r.afterAlt > q) };
+}
+
+/* ---------- render ---------- */
+function renderCurs() {
+  $('curs').innerHTML = CURS.map(c => c === 'JPY'
+    ? '<button class="chip" type="button" disabled title="Phase 2: 0-decimal currency">JPY</button>'
+    : '<button class="chip" type="button" data-c="' + c + '" aria-pressed="' + (st.cur === c) + '">' + c + '</button>').join('');
+}
+
+function render() {
+  renderCurs();
+  $('aed').value = st.aed; $('rate').value = st.rate;
+  $('cmp').checked = st.cmp; $('newer').checked = st.newer;
+  const m = model();
+  $('aed').classList.toggle('err', m.ok ? false : !m.aedOk);
+  $('rate').classList.toggle('err', m.ok ? false : !m.rateOk);
+  if (!m.ok) {
+    $('inErr').innerHTML = '<div class="bad">' + (!m.aedOk ? 'Order amount: a positive AED amount with up to 2 decimals. ' : '') + (!m.rateOk ? 'Rate: a positive number with up to 7 decimals.' : '') + '</div>';
+    ['quote', 'ruler', 'disp', 'rt', 'bars', 'sum', 'minOut', 'minTable', 'cmpOut', 'newerOut'].forEach(id => $(id).innerHTML = '');
+    $('obs').style.display = 'none';
+    window.__calc.last = m; writeHash(); return;
+  }
+  $('inErr').innerHTML = '';
+  renderQuote(m); renderRefunds(m); renderMin(m); renderObs(m);
+  window.__calc.last = m; writeHash();
+}
+
+function renderQuote(m) {
+  const c = st.cur;
+  const roundedUp = m.q * E7 !== m.exact;
+  $('quote').innerHTML =
+    '<div class="qbox"><div class="k">Order (mcpBaseAmount)</div><div class="v">' + fmtMinor(m.aed) + ' <small>AED</small></div><div class="s">What the merchant priced and sees.</div></div>' +
+    '<div class="qbox"><div class="k">AED × rate, exact</div><div class="v">' + fmtExact(m.exact) + ' <small>' + c + '</small></div><div class="s">' + fmtMinor(m.aed) + ' × ' + fmtRate(m.r7) + '</div></div>' +
+    '<div class="qbox hl"><div class="k">Quote (amount)</div><div class="v">' + fmtMinor(m.q) + ' <small>' + c + '</small></div><div class="s">' + (roundedUp ? 'Rounded up by ' + fmtExact(m.q * E7 - m.exact) + ' ' + c + '.' : 'Exact. Nothing to round.') + '</div></div>';
+  // ruler between floor and ceil
+  if (roundedUp) {
+    const lo = m.qDown, hi = m.q;
+    const frac = Number((m.exact - lo * E7) * 1000n / E7) / 1000; // 0..1
+    const pos = (frac * 100).toFixed(1);
+    $('ruler').innerHTML = '<div class="track">' +
+      '<div class="tick" style="left:0"><span>' + fmtMinor(lo) + '</span></div>' +
+      '<div class="tick up" style="left:100%"><span>' + fmtMinor(hi) + ' charged</span></div>' +
+      '<div class="arrow" style="left:' + pos + '%;width:' + (100 - frac * 100).toFixed(1) + '%"></div>' +
+      '<div class="mark" style="left:' + pos + '%">exact ' + fmtExact(m.exact) + '</div>' +
+      '</div><div class="lbls"></div>';
+  } else {
+    $('ruler').innerHTML = '';
+  }
+  $('disp').innerHTML = '<span>HPP shows: <code>' + c + ' ' + fmtMinor(m.q) + '</code></span>' +
+    '<span><code>Order amount AED ' + fmtMinor(m.aed) + '</code></span>' +
+    '<span><code>Exchange rate 1 AED = ' + fmtRateShort(m.r7) + ' ' + c + '</code></span>' +
+    '<span>Stored: <code>mcpRate ' + fmtRate(m.r7) + '</code></span>';
+}
+
+function renderRefunds(m) {
+  const c = st.cur;
+  const cmp = st.cmp;
+  let h = '<thead><tr><th>#</th><th>Refund AED<br>(mcpBaseAmount)</th><th>Checks</th><th>Conversion</th><th>Sent ' + esc(c) + '<br>(amount)</th><th>Refunded so far</th>' +
+    (cmp ? '<th class="alt">If rounded to nearest</th>' : '') + '<th></th></tr></thead><tbody>';
+  h += '<tr class="purchase"><td class="m">P</td><td class="m">' + fmtMinor(m.aed) + '</td><td><span class="st grey">purchase</span></td><td class="calc">' + fmtMinor(m.aed) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(m.exact) + ' → up</td><td class="m big">' + fmtMinor(m.q) + '</td><td class="m">—</td>' + (cmp ? '<td class="m alt">' + fmtMinor(m.q) + '</td>' : '') + '<td></td></tr>';
+  let n = 0;
+  m.rows.forEach(r => {
+    const del = '<button class="x" type="button" data-del="' + r.idx + '" title="Remove">×</button>';
+    if (r.status === 'invalid') {
+      h += '<tr class="rej"><td class="m">–</td><td class="m big">' + esc(r.input) + '</td><td><span class="st bad">invalid</span></td><td class="calc">Not an AED amount with up to 2 decimals.</td><td class="m">—</td><td class="m">—</td>' + (cmp ? '<td class="alt"></td>' : '') + '<td>' + del + '</td></tr>';
+      return;
+    }
+    if (r.status === 'rej11') {
+      h += '<tr class="rej"><td class="m">–</td><td class="m big">' + fmtMinor(r.req) + '</td><td><span class="st bad">1.1 rejected</span></td><td class="calc">More than AED left to refund (' + fmtMinor(r.remAed) + '). Existing refund message.</td><td class="m">—</td><td class="m">—</td>' + (cmp ? '<td class="alt"></td>' : '') + '<td>' + del + '</td></tr>';
+      return;
+    }
+    if (r.status === 'rej12') {
+      h += '<tr class="rej"><td class="m">–</td><td class="m big">' + fmtMinor(r.req) + '</td><td><span class="st ok">1.1 pass</span> <span class="st bad">1.2 rejected</span></td><td class="calc">' + fmtMinor(r.req) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(r.exact) + ' → down = <b>0.00</b>. Below one minor unit and not the final refund.</td><td class="m">—</td><td class="m">—</td>' + (cmp ? '<td class="alt"></td>' : '') + '<td>' + del + '</td></tr>';
+      return;
+    }
+    n++;
+    const calc = r.final
+      ? 'Final: ' + fmtMinor(m.q) + ' − ' + fmtMinor(r.afterTxn - r.txn) + ' earlier = <b>' + fmtMinor(r.txn) + '</b><br>(exact would be ' + fmtExact(r.exact) + ')'
+      : fmtMinor(r.req) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(r.exact) + ' → down = <b>' + fmtMinor(r.txn) + '</b>';
+    h += '<tr' + (r.final ? ' class="final"' : '') + '><td class="m">R' + n + '</td><td class="m big">' + fmtMinor(r.req) + '</td><td><span class="st ok">1.1 pass</span> <span class="st ' + (r.final ? 'grey' : 'ok') + '">' + (r.final ? '1.2 n/a: final' : '1.2 pass') + '</span></td><td class="calc">' + calc + '</td><td class="m big">' + fmtMinor(r.txn) + '</td><td class="m">AED ' + fmtMinor(r.afterAed) + '<br>' + esc(c) + ' ' + fmtMinor(r.afterTxn) + '</td>' +
+      (cmp ? '<td class="m alt' + (r.alt < 0n ? ' neg' : '') + '">' + fmtMinor(r.alt) + (r.alt < 0n ? '<br>negative' : (r.afterAlt > m.q ? '<br>over paid' : '')) + '</td>' : '') + '<td>' + del + '</td></tr>';
+  });
+  if (!m.rows.length) h += '<tr><td colspan="' + (cmp ? 8 : 7) + '" class="calc" style="color:var(--muted)">No refunds yet. Enter an AED amount, or use a Try preset.</td></tr>';
+  h += '</tbody>';
+  $('rt').innerHTML = h;
+
+  // bars
+  const ok = m.rows.filter(r => r.status === 'ok');
+  const bar = (label, total, parts, left, unit) => {
+    let s = '<div class="bar"><div class="lbl"><span>' + label + '</span><span>' + unit + ' ' + fmtMinor(total) + '</span></div><div class="seg">';
+    parts.forEach((p, i) => { const w = Number(p * 10000n / total) / 100; s += '<div style="width:' + w + '%;background:' + SEG[i % SEG.length] + '" title="R' + (i + 1) + ' ' + fmtMinor(p) + '">' + (w > 9 ? fmtMinor(p) : '') + '</div>'; });
+    if (left > 0n) { const w = Number(left * 10000n / total) / 100; s += '<div class="left" style="width:' + w + '%">' + (w > 14 ? 'left ' + fmtMinor(left) : '') + '</div>'; }
+    return s + '</div></div>';
+  };
+  $('bars').innerHTML = bar('AED: what the merchant refunds', m.aed, ok.map(r => r.req), m.aed - m.rAed, 'AED') +
+    bar(c + ': what goes back to the card', m.q, ok.map(r => r.txn), m.q - m.rTxn, c);
+
+  const closed = m.rAed === m.aed;
+  $('sum').innerHTML = closed
+    ? '<span class="st ok">order fully refunded</span> AED ' + fmtMinor(m.rAed) + ' = AED paid · ' + esc(c) + ' ' + fmtMinor(m.rTxn) + ' = ' + esc(c) + ' paid. Nothing left in either currency.'
+    : '<span class="st grey">open</span> Left to refund: AED ' + fmtMinor(m.aed - m.rAed) + ' · ' + esc(c) + ' ' + fmtMinor(m.q - m.rTxn) + '. The next refund of AED ' + fmtMinor(m.aed - m.rAed) + ' is the final one.';
+
+  // newer rate
+  if (st.newer) {
+    const nr = NEWER[st.cur];
+    $('newerOut').innerHTML = '<div class="info">Ignored. Refunds use the rate stored on the purchase (<code>mcpRate ' + fmtRate(m.r7) + '</code>), not the newer file' + (nr ? ' (' + nr + ')' : '') + '. S6 section 2: “Never look up a new rate.”</div>';
+  } else $('newerOut').innerHTML = '';
+
+  // compare
+  if (cmp) {
+    let t;
+    if (!ok.length) t = '<div class="info">Add refunds to compare.</div>';
+    else if (m.altNeg || m.altOver) t = '<div class="bad"><b>Rounding to nearest breaks the order.</b> Partial refunds rounded up add up to more than the ' + esc(c) + ' paid' + (m.altNeg ? ', so the final refund would be negative and cannot be sent' : '') + '. Rounding down keeps every partial refund at or below its exact value, so the final refund is never negative.</div>';
+    else t = '<div class="info">With these refunds both methods work. Try <a href="#try=nearest-fails">many small refunds</a> to see rounding to nearest fail.</div>';
+    $('cmpOut').innerHTML = t;
+  } else $('cmpOut').innerHTML = '';
+}
+
+function renderMin(m) {
+  const c = st.cur;
+  const below = m.minAed - 1n;
+  let h = '<div class="mrow">Smallest non-final refund: <b style="color:var(--money)">AED ' + fmtMinor(m.minAed) + '</b><br>' +
+    'AED ' + fmtMinor(m.minAed) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(m.minAed * m.r7) + ' → ' + fmtMinor(floorDiv(m.minAed * m.r7, E7)) + ' ' + esc(c) + ' <span class="st ok">pass</span>';
+  if (below > 0n) h += '<br>AED ' + fmtMinor(below) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(below * m.r7) + ' → 0.00 <span class="st bad">rejected</span><br><span style="color:var(--text-2)">AED ' + fmtMinor(below) + ' is accepted only as the final refund.</span>';
+  else h += '<br><span style="color:var(--text-2)">At this rate every AED amount converts to at least one minor unit. Check 1.2 never rejects.</span>';
+  $('minOut').innerHTML = h + '</div>';
+  let t = '<table class="mt"><thead><tr><th>Currency</th><th>Dummy rate</th><th>Min. AED</th></tr></thead><tbody>';
+  Object.keys(RATES).forEach(k => {
+    const r7 = parseFixed(RATES[k], 7);
+    t += '<tr' + (k === c ? ' class="sel"' : '') + '><td>' + k + '</td><td>' + RATES[k] + '</td><td>' + fmtMinor(ceilDiv(E7, r7)) + '</td></tr>';
+  });
+  $('minTable').innerHTML = t + '</tbody></table>';
+}
+
+function renderObs(m) {
+  // Observation worth raising: with many partial refunds the final refund absorbs more than one cent.
+  const ok = m.rows.filter(r => r.status === 'ok');
+  const fin = ok.find(r => r.final);
+  if (fin && ok.length > 1) {
+    const diff = fin.txn * E7 - fin.exact; // in 1e-7 minor
+    const absorbed = diff < 0n ? -diff : diff;
+    if (absorbed > E7) {
+      $('obs').style.display = '';
+      $('obs').innerHTML = '<b>Observation for discussion.</b> The final refund of AED ' + fmtMinor(fin.req) + ' sends ' + esc(st.cur) + ' ' + fmtMinor(fin.txn) + ', but its exact value is ' + fmtExact(fin.exact) + '. With ' + (ok.length - 1) + ' earlier partial refunds, the rounding of each one, plus the round-up of the purchase, collects on the final refund (here ' + fmtExact(absorbed) + ' ' + esc(st.cur) + '). The stories call this the last-cent rule; it is not limited to one cent. Totals stay correct in both currencies. Not defined: whether there is a limit on how much the final refund may absorb.';
+      return;
+    }
+  }
+  $('obs').style.display = 'none';
+}
+
+/* ---------- presets ---------- */
+const TRY = {
+  'gb':            { t: 'AED 100 → GBP', aed: '100.00', cur: 'GBP', refunds: [] },
+  'round-up':      { t: 'AED 99.99, rounded up', aed: '99.99', cur: 'GBP', refunds: [] },
+  'tiny':          { t: 'AED 0.01', aed: '0.01', cur: 'GBP', refunds: [] },
+  'inr':           { t: 'INR', aed: '37.45', cur: 'INR', refunds: [] },
+  'refund-60-40':  { t: 'Refund 60 + 40', aed: '100.00', cur: 'GBP', refunds: ['60.00', '40.00'] },
+  'thirds':        { t: 'Refund in thirds', aed: '100.00', cur: 'GBP', refunds: ['33.33', '33.33', '33.34'] },
+  'full':          { t: 'Full refund', aed: '100.00', cur: 'GBP', refunds: ['100.00'] },
+  'min-nonfinal':  { t: 'AED 0.04, not final', aed: '100.00', cur: 'GBP', refunds: ['0.04'] },
+  'min-final':     { t: 'AED 0.04 as final', aed: '100.00', cur: 'GBP', refunds: ['60.00', '39.96', '0.04'] },
+  'over':          { t: 'Refund too much', aed: '100.00', cur: 'GBP', refunds: ['100.01'] },
+  'newer-rate':    { t: 'Newer rate file', aed: '100.00', cur: 'GBP', refunds: ['60.00'], newer: true },
+  'nearest-fails': { t: 'Why round down', aed: '100.00', cur: 'GBP', refunds: Array(42).fill('2.37').concat(['0.46']), cmp: true }
+};
+function applyTry(k) {
+  const p = TRY[k]; if (!p) return false;
+  st.aed = p.aed; st.cur = p.cur; st.rate = RATES[p.cur]; st.refunds = p.refunds.slice();
+  st.cmp = !!p.cmp; st.newer = !!p.newer; curTry = k;
+  return true;
+}
+let curTry = '';
+function renderTries() {
+  $('tries').innerHTML = '<span>Try</span>' + Object.keys(TRY).map(k => '<a href="#try=' + k + '"' + (k === curTry ? ' class="on"' : '') + '>' + TRY[k].t + '</a>').join('');
+}
+
+/* ---------- hash ---------- */
+function compress(list) { // ["2.37" x42] → "2.37*42"
+  const out = []; let i = 0;
+  while (i < list.length) { let j = i; while (j < list.length && list[j] === list[i]) j++; out.push(j - i > 1 ? list[i] + '*' + (j - i) : list[i]); i = j; }
+  return out.join(',');
+}
+function expand(s) {
+  if (!s) return [];
+  return s.split(',').flatMap(p => { const [a, n] = p.split('*'); const k = Math.min(parseInt(n || '1', 10) || 1, 200); return Array(k).fill(a); });
+}
+let writing = false;
+function writeHash() {
+  const h = curTry ? '#try=' + curTry
+    : '#a=' + encodeURIComponent(st.aed) + '&c=' + st.cur + '&r=' + encodeURIComponent(st.rate) + (st.refunds.length ? '&rf=' + encodeURIComponent(compress(st.refunds)) : '') + (st.cmp ? '&cmp=1' : '') + (st.newer ? '&nr=1' : '');
+  if (location.hash !== h) { writing = true; history.replaceState(null, '', h); writing = false; }
+  renderTries();
+}
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  curTry = '';
+  if (p.get('try') && applyTry(p.get('try'))) return;
+  st.aed = p.get('a') || '100.00';
+  st.cur = RATES[p.get('c')] ? p.get('c') : 'GBP';
+  st.rate = p.get('r') || RATES[st.cur];
+  st.refunds = expand(p.get('rf'));
+  st.cmp = p.get('cmp') === '1'; st.newer = p.get('nr') === '1';
+}
+
+/* ---------- events ---------- */
+const edit = () => { curTry = ''; };
+$('aed').addEventListener('change', e => { edit(); st.aed = e.target.value.trim(); render(); });
+$('rate').addEventListener('change', e => { edit(); st.rate = e.target.value.trim(); render(); });
+$('curs').addEventListener('click', e => { const b = e.target.closest('[data-c]'); if (!b) return; edit(); st.cur = b.dataset.c; st.rate = RATES[st.cur]; render(); });
+function addRefund(v) { v = String(v).trim(); if (!v) return; edit(); st.refunds.push(v); $('rAmt').value = ''; render(); }
+$('rAddBtn').addEventListener('click', () => addRefund($('rAmt').value));
+$('rAmt').addEventListener('keydown', e => { if (e.key === 'Enter') addRefund($('rAmt').value); });
+$('rRest').addEventListener('click', () => { const m = model(); if (m.ok && m.aed > m.rAed) addRefund(fmtMinor(m.aed - m.rAed).replace(/,/g, '')); });
+$('rClear').addEventListener('click', () => { edit(); st.refunds = []; render(); });
+$('rt').addEventListener('click', e => { const b = e.target.closest('[data-del]'); if (!b) return; edit(); st.refunds.splice(+b.dataset.del, 1); render(); });
+$('cmp').addEventListener('change', e => { edit(); st.cmp = e.target.checked; render(); });
+$('newer').addEventListener('change', e => { edit(); st.newer = e.target.checked; render(); });
+window.addEventListener('hashchange', () => { if (writing) return; readHash(); render(); });
+
+window.__calc = {
+  st, model, TRY, fmtMinor, fmtExact,
+  set(o) { Object.assign(st, o); curTry = ''; render(); return model(); }
+};
+readHash(); render();
+})();
+</script>
+</body>
+</html>
