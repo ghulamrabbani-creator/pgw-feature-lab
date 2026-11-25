@@ -1,0 +1,2561 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>PGW dev stories · PGW Feature Lab</title>
+<link rel="stylesheet" href="../../assets/lab.css">
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="../">Network Tokenization</a> / PGW dev stories</nav>
+</div></header>
+<div class="doc-layout">
+<aside class="toc" aria-label="Contents"><p>contents</p><ol>
+<li class="l1"><a href="#network-tokenization-pgw-dev-stories-mpgs-and-cybersource">Network Tokenization — PGW Dev Stories (MPGS and CyberSource)</a></li>
+<li class="l2"><a href="#story-map">Story map</a></li>
+<li class="l2"><a href="#prerequisites-not-pgw-work">Prerequisites (not PGW work)</a></li>
+<li class="l2"><a href="#rules-for-every-story">Rules for every story</a></li>
+<li class="l1"><a href="#nt-0-network-token-data-model-and-merchant-apis">NT-0 — Network token data model and merchant APIs</a></li>
+<li class="l2"><a href="#background">Background</a></li>
+<li class="l2"><a href="#goal">Goal</a></li>
+<li class="l2"><a href="#story-summary">Story summary</a></li>
+<li class="l2"><a href="#requirements">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-m1-update-mpgs-token-generation">NT-M1 — Update MPGS token generation</a></li>
+<li class="l2"><a href="#background-1">Background</a></li>
+<li class="l2"><a href="#goal-1">Goal</a></li>
+<li class="l2"><a href="#story-summary-1">Story summary</a></li>
+<li class="l2"><a href="#requirements-1">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-1">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-m2-mpgs-pay-card-number">NT-M2 — MPGS Pay (card number)</a></li>
+<li class="l2"><a href="#background-2">Background</a></li>
+<li class="l2"><a href="#goal-2">Goal</a></li>
+<li class="l2"><a href="#story-summary-2">Story summary</a></li>
+<li class="l2"><a href="#requirements-2">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-2">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-m3-mpgs-token-cit">NT-M3 — MPGS token CIT</a></li>
+<li class="l2"><a href="#background-3">Background</a></li>
+<li class="l2"><a href="#goal-3">Goal</a></li>
+<li class="l2"><a href="#story-summary-3">Story summary</a></li>
+<li class="l2"><a href="#requirements-3">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-3">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-m4-mpgs-token-mit">NT-M4 — MPGS token MIT</a></li>
+<li class="l2"><a href="#background-4">Background</a></li>
+<li class="l2"><a href="#goal-4">Goal</a></li>
+<li class="l2"><a href="#story-summary-4">Story summary</a></li>
+<li class="l2"><a href="#requirements-4">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-4">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-m5-mpgs-capture-refund-void">NT-M5 — MPGS capture, refund, void</a></li>
+<li class="l2"><a href="#background-5">Background</a></li>
+<li class="l2"><a href="#goal-5">Goal</a></li>
+<li class="l2"><a href="#story-summary-5">Story summary</a></li>
+<li class="l2"><a href="#requirements-5">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-5">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-c1-create-cybs-instrument-identifier">NT-C1 — Create CYBS instrument identifier</a></li>
+<li class="l2"><a href="#background-6">Background</a></li>
+<li class="l2"><a href="#goal-6">Goal</a></li>
+<li class="l2"><a href="#story-summary-6">Story summary</a></li>
+<li class="l2"><a href="#requirements-6">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-6">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-c2-cybs-pay-card-number">NT-C2 — CYBS Pay (card number)</a></li>
+<li class="l2"><a href="#background-7">Background</a></li>
+<li class="l2"><a href="#goal-7">Goal</a></li>
+<li class="l2"><a href="#story-summary-7">Story summary</a></li>
+<li class="l2"><a href="#requirements-7">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-7">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-c3-cybs-token-cit">NT-C3 — CYBS token CIT</a></li>
+<li class="l2"><a href="#background-8">Background</a></li>
+<li class="l2"><a href="#goal-8">Goal</a></li>
+<li class="l2"><a href="#story-summary-8">Story summary</a></li>
+<li class="l2"><a href="#requirements-8">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-8">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-c4-cybs-token-mit">NT-C4 — CYBS token MIT</a></li>
+<li class="l2"><a href="#background-9">Background</a></li>
+<li class="l2"><a href="#goal-9">Goal</a></li>
+<li class="l2"><a href="#story-summary-9">Story summary</a></li>
+<li class="l2"><a href="#requirements-9">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-9">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-c5-cybs-capture-refund-void">NT-C5 — CYBS capture, refund, void</a></li>
+<li class="l2"><a href="#background-10">Background</a></li>
+<li class="l2"><a href="#goal-10">Goal</a></li>
+<li class="l2"><a href="#story-summary-10">Story summary</a></li>
+<li class="l2"><a href="#requirements-10">Requirements</a></li>
+<li class="l2"><a href="#acceptance-criteria-10">Acceptance criteria</a></li>
+<li class="l1"><a href="#nt-a1-apex-network-token-keys-waiting-on-apex-team">NT-A1 — APEX network token keys (Waiting on APEX team)</a></li>
+<li class="l1"><a href="#nt-x-token-status-and-retry-control-waiting-on-risk-compliance">NT-X — Token status and retry control (Waiting on Risk &amp; Compliance)</a></li>
+<li class="l1"><a href="#open-points">Open points</a></li>
+</ol></aside>
+<main>
+<div class="doc-meta"><span class="tag">v1.1</span><span class="tag grey">19-Nov-2026</span><span class="tag grey">Source: NT PGW Dev Stories v1.1 (Lab copy).docx</span></div>
+<article class="doc">
+<h1
+id="network-tokenization-pgw-dev-stories-mpgs-and-cybersource">Network
+Tokenization — PGW Dev Stories (MPGS and CyberSource)</h1>
+<p>Version 1.1 · 19-Nov-2026 · Prepared by Ghulam Rabbani (Product)
+Team: PGW engineering team</p>
+<p><strong>Changes in v1.1 (19-Nov-2026):</strong> Rule 1 now uses one
+master toggle, <em>Generate and Use Network Token</em>, per MID, default
+OFF. NT-C1: one CYBS call only (no enrollment call), no
+<code>securityCode</code>, adapter returns failures, no secrets in logs.
+NT-0 acceptance criterion 5 added.</p>
+<p>These stories are the requirement. Each story can be read alone. A
+story refers to another story only for work that must be built
+first.</p>
+<h2 id="story-map">Story map</h2>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Payment explorer</a><a class="visual-link" href="../token-layers.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Token layers</a></div>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Story</strong></th>
+<th><strong>What it delivers</strong></th>
+<th><strong>Depends on</strong></th>
+<th><strong>Status</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>NT-0</td>
+<td>Network token data model and merchant APIs</td>
+<td>New transaction object <code>networkTokenDetails</code>. New fields
+on the Geidea token record. Object returned to the merchant.</td>
+<td>—</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>NT-M1</td>
+<td>Update MPGS token generation</td>
+<td>PGW reads the network token provider when it creates the MPGS token.
+PGW updates the Geidea token record.</td>
+<td>NT-0</td>
+<td>Written</td>
+</tr>
+<tr class="odd">
+<td>NT-M2</td>
+<td>MPGS Pay (card number)</td>
+<td>PGW records network token data on Pay and Authorize with a card
+number.</td>
+<td>NT-0</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>NT-M3</td>
+<td>MPGS token CIT</td>
+<td>PGW records network token data on CIT with a Geidea token.</td>
+<td>NT-0, NT-M1</td>
+<td>Written</td>
+</tr>
+<tr class="odd">
+<td>NT-M4</td>
+<td>MPGS token MIT</td>
+<td>PGW records network token data on MIT with a Geidea token.</td>
+<td>NT-0, NT-M1</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>NT-M5</td>
+<td>MPGS capture, refund, void</td>
+<td>PGW records network token data on follow-on transactions.</td>
+<td>NT-M2, NT-M3, NT-M4</td>
+<td>Written</td>
+</tr>
+<tr class="odd">
+<td>NT-C1</td>
+<td>Create CYBS instrument identifier</td>
+<td>PGW creates a CYBS instrument identifier for a saved card.</td>
+<td>NT-0</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>NT-C2</td>
+<td>CYBS Pay (card number)</td>
+<td>PGW records network token data on Pay and Authorize with a card
+number.</td>
+<td>NT-0</td>
+<td>Written</td>
+</tr>
+<tr class="odd">
+<td>NT-C3</td>
+<td>CYBS token CIT</td>
+<td>PGW pays CIT with the instrument identifier. PGW records network
+token data.</td>
+<td>NT-0, NT-C1</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>NT-C4</td>
+<td>CYBS token MIT</td>
+<td>PGW pays MIT with the instrument identifier. PGW records network
+token data.</td>
+<td>NT-0, NT-C1</td>
+<td>Written</td>
+</tr>
+<tr class="odd">
+<td>NT-C5</td>
+<td>CYBS capture, refund, void</td>
+<td>PGW records network token data on follow-on transactions.</td>
+<td>NT-C2, NT-C3, NT-C4</td>
+<td>Written</td>
+</tr>
+<tr class="even">
+<td>NT-A1</td>
+<td>APEX network token keys</td>
+<td>Network token data sent to APEX in <code>userData</code>.</td>
+<td>NT-M2–M4, NT-C2–C4</td>
+<td>Waiting on APEX team</td>
+</tr>
+<tr class="odd">
+<td>NT-X</td>
+<td>Token status and retry control</td>
+<td>PGW stops using a Geidea token after a "do not retry" decline.</td>
+<td>NT-M3, NT-M4, NT-C3, NT-C4</td>
+<td>Waiting on Risk &amp; Compliance</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Build order:</strong> NT-0 → NT-M1 → NT-M2, NT-M3, NT-M4 →
+NT-M5. CYBS in parallel: NT-C1 → NT-C2, NT-C3, NT-C4 → NT-C5.</p>
+<h2 id="prerequisites-not-pgw-work">Prerequisites (not PGW work)</h2>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Item</strong></th>
+<th><strong>Needed for</strong></th>
+<th><strong>Owner</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>P1</td>
+<td>MPGS: MDES onboarding, Visa VTS via TRID <code>40000000000</code>,
+<em>Enable Network Tokens</em> per merchant</td>
+<td>NT-M1 to NT-M5 (to see network tokens in test and live)</td>
+<td>Merchant integration team, MPGS</td>
+</tr>
+<tr class="even">
+<td>P2</td>
+<td>CYBS: network token provisioning on the vault. Visa and Mastercard
+token permission per MID. In place on MID
+<code>TEST-CYBS-01</code>.</td>
+<td>NT-C1 to NT-C5</td>
+<td>Merchant integration team</td>
+</tr>
+<tr class="odd">
+<td>P3</td>
+<td>CYBS Decision Manager rule for MITs (a Mastercard MIT was rejected
+without <code>DECISION_SKIP</code> in the 11-Nov POC)</td>
+<td>NT-C4</td>
+<td>Risk &amp; Compliance</td>
+</tr>
+</tbody>
+</table>
+<h2 id="rules-for-every-story">Rules for every story</h2>
+<div class="visual-links" data-auto><a class="visual-link" href="../switches-and-rollout.html#who-decides"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Switches and rollout</a></div>
+<ol type="1">
+<li><strong>Master toggle.</strong> The existing PGW configuration
+parameter <em>Generate and Use Network Token</em> is the one master
+toggle for all work in these stories. It is set per MID. Default: OFF
+for all MIDs.
+<ul>
+<li>Toggle OFF: PGW behaves exactly as today. PGW does not create CYBS
+instrument identifiers. PGW pays CIT and MIT on CYBS with the card
+number. PGW sets <code>networkTokenDetails</code> = <code>null</code>.
+PGW does not change the Geidea token record.</li>
+<li>Toggle ON: the stories apply. The existing toggles still apply as
+today: <em>Enable tokenization</em>,
+<em>CUSTOMER_INITIATED_TRANSACTIONS</em>,
+<em>MERCHANT_INITIATED_TRANSACTIONS</em>.</li>
+<li>Do not use the other network token parameters (<em>Use Network
+Token</em>, <em>Send NT to merchant</em>).</li>
+<li>Rollout: switch ON for the production test MID, test in production,
+then switch ON for all merchants. A later release can remove this
+toggle.</li>
+<li>MPGS: MPGS configuration per MID (P1) decides if MPGS pays with a
+network token. The PGW toggle controls only what PGW records. CYBS: the
+PGW toggle controls instrument identifier creation and payment with it.
+CYBS token permission per MID (P2) decides if CYBS uses a network
+token.</li>
+</ul></li>
+<li>A failure to read or record network token data never changes the
+payment result. Log the failure. Continue.</li>
+<li>Never store or log a full card number or a full network token
+number.</li>
+<li>Gateway field names are as in MPGS REST API version 80 and
+CyberSource REST API. PGW field names are <code>camelCase</code>.</li>
+<li>New fields in merchant APIs are additions. Do not change or remove
+existing fields.</li>
+<li>Copy gateway values as received, unless a rule in the story says
+otherwise.</li>
+</ol>
+<h1 id="nt-0-network-token-data-model-and-merchant-apis">NT-0 — Network
+token data model and merchant APIs</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../what-pgw-records.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>What PGW records</a></div>
+<h2 id="background">Background</h2>
+<p>Visa charges a fee on card-not-present transactions that do not use a
+network token. PGW does not record if a transaction used a network
+token. PGW does not record if a saved card has a network token.</p>
+<h2 id="goal">Goal</h2>
+<ol type="1">
+<li>PGW has one object to record network token data on each transaction,
+for MPGS and CYBS.</li>
+<li>PGW returns this object to the merchant.</li>
+<li>The Geidea token record has fields for network token data and token
+status.</li>
+</ol>
+<h2 id="story-summary">Story summary</h2>
+<p>This story adds the object and the fields. It does not fill them. The
+gateway stories (NT-M1 to NT-M5, NT-C1 to NT-C5) fill them.</p>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-0</td>
+</tr>
+<tr class="even">
+<td>Consumers</td>
+<td>Merchants (order inquiry, callback, pay responses). PGW stories
+NT-M1 to NT-C5.</td>
+</tr>
+<tr class="odd">
+<td>Gateway API used</td>
+<td>None</td>
+</tr>
+<tr class="even">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code>; Geidea token
+record</td>
+</tr>
+<tr class="odd">
+<td>Depends on</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Followed by</td>
+<td>NT-M1 to NT-M5, NT-C1 to NT-C5</td>
+</tr>
+<tr class="odd">
+<td>Out of scope</td>
+<td>Filling the fields (gateway stories). Token status logic
+(NT-X).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements">Requirements</h2>
+<h3 id="new-transaction-object-networktokendetails">1. New transaction
+object <code>networkTokenDetails</code></h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Values</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isNetworkToken</code></td>
+<td>Boolean</td>
+<td><code>true</code> / <code>false</code></td>
+<td><code>true</code> = the gateway paid with a network token.</td>
+</tr>
+<tr class="even">
+<td><code>tokenProvider</code></td>
+<td>String</td>
+<td><code>VTS</code> / <code>MDES</code> / <code>null</code></td>
+<td>Network token provider. <code>VTS</code> = Visa. <code>MDES</code> =
+Mastercard. <code>null</code> when <code>isNetworkToken</code> =
+<code>false</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>maskedTokenNumber</code></td>
+<td>String</td>
+<td>e.g. <code>489537xxxxxx0001</code> (MPGS),
+<code>5222220000000000</code> (CYBS) / <code>null</code></td>
+<td>Masked network token number. CYBS returns only the token BIN, so the
+rest is zero-filled.</td>
+</tr>
+<tr class="even">
+<td><code>tokenExpiryMonth</code></td>
+<td>String</td>
+<td>e.g. <code>11</code> / <code>null</code></td>
+<td>Network token expiry month.</td>
+</tr>
+<tr class="odd">
+<td><code>tokenExpiryYear</code></td>
+<td>String</td>
+<td>e.g. <code>28</code> / <code>null</code></td>
+<td>Network token expiry year.</td>
+</tr>
+<tr class="even">
+<td><code>paymentAccountReference</code></td>
+<td>String</td>
+<td>e.g. <code>V0010000000000000000000000001</code> /
+<code>null</code></td>
+<td>PAR. One value per card.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="transactions-that-carry-the-object">2. Transactions that carry
+the object</h3>
+<ol type="1">
+<li>Add the object to transactions of type <code>Pay</code>,
+<code>Authorization</code>, <code>Capture</code>, <code>Refund</code>,
+<code>Void</code>.</li>
+<li>Do not add the object to <code>Authentication</code>
+transactions.</li>
+<li>Before a gateway story fills the object, set it to
+<code>null</code>.</li>
+<li>Transactions created before this release:
+<code>networkTokenDetails</code> = <code>null</code>.</li>
+</ol>
+<h3 id="return-the-object-to-the-merchant">3. Return the object to the
+merchant</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Merchant API</strong></th>
+<th><strong>Where</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Order inquiry
+<code>GET /pgw/api/v1/direct/order/{orderId}</code></td>
+<td><code>order.transactions[].networkTokenDetails</code></td>
+</tr>
+<tr class="even">
+<td>Callback to <code>callbackUrl</code></td>
+<td><code>order.transactions[].networkTokenDetails</code></td>
+</tr>
+<tr class="odd">
+<td><code>POST /pgw/api/v2/direct/pay</code> response</td>
+<td><code>order.transactions[].networkTokenDetails</code></td>
+</tr>
+<tr class="even">
+<td><code>POST /pgw/api/v2/direct/pay/token</code> response</td>
+<td><code>order.transactions[].networkTokenDetails</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="new-fields-on-the-geidea-token-record-internal">4. New fields on
+the Geidea token record (internal)</h3>
+<table>
+<colgroup>
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+<col style="width: 20%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Values</strong></th>
+<th><strong>Default (new and existing tokens)</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>schemeTokenProvider</code></td>
+<td>String</td>
+<td><code>VTS</code> / <code>MDES</code> / <code>null</code></td>
+<td><code>null</code></td>
+<td>A network token exists for this saved card. <code>null</code> = none
+seen yet.</td>
+</tr>
+<tr class="even">
+<td><code>tokenStatus</code></td>
+<td>String</td>
+<td><code>ACTIVE</code> / <code>INACTIVE</code></td>
+<td><code>ACTIVE</code></td>
+<td>For NT-X. Not read or changed in this release.</td>
+</tr>
+<tr class="odd">
+<td><code>tokenStatusReason</code></td>
+<td>String</td>
+<td>free text</td>
+<td><code>null</code></td>
+<td>For NT-X. Not changed in this release.</td>
+</tr>
+<tr class="even">
+<td><code>tokenStatusDate</code></td>
+<td>DateTime</td>
+<td>UAE time</td>
+<td><code>null</code></td>
+<td>For NT-X. Not changed in this release.</td>
+</tr>
+<tr class="odd">
+<td><code>cybsInstrumentIdentifierId</code></td>
+<td>String</td>
+<td>19 digits / <code>null</code></td>
+<td><code>null</code></td>
+<td>CYBS instrument identifier. Set by NT-C1.</td>
+</tr>
+<tr class="even">
+<td><code>networkTokenState</code></td>
+<td>String</td>
+<td>e.g. <code>ACTIVE</code> / <code>null</code></td>
+<td><code>null</code></td>
+<td>Network token state from CYBS. Set by NT-C1.</td>
+</tr>
+</tbody>
+</table>
+<p>Do not return the token record fields in any merchant API in this
+release.</p>
+<h3 id="update-rules">5. Update rules</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Field</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>networkTokenDetails</code></td>
+<td>Write once per transaction. Do not update after that.</td>
+</tr>
+<tr class="even">
+<td><code>schemeTokenProvider</code></td>
+<td>When it is not <code>null</code>, do not change it.</td>
+</tr>
+<tr class="odd">
+<td><code>tokenStatus</code>, <code>tokenStatusReason</code>,
+<code>tokenStatusDate</code></td>
+<td>Do not change in this release.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="acceptance-criteria">Acceptance criteria</h2>
+<ol type="1">
+<li>Order inquiry for an existing order returns
+<code>networkTokenDetails</code> = <code>null</code> on each
+<code>Pay</code>, <code>Authorization</code>, <code>Capture</code>,
+<code>Refund</code>, <code>Void</code> transaction.</li>
+<li><code>Authentication</code> transactions do not have the
+object.</li>
+<li>Existing Geidea tokens have <code>tokenStatus</code> =
+<code>ACTIVE</code> and all other new fields = <code>null</code>.</li>
+<li>Existing merchant API fields do not change.</li>
+<li><em>Generate and Use Network Token</em> OFF on a MID:
+<code>networkTokenDetails</code> = <code>null</code> on all new
+transactions. The Geidea token record does not change.</li>
+</ol>
+<h1 id="nt-m1-update-mpgs-token-generation">NT-M1 — Update MPGS token
+generation</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html#try=mpgs-save"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Explorer: MPGS save card</a></div>
+<h2 id="background-1">Background</h2>
+<p>On MPGS, PGW creates an MPGS token after a card is saved. When
+network tokens are enabled on MPGS (P1), MPGS asks Visa or Mastercard
+for a network token for the card. The MPGS token response shows if a
+network token exists. PGW does not read this today.</p>
+<h2 id="goal-1">Goal</h2>
+<p>PGW records on the Geidea token record if a network token exists for
+the saved card.</p>
+<h2 id="story-summary-1">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-M1</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>MPGS, API version 80</td>
+</tr>
+<tr class="odd">
+<td>MPGS API used</td>
+<td>Create or update token:
+<code>PUT /api/rest/version/80/merchant/{merchantId}/token/{tokenId}</code></td>
+</tr>
+<tr class="even">
+<td>Entities written</td>
+<td>Geidea token record: <code>schemeTokenProvider</code></td>
+</tr>
+<tr class="odd">
+<td>Depends on</td>
+<td>NT-0</td>
+</tr>
+<tr class="even">
+<td>Followed by</td>
+<td>NT-M3, NT-M4</td>
+</tr>
+<tr class="odd">
+<td>Out of scope</td>
+<td>Payment requests and responses (NT-M2 to NT-M5). Token status
+(NT-X).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-1">Requirements</h2>
+<h3 id="trigger">1. Trigger</h3>
+<p>No change. PGW calls the MPGS token endpoint at the same point as
+today (<code>SendToken</code>, after a save-card payment).</p>
+<h3 id="request">2. Request</h3>
+<p>No change.</p>
+<h3 id="response-fields-to-read">3. Response fields to read</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>MPGS field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Example</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>schemeToken.provider</code></td>
+<td>String</td>
+<td><code>VTS</code></td>
+<td>A network token exists. Absent if none exists yet.</td>
+</tr>
+</tbody>
+</table>
+<p>Note: in version 80 the token response has no masked network token
+number, no token expiry and no network token status.</p>
+<h3 id="processing">4. Processing</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Condition</strong></th>
+<th><strong>Action</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>4.1</td>
+<td><code>schemeTokenProvider</code> on the Geidea token is not
+<code>null</code></td>
+<td>Do not change it. Stop.</td>
+</tr>
+<tr class="even">
+<td>4.2</td>
+<td><code>schemeToken.provider</code> = <code>VTS</code> or
+<code>MDES</code></td>
+<td>Set <code>schemeTokenProvider</code> = the value received.</td>
+</tr>
+<tr class="odd">
+<td>4.3</td>
+<td><code>schemeToken.provider</code> is absent</td>
+<td>Leave <code>schemeTokenProvider</code> = <code>null</code>.</td>
+</tr>
+<tr class="even">
+<td>4.4</td>
+<td><code>schemeToken.provider</code> has any other value</td>
+<td>Leave <code>schemeTokenProvider</code> = <code>null</code>. Log the
+value.</td>
+</tr>
+<tr class="odd">
+<td>4.5</td>
+<td>The MPGS token call fails</td>
+<td>No change from today.</td>
+</tr>
+</tbody>
+</table>
+<p>Why 4.3: MPGS can create the network token after the token call.
+NT-M3 and NT-M4 set <code>schemeTokenProvider</code> at the first
+payment with a network token.</p>
+<h2 id="acceptance-criteria-1">Acceptance criteria</h2>
+<ol type="1">
+<li>Save a Visa card on an MPGS MID with network tokens enabled. Token
+response has <code>schemeToken.provider</code> = <code>VTS</code>.
+Geidea token has <code>schemeTokenProvider</code> =
+<code>VTS</code>.</li>
+<li>Same for Mastercard: <code>MDES</code>.</li>
+<li>MID without network tokens enabled: <code>schemeTokenProvider</code>
+= <code>null</code>.</li>
+<li>Save the same card again (same <code>tokenId</code>):
+<code>schemeTokenProvider</code> does not change.</li>
+</ol>
+<h1 id="nt-m2-mpgs-pay-card-number">NT-M2 — MPGS Pay (card number)</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../what-pgw-records.html#try=mpgs-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Mapper: MPGS card</a></div>
+<h2 id="background-2">Background</h2>
+<p>A Pay or Authorize with a card number does not use a network token.
+PGW records the result so that every transaction carries the same
+object.</p>
+<h2 id="goal-2">Goal</h2>
+<p>PGW fills <code>networkTokenDetails</code> on Pay and Authorize with
+a card number on MPGS.</p>
+<h2 id="story-summary-2">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-M2</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>MPGS, API version 80</td>
+</tr>
+<tr class="odd">
+<td>Geidea endpoints</td>
+<td><code>POST /pgw/api/v2/direct/pay</code>; HPP payment with card
+number</td>
+</tr>
+<tr class="even">
+<td>MPGS API used</td>
+<td><code>PUT /api/rest/version/80/merchant/{merchantId}/order/{orderId}/transaction/{transactionId}</code>,
+<code>apiOperation</code> = <code>PAY</code> or
+<code>AUTHORIZE</code></td>
+</tr>
+<tr class="odd">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>NT-0</td>
+</tr>
+<tr class="odd">
+<td>Followed by</td>
+<td>NT-M5</td>
+</tr>
+<tr class="even">
+<td>Out of scope</td>
+<td>Token creation (NT-M1). Payments with a Geidea token (NT-M3,
+NT-M4).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-2">Requirements</h2>
+<h3 id="request-1">1. Request</h3>
+<p>No change.</p>
+<h3 id="response-fields-to-read-1">2. Response fields to read</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>MPGS field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>sourceOfFunds.type</code></td>
+<td>String</td>
+<td><code>CARD</code></td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.brand</code></td>
+<td>String</td>
+<td><code>VISA</code></td>
+</tr>
+<tr class="odd">
+<td><code>sourceOfFunds.provided.card.deviceSpecificNumber</code></td>
+<td>String</td>
+<td><code>489537xxxxxx0001</code></td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.deviceSpecificExpiry.month</code></td>
+<td>String</td>
+<td><code>11</code></td>
+</tr>
+<tr class="odd">
+<td><code>sourceOfFunds.provided.card.deviceSpecificExpiry.year</code></td>
+<td>String</td>
+<td><code>28</code></td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.paymentAccountReference</code></td>
+<td>String</td>
+<td><code>V0010000000000000000000000001</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="mapping-to-networktokendetails">3. Mapping to
+<code>networkTokenDetails</code></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>PGW field</strong></th>
+<th><strong>MPGS source</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isNetworkToken</code></td>
+<td><code>sourceOfFunds.type</code></td>
+<td><code>true</code> if <code>SCHEME_TOKEN</code>. <code>false</code>
+for any other value.</td>
+</tr>
+<tr class="even">
+<td><code>tokenProvider</code></td>
+<td><code>sourceOfFunds.provided.card.brand</code></td>
+<td>If <code>isNetworkToken</code> = <code>true</code>:
+<code>VISA</code> → <code>VTS</code>, <code>MASTERCARD</code> →
+<code>MDES</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>maskedTokenNumber</code></td>
+<td><code>…card.deviceSpecificNumber</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="even">
+<td><code>tokenExpiryMonth</code></td>
+<td><code>…card.deviceSpecificExpiry.month</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="odd">
+<td><code>tokenExpiryYear</code></td>
+<td><code>…card.deviceSpecificExpiry.year</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="even">
+<td><code>paymentAccountReference</code></td>
+<td><code>…card.paymentAccountReference</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-1">4. Processing</h3>
+<ol type="1">
+<li>Fill the object from the MPGS response of the same transaction.</li>
+<li>If the response has no <code>sourceOfFunds</code>, set the object to
+<code>null</code>.</li>
+<li>Apply to approved and declined transactions.</li>
+<li>Do not change the Geidea token record.</li>
+</ol>
+<h2 id="acceptance-criteria-2">Acceptance criteria</h2>
+<ol type="1">
+<li>Pay with a Visa card number: <code>isNetworkToken</code> =
+<code>false</code>, <code>tokenProvider</code> = <code>null</code>.</li>
+<li>PAR in the MPGS response is copied to
+<code>paymentAccountReference</code>.</li>
+<li>Same result for <code>AUTHORIZE</code> and for HPP.</li>
+<li>The object is returned in order inquiry, callback and the
+<code>/pay</code> response.</li>
+</ol>
+<h1 id="nt-m3-mpgs-token-cit">NT-M3 — MPGS token CIT</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html#try=mpgs-cit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Explorer: MPGS CIT</a><a class="visual-link" href="../what-pgw-records.html#try=mpgs-cit-visa"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Mapper</a></div>
+<h2 id="background-3">Background</h2>
+<p>PGW pays a customer-initiated transaction (CIT) with the MPGS token
+of a saved card. When network tokens are enabled on MPGS (P1), MPGS
+sends the network token to the scheme in place of the card. Tests on
+16–17 Nov 2026 confirmed this for Visa and Mastercard. PGW does not
+record it.</p>
+<h2 id="goal-3">Goal</h2>
+<ol type="1">
+<li>PGW fills <code>networkTokenDetails</code> on token CIT.</li>
+<li>PGW sets <code>schemeTokenProvider</code> on the Geidea token when a
+network token is first seen.</li>
+</ol>
+<p>The payment request does not change.</p>
+<h2 id="story-summary-3">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-M3</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>MPGS, API version 80</td>
+</tr>
+<tr class="odd">
+<td>Geidea endpoints</td>
+<td><code>POST /pgw/api/v2/direct/pay/token</code>
+(<code>initiatedBy</code> = <code>Payer</code>); HPP with
+<code>tokenId</code></td>
+</tr>
+<tr class="even">
+<td>MPGS API used</td>
+<td><code>PUT /api/rest/version/80/merchant/{merchantId}/order/{orderId}/transaction/{transactionId}</code>,
+<code>apiOperation</code> = <code>PAY</code> or <code>AUTHORIZE</code>,
+<code>sourceOfFunds.token</code></td>
+</tr>
+<tr class="odd">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code>; Geidea token
+record: <code>schemeTokenProvider</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>NT-0, NT-M1</td>
+</tr>
+<tr class="odd">
+<td>Followed by</td>
+<td>NT-M5, NT-X</td>
+</tr>
+<tr class="even">
+<td>Out of scope</td>
+<td>Token status and retry control (NT-X).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-3">Requirements</h2>
+<h3 id="request-2">1. Request</h3>
+<p>No change.</p>
+<h3 id="response-fields-to-read-2">2. Response fields to read</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>MPGS field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>sourceOfFunds.type</code></td>
+<td>String</td>
+<td><code>SCHEME_TOKEN</code></td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.brand</code></td>
+<td>String</td>
+<td><code>MASTERCARD</code></td>
+</tr>
+<tr class="odd">
+<td><code>sourceOfFunds.provided.card.deviceSpecificNumber</code></td>
+<td>String</td>
+<td>masked token number</td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.deviceSpecificExpiry.month</code></td>
+<td>String</td>
+<td><code>11</code></td>
+</tr>
+<tr class="odd">
+<td><code>sourceOfFunds.provided.card.deviceSpecificExpiry.year</code></td>
+<td>String</td>
+<td><code>28</code></td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.paymentAccountReference</code></td>
+<td>String</td>
+<td>PAR</td>
+</tr>
+</tbody>
+</table>
+<h3 id="mapping-to-networktokendetails-1">3. Mapping to
+<code>networkTokenDetails</code></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>PGW field</strong></th>
+<th><strong>MPGS source</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isNetworkToken</code></td>
+<td><code>sourceOfFunds.type</code></td>
+<td><code>true</code> if <code>SCHEME_TOKEN</code>. <code>false</code>
+for any other value.</td>
+</tr>
+<tr class="even">
+<td><code>tokenProvider</code></td>
+<td><code>sourceOfFunds.provided.card.brand</code></td>
+<td>If <code>isNetworkToken</code> = <code>true</code>:
+<code>VISA</code> → <code>VTS</code>, <code>MASTERCARD</code> →
+<code>MDES</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>maskedTokenNumber</code></td>
+<td><code>…card.deviceSpecificNumber</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="even">
+<td><code>tokenExpiryMonth</code></td>
+<td><code>…card.deviceSpecificExpiry.month</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="odd">
+<td><code>tokenExpiryYear</code></td>
+<td><code>…card.deviceSpecificExpiry.year</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="even">
+<td><code>paymentAccountReference</code></td>
+<td><code>…card.paymentAccountReference</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-2">4. Processing</h3>
+<ol type="1">
+<li>Fill the object from the MPGS response of the same transaction.</li>
+<li>If the response has no <code>sourceOfFunds</code>, set the object to
+<code>null</code>.</li>
+<li>Apply to approved and declined transactions.</li>
+<li>If <code>isNetworkToken</code> = <code>true</code> and
+<code>schemeTokenProvider</code> on the Geidea token is
+<code>null</code>: set <code>schemeTokenProvider</code> =
+<code>tokenProvider</code>.</li>
+<li>If <code>schemeTokenProvider</code> is not <code>null</code>: do not
+change it.</li>
+<li>Keep saving <code>authorizationResponse.merchantAdviceCode</code>
+and <code>response.acquirerCode</code> as today. NT-X uses them.</li>
+</ol>
+<h2 id="acceptance-criteria-3">Acceptance criteria</h2>
+<ol type="1">
+<li>Token CIT, Visa, network tokens enabled: <code>isNetworkToken</code>
+= <code>true</code>, <code>tokenProvider</code> = <code>VTS</code>,
+masked number, expiry and PAR filled.</li>
+<li>Same for Mastercard: <code>MDES</code>.</li>
+<li>Geidea token with <code>schemeTokenProvider</code> =
+<code>null</code> gets <code>VTS</code> or <code>MDES</code> after the
+first network token CIT.</li>
+<li>Token CIT on a MID without network tokens:
+<code>isNetworkToken</code> = <code>false</code>.
+<code>schemeTokenProvider</code> does not change.</li>
+<li>Same results for <code>AUTHORIZE</code> and for HPP with
+<code>tokenId</code>.</li>
+</ol>
+<h1 id="nt-m4-mpgs-token-mit">NT-M4 — MPGS token MIT</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html#try=mpgs-mit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Explorer: MPGS MIT</a><a class="visual-link" href="../what-pgw-records.html#try=mpgs-mit-mc"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Mapper</a></div>
+<h2 id="background-4">Background</h2>
+<p>PGW pays a merchant-initiated transaction (MIT) with the MPGS token
+of a saved card. When network tokens are enabled on MPGS (P1), MPGS
+sends the network token in place of the card. Tests on 16–17 Nov 2026
+confirmed this for Visa and Mastercard. PGW does not record it.</p>
+<h2 id="goal-4">Goal</h2>
+<ol type="1">
+<li>PGW fills <code>networkTokenDetails</code> on token MIT.</li>
+<li>PGW sets <code>schemeTokenProvider</code> on the Geidea token when a
+network token is first seen.</li>
+</ol>
+<p>The payment request does not change.</p>
+<h2 id="story-summary-4">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-M4</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>MPGS, API version 80</td>
+</tr>
+<tr class="odd">
+<td>Geidea endpoint</td>
+<td><code>POST /pgw/api/v2/direct/pay/token</code>
+(<code>initiatedBy</code> = <code>Merchant</code>)</td>
+</tr>
+<tr class="even">
+<td>MPGS API used</td>
+<td><code>PUT /api/rest/version/80/merchant/{merchantId}/order/{orderId}/transaction/{transactionId}</code>,
+<code>apiOperation</code> = <code>PAY</code>,
+<code>sourceOfFunds.token</code></td>
+</tr>
+<tr class="odd">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code>; Geidea token
+record: <code>schemeTokenProvider</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>NT-0, NT-M1</td>
+</tr>
+<tr class="odd">
+<td>Followed by</td>
+<td>NT-M5, NT-X</td>
+</tr>
+<tr class="even">
+<td>Out of scope</td>
+<td>Token status and retry control (NT-X).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-4">Requirements</h2>
+<h3 id="request-3">1. Request</h3>
+<p>No change.</p>
+<h3 id="response-fields-to-read-3">2. Response fields to read</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>MPGS field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>sourceOfFunds.type</code></td>
+<td>String</td>
+<td><code>SCHEME_TOKEN</code></td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.brand</code></td>
+<td>String</td>
+<td><code>VISA</code></td>
+</tr>
+<tr class="odd">
+<td><code>sourceOfFunds.provided.card.deviceSpecificNumber</code></td>
+<td>String</td>
+<td><code>489537xxxxxx0001</code></td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.deviceSpecificExpiry.month</code></td>
+<td>String</td>
+<td><code>11</code></td>
+</tr>
+<tr class="odd">
+<td><code>sourceOfFunds.provided.card.deviceSpecificExpiry.year</code></td>
+<td>String</td>
+<td><code>28</code></td>
+</tr>
+<tr class="even">
+<td><code>sourceOfFunds.provided.card.paymentAccountReference</code></td>
+<td>String</td>
+<td><code>V0010000000000000000000000001</code></td>
+</tr>
+</tbody>
+</table>
+<h3 id="mapping-to-networktokendetails-2">3. Mapping to
+<code>networkTokenDetails</code></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>PGW field</strong></th>
+<th><strong>MPGS source</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isNetworkToken</code></td>
+<td><code>sourceOfFunds.type</code></td>
+<td><code>true</code> if <code>SCHEME_TOKEN</code>. <code>false</code>
+for any other value.</td>
+</tr>
+<tr class="even">
+<td><code>tokenProvider</code></td>
+<td><code>sourceOfFunds.provided.card.brand</code></td>
+<td>If <code>isNetworkToken</code> = <code>true</code>:
+<code>VISA</code> → <code>VTS</code>, <code>MASTERCARD</code> →
+<code>MDES</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>maskedTokenNumber</code></td>
+<td><code>…card.deviceSpecificNumber</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="even">
+<td><code>tokenExpiryMonth</code></td>
+<td><code>…card.deviceSpecificExpiry.month</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="odd">
+<td><code>tokenExpiryYear</code></td>
+<td><code>…card.deviceSpecificExpiry.year</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="even">
+<td><code>paymentAccountReference</code></td>
+<td><code>…card.paymentAccountReference</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-3">4. Processing</h3>
+<ol type="1">
+<li>Fill the object from the MPGS response of the same transaction.</li>
+<li>If the response has no <code>sourceOfFunds</code>, set the object to
+<code>null</code>.</li>
+<li>Apply to approved and declined transactions.</li>
+<li>If <code>isNetworkToken</code> = <code>true</code> and
+<code>schemeTokenProvider</code> on the Geidea token is
+<code>null</code>: set <code>schemeTokenProvider</code> =
+<code>tokenProvider</code>.</li>
+<li>If <code>schemeTokenProvider</code> is not <code>null</code>: do not
+change it.</li>
+<li>Keep saving <code>authorizationResponse.merchantAdviceCode</code>
+and <code>response.acquirerCode</code> as today. NT-X uses them.</li>
+</ol>
+<h3 id="example-visa-mit-mit-0000a001-0000000001">5. Example: Visa MIT
+<code>MIT-0000A001-0000000001</code></h3>
+<p>MPGS response (excerpt):</p>
+<pre><code>&quot;sourceOfFunds&quot;: {
+  &quot;type&quot;: &quot;SCHEME_TOKEN&quot;,
+  &quot;token&quot;: &quot;0A1B2C3D4E5F60718293A4B5C6D7E8F9&quot;,
+  &quot;provided&quot;: { &quot;card&quot;: {
+    &quot;brand&quot;: &quot;VISA&quot;,
+    &quot;deviceSpecificNumber&quot;: &quot;489537xxxxxx0001&quot;,
+    &quot;deviceSpecificExpiry&quot;: { &quot;month&quot;: &quot;11&quot;, &quot;year&quot;: &quot;28&quot; },
+    &quot;paymentAccountReference&quot;: &quot;V0010000000000000000000000001&quot;,
+    &quot;storedOnFile&quot;: &quot;STORED&quot; } } }</code></pre>
+<p>PGW transaction:</p>
+<pre><code>&quot;networkTokenDetails&quot;: {
+  &quot;isNetworkToken&quot;: true,
+  &quot;tokenProvider&quot;: &quot;VTS&quot;,
+  &quot;maskedTokenNumber&quot;: &quot;489537xxxxxx0001&quot;,
+  &quot;tokenExpiryMonth&quot;: &quot;11&quot;,
+  &quot;tokenExpiryYear&quot;: &quot;28&quot;,
+  &quot;paymentAccountReference&quot;: &quot;V0010000000000000000000000001&quot;
+}</code></pre>
+<h2 id="acceptance-criteria-4">Acceptance criteria</h2>
+<ol type="1">
+<li>The example above gives the PGW object above.</li>
+<li>Same for Mastercard: <code>MDES</code>.</li>
+<li>Geidea token with <code>schemeTokenProvider</code> =
+<code>null</code> gets <code>VTS</code> or <code>MDES</code> after the
+first network token MIT.</li>
+<li>MIT on a MID without network tokens: <code>isNetworkToken</code> =
+<code>false</code>. <code>schemeTokenProvider</code> does not
+change.</li>
+</ol>
+<h1 id="nt-m5-mpgs-capture-refund-void">NT-M5 — MPGS capture, refund,
+void</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html#try=mpgs-refund"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Explorer: MPGS refund</a></div>
+<h2 id="background-5">Background</h2>
+<p>Capture, refund and void follow a Pay, Authorize, CIT or MIT. MPGS
+returns the source of funds on these transactions. Tests on 16–17 Nov
+2026 confirmed capture and refund on network tokens.</p>
+<h2 id="goal-5">Goal</h2>
+<p>PGW fills <code>networkTokenDetails</code> on capture, refund and
+void on MPGS.</p>
+<h2 id="story-summary-5">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-M5</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>MPGS, API version 80</td>
+</tr>
+<tr class="odd">
+<td>Geidea endpoints</td>
+<td><code>POST /pgw/api/v1/direct/capture</code>;
+<code>POST /pgw/api/v2/direct/refund</code>;
+<code>POST /pgw/api/v3/direct/void</code></td>
+</tr>
+<tr class="even">
+<td>MPGS API used</td>
+<td><code>PUT /api/rest/version/80/merchant/{merchantId}/order/{orderId}/transaction/{transactionId}</code>,
+<code>apiOperation</code> = <code>CAPTURE</code>, <code>REFUND</code> or
+<code>VOID</code></td>
+</tr>
+<tr class="odd">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>NT-M2, NT-M3, NT-M4</td>
+</tr>
+<tr class="odd">
+<td>Out of scope</td>
+<td>Geidea token record (no change in this story).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-5">Requirements</h2>
+<h3 id="request-4">1. Request</h3>
+<p>No change.</p>
+<h3 id="mapping-to-networktokendetails-3">2. Mapping to
+<code>networkTokenDetails</code></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>PGW field</strong></th>
+<th><strong>MPGS source</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isNetworkToken</code></td>
+<td><code>sourceOfFunds.type</code></td>
+<td><code>true</code> if <code>SCHEME_TOKEN</code>. <code>false</code>
+for any other value.</td>
+</tr>
+<tr class="even">
+<td><code>tokenProvider</code></td>
+<td><code>sourceOfFunds.provided.card.brand</code></td>
+<td>If <code>isNetworkToken</code> = <code>true</code>:
+<code>VISA</code> → <code>VTS</code>, <code>MASTERCARD</code> →
+<code>MDES</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>maskedTokenNumber</code></td>
+<td><code>…card.deviceSpecificNumber</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="even">
+<td><code>tokenExpiryMonth</code></td>
+<td><code>…card.deviceSpecificExpiry.month</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="odd">
+<td><code>tokenExpiryYear</code></td>
+<td><code>…card.deviceSpecificExpiry.year</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+<tr class="even">
+<td><code>paymentAccountReference</code></td>
+<td><code>…card.paymentAccountReference</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-4">3. Processing</h3>
+<ol type="1">
+<li>Fill the object from the MPGS response of the same transaction.</li>
+<li>If the response has no <code>sourceOfFunds</code>: copy
+<code>networkTokenDetails</code> from the original <code>Pay</code> or
+<code>Authorization</code> transaction of the order.</li>
+<li>If the original transaction has no object: set the object to
+<code>null</code>.</li>
+<li>Do not change the Geidea token record.</li>
+</ol>
+<h2 id="acceptance-criteria-5">Acceptance criteria</h2>
+<ol type="1">
+<li>Capture of a network token Authorize: <code>isNetworkToken</code> =
+<code>true</code>, same provider and PAR as the Authorize.</li>
+<li>Refund and void: same.</li>
+<li>Capture of a card-number Authorize: <code>isNetworkToken</code> =
+<code>false</code>.</li>
+</ol>
+<h1 id="nt-c1-create-cybs-instrument-identifier">NT-C1 — Create CYBS
+instrument identifier</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html#try=cybs-save"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Explorer: save card (T1)</a><a class="visual-link" href="../payment-explorer.html#try=cybs-old-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>On demand (T2)</a><a class="visual-link" href="../payment-explorer.html#try=cybs-ii-fail"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Failure</a></div>
+<h2 id="background-6">Background</h2>
+<p>On CYBS, PGW does not create a gateway token when a card is saved.
+PGW sends the card number from the Geidea vault on each CIT and MIT.
+CYBS cannot use a network token this way. A CYBS instrument identifier
+links the card to a network token. A POC on 11 Nov 2026 (MID
+<code>TEST-CYBS-01</code>) confirmed: CYBS creates the network token
+with the instrument identifier, and payments with it use the network
+token.</p>
+<h2 id="goal-6">Goal</h2>
+<p>PGW creates a CYBS instrument identifier for each saved card on CYBS
+and stores it on the Geidea token.</p>
+<h2 id="story-summary-6">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-C1</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>CyberSource REST API (Token Management Service)</td>
+</tr>
+<tr class="odd">
+<td>CYBS API used</td>
+<td><code>POST /tms/v1/instrumentidentifiers</code></td>
+</tr>
+<tr class="even">
+<td>Entities written</td>
+<td>Geidea token record: <code>cybsInstrumentIdentifierId</code>,
+<code>networkTokenState</code></td>
+</tr>
+<tr class="odd">
+<td>Depends on</td>
+<td>NT-0</td>
+</tr>
+<tr class="even">
+<td>Followed by</td>
+<td>NT-C3, NT-C4</td>
+</tr>
+<tr class="odd">
+<td>Out of scope</td>
+<td>Payment requests (NT-C2 to NT-C5). Creating the identifier inside
+the payment (<code>actionList: ["TOKEN_CREATE"]</code>): not used. CYBS
+customer and payment instrument tokens. Network token lifecycle updates
+from CYBS.</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-6">Requirements</h2>
+<h3 id="triggers">1. Triggers</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Trigger</strong></th>
+<th><strong>When</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>T1</td>
+<td>After save card</td>
+<td>A Pay or Authorize with save card is approved on a CYBS MID, and PGW
+saves the card. Same point as <code>SendToken</code> on MPGS.</td>
+</tr>
+<tr class="even">
+<td>T2</td>
+<td>On demand</td>
+<td>NT-C3 or NT-C4 calls it before a CIT or MIT when
+<code>cybsInstrumentIdentifierId</code> = <code>null</code>. This covers
+cards saved before go-live and failed T1 calls.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="pre-checks">2. Pre-checks</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Check</strong></th>
+<th><strong>On failure</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>2.1</td>
+<td>The MID is routed to CYBS.</td>
+<td>Do not call CYBS. No error to the merchant.</td>
+</tr>
+<tr class="even">
+<td>2.2</td>
+<td><em>Enable tokenization</em> is ON for the MID.</td>
+<td>Do not call CYBS. No error to the merchant.</td>
+</tr>
+<tr class="odd">
+<td>2.2a</td>
+<td><em>Generate and Use Network Token</em> is ON for the MID.</td>
+<td>Do not call CYBS. No error to the merchant.</td>
+</tr>
+<tr class="even">
+<td>2.3</td>
+<td>The card number and expiry are available in the Geidea vault for
+this token.</td>
+<td>Do not call CYBS. Log. No error to the merchant.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="request-5">3. Request</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>CYBS field</strong></th>
+<th><strong>M/O/C</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>type</code></td>
+<td>M</td>
+<td><code>enrollable card</code></td>
+</tr>
+<tr class="even">
+<td><code>card.number</code></td>
+<td>M</td>
+<td>Card number from the Geidea vault</td>
+</tr>
+<tr class="odd">
+<td><code>card.expirationMonth</code></td>
+<td>M</td>
+<td>2 digits, e.g. <code>02</code></td>
+</tr>
+<tr class="even">
+<td><code>card.expirationYear</code></td>
+<td>M</td>
+<td>4 digits, e.g. <code>2029</code></td>
+</tr>
+<tr class="odd">
+<td><code>card.securityCode</code></td>
+<td>—</td>
+<td>Do not send.</td>
+</tr>
+</tbody>
+</table>
+<pre><code>{ &quot;type&quot;: &quot;enrollable card&quot;,
+  &quot;card&quot;: { &quot;number&quot;: &quot;&lt;PAN&gt;&quot;, &quot;expirationMonth&quot;: &quot;02&quot;, &quot;expirationYear&quot;: &quot;2029&quot; } }</code></pre>
+<p>Headers: the same as PGW payment calls on the MID:
+<code>v-c-merchant-id</code>, <code>v-c-date</code>,
+<code>Digest</code>, <code>Signature</code> (HTTP Signature,
+HmacSHA256), <code>Content-Type: application/json</code>. No
+<code>profile-id</code> header. (Proven in the 11-Nov POC, Postman
+collection "CYBS NT POC", request 2.)</p>
+<p>HTTP status:</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Status</strong></th>
+<th><strong>Meaning</strong></th>
+<th><strong>Action</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>201</code></td>
+<td>New instrument identifier created</td>
+<td>Success (section 5)</td>
+</tr>
+<tr class="even">
+<td><code>200</code></td>
+<td>Instrument identifier already exists for this card</td>
+<td>Success (section 5)</td>
+</tr>
+<tr class="odd">
+<td>Any other</td>
+<td>Failure</td>
+<td>Section 5.3</td>
+</tr>
+</tbody>
+</table>
+<p>This is the only CYBS call in NT-C1. Do not call
+<code>POST /tms/v1/instrumentidentifiers/{id}/enrollment</code> or any
+other TMS endpoint. (Test log 18-Nov-2026: the Cybersource adapter sent
+this extra call. CYBS rejected it with HTTP 400
+<code>invalidFields</code>, <code>card.number</code>.)</p>
+<h3 id="response-fields-to-read-4">4. Response fields to read</h3>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>CYBS field</strong></th>
+<th><strong>Type</strong></th>
+<th><strong>Example</strong></th>
+<th><strong>Meaning</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>id</code></td>
+<td>String (19 digits)</td>
+<td><code>7000000000000000001</code></td>
+<td>Instrument identifier. CYBS generates it. PGW cannot set it.</td>
+</tr>
+<tr class="even">
+<td><code>tokenizedCard.state</code></td>
+<td>String</td>
+<td><code>ACTIVE</code></td>
+<td>Network token state at creation.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-5">5. Processing</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Outcome</strong></th>
+<th><strong>Action</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>5.1</td>
+<td>Success, <code>id</code> received</td>
+<td>Save <code>id</code> in <code>cybsInstrumentIdentifierId</code>.
+Save <code>tokenizedCard.state</code> in <code>networkTokenState</code>
+(<code>null</code> if absent).</td>
+</tr>
+<tr class="even">
+<td>5.2</td>
+<td>Success, <code>id</code> differs from the stored value</td>
+<td>Replace the stored value. Log the old and new value.</td>
+</tr>
+<tr class="odd">
+<td>5.3</td>
+<td>Failure (timeout, HTTP 4xx, HTTP 5xx)</td>
+<td>Leave <code>cybsInstrumentIdentifierId</code> = <code>null</code>.
+Log the error. Do not change the result of the payment (T1). Return "not
+created" to the caller (T2). The Cybersource adapter returns the failure
+to PGW. It does not return a success code (<code>000</code>) when a CYBS
+call fails.</td>
+</tr>
+</tbody>
+</table>
+<p>Note: the same card gives the same <code>id</code>. The CYBS test
+bench showed <code>instrumentidentifierNew</code> = <code>true</code>
+for a new card and <code>false</code> for a known card.</p>
+<h3 id="sensitive-data">6. Sensitive data</h3>
+<ol type="1">
+<li>Read the card number from the vault only for this call.</li>
+<li>Do not log the request body.</li>
+<li>Do not log the merchant <code>SharedSecretKey</code>,
+<code>MerchantKeyId</code> or the CVV.</li>
+</ol>
+<h2 id="acceptance-criteria-6">Acceptance criteria</h2>
+<ol type="1">
+<li>Save a Visa card on MID <code>TEST-CYBS-01</code>: Geidea token gets
+a 19-digit <code>cybsInstrumentIdentifierId</code> and
+<code>networkTokenState</code> = <code>ACTIVE</code>.</li>
+<li>Same for Mastercard.</li>
+<li>Save the same card again: same
+<code>cybsInstrumentIdentifierId</code>.</li>
+<li>CYBS returns an error: the save-card payment result does not change.
+<code>cybsInstrumentIdentifierId</code> = <code>null</code>.</li>
+<li>MID routed to MPGS: no call to CYBS.</li>
+<li>CYBS MID with <em>Enable tokenization</em> OFF: no call to
+CYBS.</li>
+<li>CYBS MID with <em>Generate and Use Network Token</em> OFF: no call
+to CYBS. CIT and MIT go out with the card number, as today.</li>
+<li>Logs do not contain the card number.</li>
+</ol>
+<h1 id="nt-c2-cybs-pay-card-number">NT-C2 — CYBS Pay (card number)</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../what-pgw-records.html#try=cybs-card"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Mapper: CYBS card</a></div>
+<h2 id="background-7">Background</h2>
+<p>A Pay or Authorize with a card number does not use a network token.
+PGW records the result so that every transaction carries the same
+object.</p>
+<h2 id="goal-7">Goal</h2>
+<p>PGW fills <code>networkTokenDetails</code> on Pay and Authorize with
+a card number on CYBS.</p>
+<h2 id="story-summary-7">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-C2</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>CyberSource REST API</td>
+</tr>
+<tr class="odd">
+<td>Geidea endpoints</td>
+<td><code>POST /pgw/api/v2/direct/pay</code>; HPP payment with card
+number</td>
+</tr>
+<tr class="even">
+<td>CYBS API used</td>
+<td><code>POST /pts/v2/payments</code></td>
+</tr>
+<tr class="odd">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>NT-0</td>
+</tr>
+<tr class="odd">
+<td>Followed by</td>
+<td>NT-C5</td>
+</tr>
+<tr class="even">
+<td>Out of scope</td>
+<td>Instrument identifier creation after save card (NT-C1). Payments
+with a Geidea token (NT-C3, NT-C4).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-7">Requirements</h2>
+<h3 id="request-6">1. Request</h3>
+<p>No change.</p>
+<h3 id="mapping-to-networktokendetails-4">2. Mapping to
+<code>networkTokenDetails</code></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>PGW field</strong></th>
+<th><strong>CYBS response source</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isNetworkToken</code></td>
+<td><code>processingInformation.paymentSolution</code></td>
+<td><code>true</code> if <code>015</code> or <code>014</code>.
+<code>false</code> for any other value or if absent.</td>
+</tr>
+<tr class="even">
+<td><code>tokenProvider</code></td>
+<td><code>processingInformation.paymentSolution</code></td>
+<td><code>015</code> → <code>VTS</code>. <code>014</code> →
+<code>MDES</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>maskedTokenNumber</code></td>
+<td><code>paymentInformation.card.bin</code> (token BIN, 6 digits)</td>
+<td>If <code>isNetworkToken</code> = <code>true</code>: the 6-digit BIN
+followed by 10 zeros (16 digits). Example: <code>522222</code> →
+<code>5222220000000000</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="even">
+<td><code>tokenExpiryMonth</code></td>
+<td>Not in the CYBS response</td>
+<td><code>null</code></td>
+</tr>
+<tr class="odd">
+<td><code>tokenExpiryYear</code></td>
+<td>Not in the CYBS response</td>
+<td><code>null</code></td>
+</tr>
+<tr class="even">
+<td><code>paymentAccountReference</code></td>
+<td><code>processorInformation.paymentAccountReferenceNumber</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-6">3. Processing</h3>
+<ol type="1">
+<li>Fill the object from the CYBS response of the same transaction.</li>
+<li>Apply to approved and declined transactions.</li>
+<li>Do not change the Geidea token record.</li>
+</ol>
+<h2 id="acceptance-criteria-7">Acceptance criteria</h2>
+<ol type="1">
+<li>Pay with a Visa card number: <code>isNetworkToken</code> =
+<code>false</code>, <code>tokenProvider</code> = <code>null</code>.</li>
+<li>PAR in the CYBS response is copied to
+<code>paymentAccountReference</code>.</li>
+<li>Same result for Authorize and for HPP.</li>
+</ol>
+<h1 id="nt-c3-cybs-token-cit">NT-C3 — CYBS token CIT</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html#try=cybs-cit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Explorer: CYBS CIT</a><a class="visual-link" href="../what-pgw-records.html#try=cybs-cit-mc"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Mapper</a></div>
+<h2 id="background-8">Background</h2>
+<p>On CYBS, PGW pays a CIT with the card number from the Geidea vault.
+CYBS cannot use a network token this way. A POC on 11 Nov 2026 (MID
+<code>TEST-CYBS-01</code>) confirmed: a CIT with the instrument
+identifier uses the network token. Test
+<code>CY-0000C002-0000000002</code> (Mastercard): 3DS ran,
+<code>paymentSolution</code> = <code>014</code>, PAR returned.</p>
+<h2 id="goal-8">Goal</h2>
+<ol type="1">
+<li>PGW pays token CIT with the CYBS instrument identifier.</li>
+<li>PGW fills <code>networkTokenDetails</code>.</li>
+<li>PGW sets <code>schemeTokenProvider</code> on the Geidea token when a
+network token is first seen.</li>
+</ol>
+<h2 id="story-summary-8">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-C3</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>CyberSource REST API</td>
+</tr>
+<tr class="odd">
+<td>Geidea endpoints</td>
+<td><code>POST /pgw/api/v2/direct/pay/token</code>
+(<code>initiatedBy</code> = <code>Payer</code>); HPP with
+<code>tokenId</code></td>
+</tr>
+<tr class="even">
+<td>CYBS API used</td>
+<td><code>POST /pts/v2/payments</code></td>
+</tr>
+<tr class="odd">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code>; Geidea token
+record: <code>schemeTokenProvider</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>NT-0, NT-C1</td>
+</tr>
+<tr class="odd">
+<td>Followed by</td>
+<td>NT-C5, NT-X</td>
+</tr>
+<tr class="even">
+<td>Out of scope</td>
+<td>Token status and retry control (NT-X). 3DS flow (no change).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-8">Requirements</h2>
+<h3 id="choose-the-funding-source">1. Choose the funding source</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Condition</strong></th>
+<th><strong>Action</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1.1</td>
+<td><code>cybsInstrumentIdentifierId</code> is not
+<code>null</code></td>
+<td>Send the request in section 2.</td>
+</tr>
+<tr class="even">
+<td>1.2</td>
+<td><code>cybsInstrumentIdentifierId</code> = <code>null</code></td>
+<td>Call NT-C1 (trigger T2). If it returns an <code>id</code>, send the
+request in section 2.</td>
+</tr>
+<tr class="odd">
+<td>1.3</td>
+<td>NT-C1 returns "not created"</td>
+<td>Send the request with the card number, as today.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="request-change">2. Request change</h3>
+<p>Change only <code>paymentInformation</code>. Add
+<code>tokenInformation</code>. Do not change any other field.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>CYBS field</strong></th>
+<th><strong>M/O/C</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>paymentInformation.instrumentIdentifier.id</code></td>
+<td>M</td>
+<td><code>cybsInstrumentIdentifierId</code></td>
+</tr>
+<tr class="even">
+<td><code>paymentInformation.card.number</code></td>
+<td>—</td>
+<td>Do not send.</td>
+</tr>
+<tr class="odd">
+<td><code>paymentInformation.card.expirationMonth</code></td>
+<td>M</td>
+<td>From the Geidea vault, as today</td>
+</tr>
+<tr class="even">
+<td><code>paymentInformation.card.expirationYear</code></td>
+<td>M</td>
+<td>From the Geidea vault, as today</td>
+</tr>
+<tr class="odd">
+<td><code>paymentInformation.card.securityCode</code></td>
+<td>C</td>
+<td>Send when the cardholder enters the CVV, as today</td>
+</tr>
+<tr class="even">
+<td><code>tokenInformation.networkTokenOption</code></td>
+<td>M</td>
+<td><code>prefer</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code>// today
+&quot;paymentInformation&quot;: { &quot;card&quot;: { &quot;number&quot;: &quot;&lt;PAN&gt;&quot;, &quot;expirationMonth&quot;: &quot;02&quot;, &quot;expirationYear&quot;: &quot;2029&quot;, &quot;securityCode&quot;: &quot;&lt;CVV&gt;&quot; } }
+
+// new
+&quot;paymentInformation&quot;: {
+  &quot;instrumentIdentifier&quot;: { &quot;id&quot;: &quot;7000000000000000001&quot; },
+  &quot;card&quot;: { &quot;expirationMonth&quot;: &quot;02&quot;, &quot;expirationYear&quot;: &quot;2029&quot;, &quot;securityCode&quot;: &quot;&lt;CVV&gt;&quot; } },
+&quot;tokenInformation&quot;: { &quot;networkTokenOption&quot;: &quot;prefer&quot; }</code></pre>
+<p>No change to:
+<code>processingInformation.authorizationOptions.initiator</code>,
+stored-credential flags, <code>consumerAuthenticationInformation</code>,
+order and amount fields.</p>
+<h3 id="mapping-to-networktokendetails-5">3. Mapping to
+<code>networkTokenDetails</code></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>PGW field</strong></th>
+<th><strong>CYBS response source</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isNetworkToken</code></td>
+<td><code>processingInformation.paymentSolution</code></td>
+<td><code>true</code> if <code>015</code> or <code>014</code>.
+<code>false</code> for any other value or if absent.</td>
+</tr>
+<tr class="even">
+<td><code>tokenProvider</code></td>
+<td><code>processingInformation.paymentSolution</code></td>
+<td><code>015</code> → <code>VTS</code>. <code>014</code> →
+<code>MDES</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>maskedTokenNumber</code></td>
+<td><code>paymentInformation.card.bin</code> (token BIN, 6 digits)</td>
+<td>If <code>isNetworkToken</code> = <code>true</code>: the 6-digit BIN
+followed by 10 zeros (16 digits). Example: <code>522222</code> →
+<code>5222220000000000</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="even">
+<td><code>tokenExpiryMonth</code></td>
+<td>Not in the CYBS response</td>
+<td><code>null</code></td>
+</tr>
+<tr class="odd">
+<td><code>tokenExpiryYear</code></td>
+<td>Not in the CYBS response</td>
+<td><code>null</code></td>
+</tr>
+<tr class="even">
+<td><code>paymentAccountReference</code></td>
+<td><code>processorInformation.paymentAccountReferenceNumber</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-7">4. Processing</h3>
+<ol type="1">
+<li>Fill the object from the CYBS response of the same transaction.</li>
+<li>Apply to approved and declined transactions.</li>
+<li>If <code>isNetworkToken</code> = <code>true</code> and
+<code>schemeTokenProvider</code> is <code>null</code>: set
+<code>schemeTokenProvider</code> = <code>tokenProvider</code>.</li>
+<li>If <code>schemeTokenProvider</code> is not <code>null</code>: do not
+change it.</li>
+<li>A decline on the instrument identifier is final. Do not retry with
+the card number.</li>
+<li>Save on the transaction, if PGW does not save them today:
+<code>processorInformation.responseCode</code>,
+<code>processorInformation.merchantAdvice.code</code>,
+<code>processorInformation.merchantAdvice.codeRaw</code>. NT-X uses
+them.</li>
+</ol>
+<h2 id="acceptance-criteria-8">Acceptance criteria</h2>
+<ol type="1">
+<li>Token CIT, Mastercard, MID <code>TEST-CYBS-01</code>: request has
+<code>instrumentIdentifier.id</code> and no card number. Response
+<code>paymentSolution</code> = <code>014</code>.
+<code>isNetworkToken</code> = <code>true</code>,
+<code>tokenProvider</code> = <code>MDES</code>, PAR filled.</li>
+<li>Same for Visa: <code>015</code>, <code>VTS</code>.</li>
+<li>Token without an instrument identifier: NT-C1 is called, then the
+CIT uses the new <code>id</code>.</li>
+<li>NT-C1 fails: the CIT is sent with the card number.
+<code>isNetworkToken</code> = <code>false</code>.</li>
+<li>3DS runs as today. CVV is sent when entered.</li>
+<li>Geidea token with <code>schemeTokenProvider</code> =
+<code>null</code> gets <code>VTS</code> or <code>MDES</code> after the
+first network token CIT.</li>
+</ol>
+<h1 id="nt-c4-cybs-token-mit">NT-C4 — CYBS token MIT</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html#try=cybs-mit"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Explorer: CYBS MIT</a><a class="visual-link" href="../what-pgw-records.html#try=cybs-mit-visa"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Mapper</a></div>
+<h2 id="background-9">Background</h2>
+<p>On CYBS, PGW pays an MIT with the card number from the Geidea vault
+and the network transaction ID of the first payment. CYBS cannot use a
+network token this way. A POC on 11 Nov 2026 (MID
+<code>TEST-CYBS-01</code>) confirmed: an MIT with the instrument
+identifier uses the network token for Visa (<code>015</code>) and
+Mastercard (<code>014</code>).</p>
+<h2 id="goal-9">Goal</h2>
+<ol type="1">
+<li>PGW pays token MIT with the CYBS instrument identifier.</li>
+<li>PGW fills <code>networkTokenDetails</code>.</li>
+<li>PGW sets <code>schemeTokenProvider</code> on the Geidea token when a
+network token is first seen.</li>
+</ol>
+<h2 id="story-summary-9">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-C4</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>CyberSource REST API</td>
+</tr>
+<tr class="odd">
+<td>Geidea endpoint</td>
+<td><code>POST /pgw/api/v2/direct/pay/token</code>
+(<code>initiatedBy</code> = <code>Merchant</code>)</td>
+</tr>
+<tr class="even">
+<td>CYBS API used</td>
+<td><code>POST /pts/v2/payments</code></td>
+</tr>
+<tr class="odd">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code>; Geidea token
+record: <code>schemeTokenProvider</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>NT-0, NT-C1. Prerequisite P3 (Decision Manager rule).</td>
+</tr>
+<tr class="odd">
+<td>Followed by</td>
+<td>NT-C5, NT-X</td>
+</tr>
+<tr class="even">
+<td>Out of scope</td>
+<td>Token status and retry control (NT-X).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-9">Requirements</h2>
+<h3 id="choose-the-funding-source-1">1. Choose the funding source</h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Condition</strong></th>
+<th><strong>Action</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1.1</td>
+<td><code>cybsInstrumentIdentifierId</code> is not
+<code>null</code></td>
+<td>Send the request in section 2.</td>
+</tr>
+<tr class="even">
+<td>1.2</td>
+<td><code>cybsInstrumentIdentifierId</code> = <code>null</code></td>
+<td>Call NT-C1 (trigger T2). If it returns an <code>id</code>, send the
+request in section 2.</td>
+</tr>
+<tr class="odd">
+<td>1.3</td>
+<td>NT-C1 returns "not created"</td>
+<td>Send the request with the card number, as today.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="request-change-1">2. Request change</h3>
+<p>Change only <code>paymentInformation</code>. Add
+<code>tokenInformation</code>. Do not change any other field.</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>CYBS field</strong></th>
+<th><strong>M/O/C</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>paymentInformation.instrumentIdentifier.id</code></td>
+<td>M</td>
+<td><code>cybsInstrumentIdentifierId</code></td>
+</tr>
+<tr class="even">
+<td><code>paymentInformation.card.number</code></td>
+<td>—</td>
+<td>Do not send.</td>
+</tr>
+<tr class="odd">
+<td><code>paymentInformation.card.expirationMonth</code></td>
+<td>M</td>
+<td>From the Geidea vault, as today</td>
+</tr>
+<tr class="even">
+<td><code>paymentInformation.card.expirationYear</code></td>
+<td>M</td>
+<td>From the Geidea vault, as today</td>
+</tr>
+<tr class="odd">
+<td><code>paymentInformation.card.securityCode</code></td>
+<td>—</td>
+<td>Do not send (MIT).</td>
+</tr>
+<tr class="even">
+<td><code>tokenInformation.networkTokenOption</code></td>
+<td>M</td>
+<td><code>prefer</code></td>
+</tr>
+</tbody>
+</table>
+<pre><code>// today
+&quot;paymentInformation&quot;: { &quot;card&quot;: { &quot;number&quot;: &quot;&lt;PAN&gt;&quot;, &quot;expirationMonth&quot;: &quot;02&quot;, &quot;expirationYear&quot;: &quot;2029&quot; } }
+
+// new
+&quot;paymentInformation&quot;: {
+  &quot;instrumentIdentifier&quot;: { &quot;id&quot;: &quot;7000000000000000001&quot; },
+  &quot;card&quot;: { &quot;expirationMonth&quot;: &quot;02&quot;, &quot;expirationYear&quot;: &quot;2029&quot; } },
+&quot;tokenInformation&quot;: { &quot;networkTokenOption&quot;: &quot;prefer&quot; }</code></pre>
+<p>No change to:
+<code>processingInformation.authorizationOptions.initiator</code>,
+stored-credential flags,
+<code>processingInformation.authorizationOptions.initiator.merchantInitiatedTransaction.previousTransactionId</code>
+(the stored
+<code>transactions[].cybersourceDetails.networkTransactionId</code>),
+order and amount fields.</p>
+<h3 id="mapping-to-networktokendetails-6">3. Mapping to
+<code>networkTokenDetails</code></h3>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>PGW field</strong></th>
+<th><strong>CYBS response source</strong></th>
+<th><strong>Rule</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>isNetworkToken</code></td>
+<td><code>processingInformation.paymentSolution</code></td>
+<td><code>true</code> if <code>015</code> or <code>014</code>.
+<code>false</code> for any other value or if absent.</td>
+</tr>
+<tr class="even">
+<td><code>tokenProvider</code></td>
+<td><code>processingInformation.paymentSolution</code></td>
+<td><code>015</code> → <code>VTS</code>. <code>014</code> →
+<code>MDES</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="odd">
+<td><code>maskedTokenNumber</code></td>
+<td><code>paymentInformation.card.bin</code> (token BIN, 6 digits)</td>
+<td>If <code>isNetworkToken</code> = <code>true</code>: the 6-digit BIN
+followed by 10 zeros (16 digits). Example: <code>522222</code> →
+<code>5222220000000000</code>. Otherwise <code>null</code>.</td>
+</tr>
+<tr class="even">
+<td><code>tokenExpiryMonth</code></td>
+<td>Not in the CYBS response</td>
+<td><code>null</code></td>
+</tr>
+<tr class="odd">
+<td><code>tokenExpiryYear</code></td>
+<td>Not in the CYBS response</td>
+<td><code>null</code></td>
+</tr>
+<tr class="even">
+<td><code>paymentAccountReference</code></td>
+<td><code>processorInformation.paymentAccountReferenceNumber</code></td>
+<td>Copy. <code>null</code> if absent.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="processing-8">4. Processing</h3>
+<ol type="1">
+<li>Fill the object from the CYBS response of the same transaction.</li>
+<li>Apply to approved and declined transactions.</li>
+<li>If <code>isNetworkToken</code> = <code>true</code> and
+<code>schemeTokenProvider</code> is <code>null</code>: set
+<code>schemeTokenProvider</code> = <code>tokenProvider</code>.</li>
+<li>If <code>schemeTokenProvider</code> is not <code>null</code>: do not
+change it.</li>
+<li>A decline on the instrument identifier is final. Do not retry with
+the card number.</li>
+<li>Save on the transaction, if PGW does not save them today:
+<code>processorInformation.responseCode</code>,
+<code>processorInformation.merchantAdvice.code</code>,
+<code>processorInformation.merchantAdvice.codeRaw</code>. NT-X uses
+them.</li>
+</ol>
+<h2 id="acceptance-criteria-9">Acceptance criteria</h2>
+<ol type="1">
+<li>Token MIT, Visa, MID <code>TEST-CYBS-01</code>: request has
+<code>instrumentIdentifier.id</code>, no card number, no CVV, the stored
+network transaction ID. Response <code>paymentSolution</code> =
+<code>015</code>. <code>isNetworkToken</code> = <code>true</code>,
+<code>tokenProvider</code> = <code>VTS</code>.</li>
+<li>Same for Mastercard: <code>014</code>, <code>MDES</code> (needs
+P3).</li>
+<li>Token without an instrument identifier: NT-C1 is called, then the
+MIT uses the new <code>id</code>.</li>
+<li>NT-C1 fails: the MIT is sent with the card number.
+<code>isNetworkToken</code> = <code>false</code>.</li>
+</ol>
+<h1 id="nt-c5-cybs-capture-refund-void">NT-C5 — CYBS capture, refund,
+void</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../payment-explorer.html#try=cybs-refund"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Explorer: CYBS refund</a></div>
+<h2 id="background-10">Background</h2>
+<p>Capture, refund and void follow a Pay, Authorize, CIT or MIT. They
+refer to the original CYBS payment. They do not carry a funding source.
+The CYBS response does not show network token data.</p>
+<h2 id="goal-10">Goal</h2>
+<p>PGW fills <code>networkTokenDetails</code> on capture, refund and
+void on CYBS.</p>
+<h2 id="story-summary-10">Story summary</h2>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Item</strong></th>
+<th><strong>Value</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Story ID</td>
+<td>NT-C5</td>
+</tr>
+<tr class="even">
+<td>Gateway</td>
+<td>CyberSource REST API</td>
+</tr>
+<tr class="odd">
+<td>Geidea endpoints</td>
+<td><code>POST /pgw/api/v1/direct/capture</code>;
+<code>POST /pgw/api/v2/direct/refund</code>;
+<code>POST /pgw/api/v3/direct/void</code></td>
+</tr>
+<tr class="even">
+<td>CYBS API used</td>
+<td>Capture <code>POST /pts/v2/payments/{id}/captures</code>; refund
+<code>POST /pts/v2/payments/{id}/refunds</code>; void
+<code>POST /pts/v2/payments/{id}/voids</code>. No change to the
+requests.</td>
+</tr>
+<tr class="odd">
+<td>Entities written</td>
+<td><code>transactions[].networkTokenDetails</code></td>
+</tr>
+<tr class="even">
+<td>Depends on</td>
+<td>NT-C2, NT-C3, NT-C4</td>
+</tr>
+<tr class="odd">
+<td>Out of scope</td>
+<td>Geidea token record (no change in this story).</td>
+</tr>
+</tbody>
+</table>
+<h2 id="requirements-10">Requirements</h2>
+<ol type="1">
+<li>Request: no change.</li>
+<li>Copy <code>networkTokenDetails</code> from the original
+<code>Pay</code> or <code>Authorization</code> transaction of the
+order.</li>
+<li>If the original transaction has no object: set the object to
+<code>null</code>.</li>
+<li>Do not change the Geidea token record.</li>
+</ol>
+<h2 id="acceptance-criteria-10">Acceptance criteria</h2>
+<ol type="1">
+<li>Capture of a network token Authorize: same
+<code>networkTokenDetails</code> as the Authorize.</li>
+<li>Refund and void: same.</li>
+<li>Capture of a card-number Authorize: <code>isNetworkToken</code> =
+<code>false</code>.</li>
+</ol>
+<h1 id="nt-a1-apex-network-token-keys-waiting-on-apex-team">NT-A1 — APEX
+network token keys (Waiting on APEX team)</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../not-yet-defined.html#nt-a1-apex-network-token-keys"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Not yet defined</a></div>
+<p>Proposal to discuss: send network token data to APEX in
+<code>userData</code>, in the existing key format (<code>TOKEN</code>,
+<code>CHANNEL_TYPE</code>, <code>AUTH_PERFORMED</code>,
+<code>AUTH_TXN_ID</code> exist today).</p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>Key</strong></th>
+<th><strong>Values</strong></th>
+<th><strong>Example</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>NETWORK_TOKEN</code></td>
+<td><code>Y</code> / <code>N</code></td>
+<td><code>213NETWORK_TOKEN11Y</code></td>
+</tr>
+<tr class="even">
+<td><code>NT_PROVIDER</code></td>
+<td><code>VTS</code> / <code>MDES</code></td>
+<td><code>211NT_PROVIDER13VTS</code></td>
+</tr>
+</tbody>
+</table>
+<p>Questions: Is PAR needed? Display in Merchant Portal or reports? Does
+next-day clearing already carry a token indicator?</p>
+<h1
+id="nt-x-token-status-and-retry-control-waiting-on-risk-compliance">NT-X
+— Token status and retry control (Waiting on Risk &amp; Compliance)</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../not-yet-defined.html#nt-x-token-status-and-retry-control"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Not yet defined</a></div>
+<p>Uses the NT-0 fields <code>tokenStatus</code>,
+<code>tokenStatusReason</code>, <code>tokenStatusDate</code>. Proposal
+for MPGS (to be confirmed): set <code>INACTIVE</code> after merchant
+advice code <code>03</code>, <code>21</code> or DE 39 <code>04</code>,
+<code>14</code>, <code>15</code>, <code>41</code>, <code>43</code>,
+<code>46</code>, <code>62</code>, <code>78</code> on token CIT or MIT.
+Exclude <code>54</code>, <code>63</code>, <code>88</code>. Reject
+payments on an <code>INACTIVE</code> token with a new PGW code ("Token
+inactive. Use another card."). CYBS values: waiting on Risk &amp;
+Compliance.</p>
+<h1 id="open-points">Open points</h1>
+<div class="visual-links" data-auto><a class="visual-link" href="../not-yet-defined.html#open-point-1-no-token-permission-on-cybs"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Open point 1</a></div>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th><strong>#</strong></th>
+<th><strong>Point</strong></th>
+<th><strong>Story</strong></th>
+<th><strong>Status</strong></th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td>At release, every CYBS MID with <em>Enable tokenization</em> ON
+starts to create instrument identifiers and pay CIT/MIT with them.
+Confirm that a payment with an instrument identifier on a MID
+<strong>without</strong> CYBS token permission (P2) goes out as the
+card, so P2 is the PVT control.</td>
+<td>NT-C1, NT-C3, NT-C4</td>
+<td>Merchant integration team / PGW engineering team to verify on a test
+MID</td>
+</tr>
+</tbody>
+</table>
+<p>Closed 17-Nov: CYBS <code>maskedTokenNumber</code> = token BIN + zero
+fill. CYBS capture, refund and void endpoints (refund and void proven on
+the test bench 14-Nov). Decision Manager MIT rule = operational, with
+Risk (P3). TMS headers and HTTP status (headers proven 11-Nov;
+<code>201</code> new / <code>200</code> existing per CYBS docs). No new
+toggle: CYBS follows the existing tokenization toggles. Closed 19-Nov:
+master toggle = <em>Generate and Use Network Token</em> (rule 1). NT-C1
+= one CYBS call only.</p>
+
+</article>
+</main>
+</div>
+<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+<script src="../../assets/search.js" defer></script>
+</body>
+</html>

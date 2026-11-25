@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Network Tokenization · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<link rel="stylesheet" href="nt.css">
+<style>
+.gw2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+.gw2 .c { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
+.gw2 .c .k { font: 500 12px var(--mono); color: var(--accent); }
+.gw2 .c h3 { margin: 6px 0 8px; font: 700 18px var(--head); color: var(--ink); }
+.gw2 .c ul { margin: 0; padding-left: 18px; font-size: 14.5px; color: var(--text-2); }
+.gw2 .c li { margin: 3px 0; }
+.keychg { background: var(--accent-bg); border-left: 3px solid var(--accent); border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 0 0 16px; font-size: 15px; max-width: 1100px; }
+.keychg b { color: var(--ink); }
+.row.plan { opacity: .75; }
+.proof { display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 12px; }
+.proof .p { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px; font-size: 13.5px; color: var(--text-2); }
+.proof .p .k { font: 500 11px var(--mono); color: var(--muted); display: block; }
+.proof .p b { color: var(--ink); font-weight: 600; }
+@media (max-width: 900px) { .gw2 { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs">Network Tokenization</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">feature</p>
+<h1 class="page">Network Tokenization: saved-card payments with the scheme token</h1>
+<p class="lead">Visa charges a PAN Integrity Fee on card-not-present Visa payments that do not use a Visa network token. In the UAE the network token requirement for cards on file started on 18-Apr-2026 and the fee on 17-Oct-2026. Phase 1: every saved-card payment (CIT and MIT) through PGW goes out with the network token, and PGW records it on the transaction.</p>
+
+<h2 id="two-gateways-two-different-changes" class="section-title">Two gateways, two different changes</h2>
+<div class="keychg"><b>The point to understand first.</b> On MPGS the network token already works with today's PGW requests; PGW only has to <b>record</b> it. On CyberSource PGW sends the card number today, so PGW must <b>pay differently</b>: create an instrument identifier and pay with it.</div>
+<div class="gw2">
+<div class="c"><span class="k">MPGS · record only</span><h3 id="the-payment-request-does-not-change">The payment request does not change</h3><ul>
+<li>PGW already pays CIT and MIT with the MPGS token.</li>
+<li>With network tokens set up for the MID at MPGS, MPGS sends the network token by itself. Proven through PGW on 16–17 Nov for Visa and Mastercard.</li>
+<li>New: PGW reads <code>sourceOfFunds.type</code> = <code>SCHEME_TOKEN</code> and records it (NT-M1 to NT-M5).</li></ul></div>
+<div class="c"><span class="k">CyberSource · pay differently</span><h3 id="pgw-pays-with-an-instrument-identifier">PGW pays with an instrument identifier</h3><ul>
+<li>Today PGW sends the card number on every CIT and MIT, so CYBS cannot use a network token.</li>
+<li>New: create the instrument identifier at save card (NT-C1) and pay with it and <code>networkTokenOption</code> = <code>prefer</code> (NT-C3, NT-C4).</li>
+<li>Proven in the 11-Nov POC and the 14-Nov test bench: Visa <code>015</code>, Mastercard <code>014</code>.</li></ul></div>
+</div>
+<p class="src" style="font:11px var(--mono);color:var(--muted);margin-top:10px">Both: new object <code>transactions[].networkTokenDetails</code> returned to the merchant (NT-0). One master toggle per MID, default OFF (Rule 1). <a href="docs/stories.html#story-map">Story map</a></p>
+
+<h2 id="documents" class="section-title">Documents</h2>
+<div class="rows">
+<a class="row" href="docs/stories.html"><div class="grow"><div class="t">PGW dev stories</div><div class="d">NT-0, MPGS NT-M1 to NT-M5, CYBS NT-C1 to NT-C5 written; NT-A1 (APEX) and NT-X (token status) parked</div></div><span class="tag">v1.1 · 19-Nov-2026</span></a>
+</div>
+
+<h2 id="visual-pages" class="section-title">Visual pages</h2>
+<div class="rows">
+<a class="row" href="token-layers.html"><div class="grow"><div class="t">Token layers</div><div class="d">Card number, Geidea token, gateway token, network token: who holds what, how each is created, PAR</div></div><span class="tag">open</span></a>
+<a class="row" href="payment-explorer.html"><div class="grow"><div class="t">Payment explorer</div><div class="d">Sequence diagram per gateway: save card, CIT, MIT, refund; switch the toggles and the card's state; see what changes, how the payment goes to the scheme and what PGW records</div></div><span class="tag">open</span></a>
+<a class="row" href="what-pgw-records.html"><div class="grow"><div class="t">What PGW records</div><div class="d">Gateway response to <code>networkTokenDetails</code>, field by field; where the merchant sees it; the Geidea token record</div></div><span class="tag">open</span></a>
+<a class="row" href="switches-and-rollout.html"><div class="grow"><div class="t">Switches and rollout</div><div class="d">PGW master toggle versus gateway set-up on MPGS and CYBS; rollout steps; partners on Geidea's MSO or their own</div></div><span class="tag">open</span></a>
+<a class="row" href="not-yet-defined.html"><div class="grow"><div class="t">Not yet defined</div><div class="d">NT-A1 APEX keys, NT-X token status, open point 1, guest checkout POC</div></div><span class="tag warn">parked and in POC</span></a>
+</div>
+
+<h2 class="section-title" id="stories">Stories and where to see them</h2>
+<div class="rows">
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-0-network-token-data-model-and-merchant-apis">NT-0</a> · Data model and merchant APIs</div><div class="d"><a href="what-pgw-records.html">What PGW records</a> · <a href="token-layers.html">Token layers</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-m1-update-mpgs-token-generation">NT-M1</a> · MPGS token generation</div><div class="d"><a href="payment-explorer.html#try=mpgs-save">Explorer: save card</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-m2-mpgs-pay-card-number">NT-M2</a> · MPGS Pay (card number)</div><div class="d"><a href="what-pgw-records.html#try=mpgs-card">Mapper</a> · <a href="payment-explorer.html#try=mpgs-save">Explorer</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-m3-mpgs-token-cit">NT-M3</a> · MPGS token CIT</div><div class="d"><a href="payment-explorer.html#try=mpgs-cit">Explorer</a> · <a href="payment-explorer.html#try=mpgs-pending">Not provisioned yet</a> · <a href="what-pgw-records.html#try=mpgs-cit-visa">Mapper</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-m4-mpgs-token-mit">NT-M4</a> · MPGS token MIT</div><div class="d"><a href="payment-explorer.html#try=mpgs-mit">Explorer</a> · <a href="what-pgw-records.html#try=mpgs-mit-mc">Mapper</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-m5-mpgs-capture-refund-void">NT-M5</a> · MPGS capture, refund, void</div><div class="d"><a href="payment-explorer.html#try=mpgs-refund">Explorer</a> · <a href="what-pgw-records.html#try=mpgs-no-sof">No sourceOfFunds</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-c1-create-cybs-instrument-identifier">NT-C1</a> · Create CYBS instrument identifier</div><div class="d"><a href="payment-explorer.html#try=cybs-save">Explorer: save card (T1)</a> · <a href="payment-explorer.html#try=cybs-old-card">On demand (T2)</a> · <a href="payment-explorer.html#try=cybs-ii-fail">Failure</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-c2-cybs-pay-card-number">NT-C2</a> · CYBS Pay (card number)</div><div class="d"><a href="what-pgw-records.html#try=cybs-card">Mapper</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-c3-cybs-token-cit">NT-C3</a> · CYBS token CIT</div><div class="d"><a href="payment-explorer.html#try=cybs-cit">Explorer</a> · <a href="what-pgw-records.html#try=cybs-cit-mc">Mapper</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-c4-cybs-token-mit">NT-C4</a> · CYBS token MIT</div><div class="d"><a href="payment-explorer.html#try=cybs-mit">Explorer</a> · <a href="what-pgw-records.html#try=cybs-mit-visa">Mapper</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-c5-cybs-capture-refund-void">NT-C5</a> · CYBS capture, refund, void</div><div class="d"><a href="payment-explorer.html#try=cybs-refund">Explorer</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-a1-apex-network-token-keys-waiting-on-apex-team">NT-A1</a> · APEX keys (parked)</div><div class="d"><a href="not-yet-defined.html#nt-a1-apex-network-token-keys">Not yet defined</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#nt-x-token-status-and-retry-control-waiting-on-risk-compliance">NT-X</a> · Token status and retry (parked)</div><div class="d"><a href="not-yet-defined.html#nt-x-token-status-and-retry-control">Not yet defined</a></div></div></div>
+</div>
+
+<h2 id="proven-in-tests" class="section-title">Proven in tests</h2>
+<div class="proof">
+<div class="p"><span class="k">11-Nov · CYBS POC</span><b>Instrument identifier</b> created with the network token <code>ACTIVE</code>; CIT and MIT approved on the network token (Visa <code>015</code>, Mastercard <code>014</code>). Mastercard MIT needed the Decision Manager rule (P3).</div>
+<div class="p"><span class="k">14-Nov · CYBS test bench</span><b>Save card, then CIT with the instrument identifier</b>: 3DS ran, <code>paymentSolution</code> <code>014</code>, token BIN and PAR returned; refund and void.</div>
+<div class="p"><span class="k">16–17 Nov · MPGS through PGW</span><b>Token CIT and MIT</b> went out as <code>SCHEME_TOKEN</code> for Visa and Mastercard, with no change to PGW requests; 3DS, capture and refunds on the network token.</div>
+<div class="p"><span class="k">25-Nov · MPGS POC</span><b>Token then pay, back to back</b>: card number with asynchronous provisioning, network token with attempt-synchronous. <a href="not-yet-defined.html#guest-checkout-poc">Guest checkout POC</a></div>
+</div>
+</main>
+<!--
+Dummy values used on every NT page (public site; real values are kept off the repo):
+MIDs TEST-MPGS-01, TEST-CYBS-01 · TRID 40000000000 · Geidea tokenId Visa 0a1b2c3d-4e5f-6071-8293-a4b5c6d7e8f9, MC 1b2c3d4e-5f60-7182-93a4-b5c6d7e8f9a0
+MPGS token = tokenId without dashes, upper case · II Visa 7000000000000000001, MC 7000000000000000002
+Network token Visa 489537xxxxxx0001 (11/28), MC 522222xxxxxx0002 (09/29) · token BIN Visa 489537, MC 522222
+PAR Visa V0010000000000000000000000001, MC 5001TESTPAR000000000000000002 · cards 411111xxxxxx1111, 512345xxxxxx0008 · NTID TESTNTID00001
+Doc order refs MIT-0000A001-0000000001, CY-0000C002-0000000002 · Postman "CYBS NT POC"
+-->
+<script src="../assets/search.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT Payment explorer · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<link rel="stylesheet" href="nt.css">
+<style>
+.grid { display: grid; grid-template-columns: 320px minmax(0, 1fr); gap: 20px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.sticky { position: sticky; top: 72px; }
+.outrow { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.outrow .k { font: 500 11px var(--mono); color: var(--muted); width: 100%; }
+/* Sequence */
+.lanes, .srow .ar-row { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.lanes { position: sticky; top: 56px; z-index: 2; background: #fff; border-bottom: 1px solid var(--border); padding: 10px 18px; gap: 0; }
+.lanes div { font: 600 12px var(--sans); color: var(--ink); text-align: center; padding: 0 4px; }
+.lanes div small { display: block; font: 400 11px var(--mono); color: var(--muted); }
+.seq { padding: 6px 18px 14px; position: relative; }
+.seq::before { content: ''; position: absolute; inset: 0 18px; background:
+  linear-gradient(90deg, transparent calc(12.5% - 1px), var(--border) calc(12.5% - 1px) 12.5%, transparent 12.5% calc(37.5% - 1px), var(--border) calc(37.5% - 1px) 37.5%, transparent 37.5% calc(62.5% - 1px), var(--border) calc(62.5% - 1px) 62.5%, transparent 62.5% calc(87.5% - 1px), var(--border) calc(87.5% - 1px) 87.5%, transparent 87.5%); pointer-events: none; }
+.srow { position: relative; padding: 10px 0 4px; }
+.srow .lab { position: relative; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 6px 10px; cursor: pointer; font-size: 13.5px; color: var(--text); text-align: left; width: 100%; font-family: var(--sans); }
+.srow .lab:hover { border-color: #BFDBFE; }
+.srow .lab .n { font: 500 11px var(--mono); color: var(--muted); }
+.srow .lab .tx { flex: 1 1 260px; min-width: 0; }
+.srow .lab code { font-size: 12px; overflow-wrap: anywhere; }
+.srow .ar-row { margin-top: 6px; height: 14px; position: relative; }
+.ar { position: relative; height: 14px; }
+.ar::before { content: ''; position: absolute; left: 0; right: 0; top: 6px; border-top: 2px solid var(--ink); }
+.ar.back::before { border-top-style: dashed; border-top-color: var(--text-2); }
+.ar.async::before { border-top: 2px dotted var(--s-released); }
+.ar::after { content: ''; position: absolute; top: 2px; border: 5px solid transparent; }
+.ar.r::after { right: -2px; border-left: 7px solid var(--ink); border-right: 0; }
+.ar.l::after { left: -2px; border-right: 7px solid var(--ink); border-left: 0; }
+.ar.back.r::after { border-left-color: var(--text-2); } .ar.back.l::after { border-right-color: var(--text-2); }
+.ar.async.r::after { border-left-color: var(--s-released); } .ar.async.l::after { border-right-color: var(--s-released); }
+.box { height: 14px; margin: 0 18%; border-radius: 4px; background: var(--ink); }
+.box.new { background: var(--money); } .box.chg { background: #D97706; } .box.async { background: repeating-linear-gradient(90deg, var(--s-released) 0 4px, transparent 4px 7px); }
+.box.skip { background: repeating-linear-gradient(90deg, var(--border-2) 0 4px, transparent 4px 7px); }
+.srow.skip .lab { opacity: .6; border-style: dashed; }
+.srow .det { display: none; margin: 6px 0 4px; padding: 10px 12px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; font-size: 13px; }
+.srow.open .det { display: block; }
+.srow .det p { margin: 0 0 6px; }
+.phase { font: 500 11px var(--mono); color: var(--accent); margin: 14px 0 0; position: relative; background: #fff; display: inline-block; padding-right: 8px; }
+.objgrid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.trec td:first-child code { white-space: nowrap; }
+.trec .chg td { background: var(--money-bg); }
+.trec .unk td { background: #F8FAFC; }
+@media (max-width: 1100px) { .grid { grid-template-columns: minmax(0, 1fr); } .sticky { position: static; } .objgrid { grid-template-columns: minmax(0, 1fr); } }
+@media (max-width: 600px) { .lanes div { font-size: 11px; } .lanes div small { display: none; } .seq, .lanes { padding-left: 10px; padding-right: 10px; } .seq::before { inset: 0 10px; } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Network Tokenization</a> / Payment explorer</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual page</p>
+<h1 class="page">Payment explorer: MPGS and CyberSource side by side</h1>
+<p class="lead">Pick a gateway, a card, the switches and the saved card's state. The sequence shows each call between the merchant, PGW, the gateway and the scheme, what changes for PGW, and how the payment goes to the scheme: with the network token or with the card number.</p>
+<div class="vp-meta"><span class="tag warn">Illustrative</span><span class="tag grey">Reflects PGW dev stories v1.1 · 19-Nov-2026</span><a href="docs/stories.html#story-map">Story map</a><a href="docs/stories.html#rules-for-every-story">Rules for every story</a></div>
+<div class="terms"><b>Terms.</b> <b>Geidea token</b> = the <code>tokenId</code> the merchant holds. <b>Gateway token</b> = MPGS token (MPGS) or instrument identifier, II (CyberSource). <b>Network token</b> = the token Visa (VTS) or Mastercard (MDES) issues for the card; the gateway sends it with a cryptogram. PGW never sees the full network token or the cryptogram. <b>CIT</b> = customer-initiated, <b>MIT</b> = merchant-initiated payment with a saved card. All identifiers are dummy values. <a href="token-layers.html">Token layers</a> explains the layers.</div>
+
+<h2 id="try-a-case" class="section-title" style="margin-top:8px">Try a case</h2>
+<div class="tries" id="tries"></div>
+
+<div class="grid">
+<div class="col sticky">
+<section class="card" aria-labelledby="h-set"><header><h2 id="h-set">Settings</h2></header><div class="in" id="ctl"></div></section>
+</div>
+<div class="col">
+<section class="card" aria-labelledby="h-out"><header><h2 id="h-out">Result</h2><span class="who" id="out-who"></span></header><div class="in" id="out"></div></section>
+<section class="card" aria-labelledby="h-seq"><header><h2 id="h-seq">Sequence</h2><span class="who">click a step for the payload</span></header>
+<div class="lanes" aria-hidden="true"><div>Merchant / HPP</div><div>Geidea PGW</div><div id="lane-gw">Gateway</div><div>Scheme<small>VTS / MDES</small></div></div>
+<div class="seq" id="seq"></div>
+<div class="in" style="border-top:1px solid var(--border)"><div class="legend"><span class="tg nc">NO CHANGE</span> today's behaviour <span class="tg chg">CHANGED</span> an existing call changes <span class="tg new">NEW</span> build needed <span class="tg gw">GATEWAY</span> done by the gateway <span class="tg async">ASYNC</span> in the background <span class="tg off">SKIPPED</span> not done in this case</div></div>
+</section>
+<section class="card" aria-labelledby="h-rec"><header><h2 id="h-rec">What PGW records</h2><span class="who"><a href="what-pgw-records.html">Field-by-field mapping</a></span></header><div class="in"><div class="objgrid">
+<div><div class="f"><span class="lbl">transactions[].networkTokenDetails (returned to the merchant)</span><pre class="code" id="obj"></pre></div><div id="obj-note"></div></div>
+<div><div class="f"><span class="lbl">Geidea token record (internal, not returned)</span><div class="tblwrap"><table class="tbl trec" id="trec"></table></div></div><div id="trec-note"></div></div>
+</div></div></section>
+</div>
+</div>
+</main>
+<footer class="lab-footer">Illustrative. Requirements are in the <a href="docs/stories.html">PGW dev stories v1.1</a>; if this page and the stories differ, the stories win.</footer>
+<script src="nt-data.js"></script>
+<script>
+(function () {
+  var D = window.NT;
+  var S = { g: 'mpgs', b: 'visa', t: 'on', c: 'on', f: 'cit', s: 'ready' };
+  var TRIES = [
+    ['mpgs-cit', 'MPGS: token CIT, Visa', { g: 'mpgs', b: 'visa', t: 'on', c: 'on', f: 'cit', s: 'ready' }],
+    ['mpgs-mit', 'MPGS: token MIT, Mastercard', { g: 'mpgs', b: 'mc', t: 'on', c: 'on', f: 'mit', s: 'ready' }],
+    ['mpgs-save', 'MPGS: first payment, save card', { g: 'mpgs', b: 'visa', t: 'on', c: 'on', f: 'save', s: 'pending' }],
+    ['mpgs-pending', 'MPGS: network token not provisioned yet', { g: 'mpgs', b: 'visa', t: 'on', c: 'on', f: 'cit', s: 'pending' }],
+    ['mpgs-toggle-off', 'MPGS: PGW toggle OFF', { g: 'mpgs', b: 'visa', t: 'off', c: 'on', f: 'cit', s: 'ready' }],
+    ['mpgs-no-nt', 'MPGS: MID without NT set-up', { g: 'mpgs', b: 'visa', t: 'on', c: 'off', f: 'cit', s: 'ready' }],
+    ['mpgs-refund', 'MPGS: refund of a token CIT', { g: 'mpgs', b: 'mc', t: 'on', c: 'on', f: 'follow', s: 'ready' }],
+    ['cybs-save', 'CYBS: first payment, save card', { g: 'cybs', b: 'visa', t: 'on', c: 'on', f: 'save', s: 'miss' }],
+    ['cybs-cit', 'CYBS: token CIT, Mastercard', { g: 'cybs', b: 'mc', t: 'on', c: 'on', f: 'cit', s: 'ii' }],
+    ['cybs-mit', 'CYBS: token MIT, Visa', { g: 'cybs', b: 'visa', t: 'on', c: 'on', f: 'mit', s: 'ii' }],
+    ['cybs-old-card', 'CYBS: card saved before go-live', { g: 'cybs', b: 'visa', t: 'on', c: 'on', f: 'cit', s: 'miss' }],
+    ['cybs-ii-fail', 'CYBS: instrument identifier not created', { g: 'cybs', b: 'visa', t: 'on', c: 'on', f: 'cit', s: 'fail' }],
+    ['cybs-toggle-off', 'CYBS: PGW toggle OFF', { g: 'cybs', b: 'visa', t: 'off', c: 'on', f: 'cit', s: 'ii' }],
+    ['cybs-no-permission', 'CYBS: MID without token permission', { g: 'cybs', b: 'visa', t: 'on', c: 'off', f: 'cit', s: 'ii' }],
+    ['cybs-refund', 'CYBS: refund of a token CIT', { g: 'cybs', b: 'mc', t: 'on', c: 'on', f: 'follow', s: 'ii' }]
+  ];
+  var GW = { mpgs: 'MPGS', cybs: 'CyberSource' };
+  var ST = {
+    mpgs: [['ready', 'Network token provisioned'], ['pending', 'Not provisioned yet']],
+    cybs: [['ii', 'II stored on the Geidea token'], ['miss', 'No II stored'], ['fail', 'No II stored, CYBS call fails']]
+  };
+  var CTL = [
+    ['g', 'Gateway', [['mpgs', 'MPGS'], ['cybs', 'CyberSource']]],
+    ['b', 'Card', [['visa', 'Visa'], ['mc', 'Mastercard']]],
+    ['f', 'Payment', [['save', 'First payment, save card'], ['cit', 'Token CIT'], ['mit', 'Token MIT'], ['follow', 'Refund of a token CIT']]],
+    ['t', 'PGW: Generate and Use Network Token', [['on', 'ON'], ['off', 'OFF']]],
+    ['c', 'gwcfg', [['on', 'Yes'], ['off', 'No']]],
+    ['s', 'state', null]
+  ];
+  function story(id, anchor) { return '<a class="story" href="docs/stories.html#' + anchor + '">' + id + '</a>'; }
+  var A = {
+    'NT-0': 'nt-0-network-token-data-model-and-merchant-apis', 'NT-M1': 'nt-m1-update-mpgs-token-generation', 'NT-M2': 'nt-m2-mpgs-pay-card-number',
+    'NT-M3': 'nt-m3-mpgs-token-cit', 'NT-M4': 'nt-m4-mpgs-token-mit', 'NT-M5': 'nt-m5-mpgs-capture-refund-void',
+    'NT-C1': 'nt-c1-create-cybs-instrument-identifier', 'NT-C2': 'nt-c2-cybs-pay-card-number', 'NT-C3': 'nt-c3-cybs-token-cit',
+    'NT-C4': 'nt-c4-cybs-token-mit', 'NT-C5': 'nt-c5-cybs-capture-refund-void', 'Rule 1': 'rules-for-every-story', 'P1': 'prerequisites-not-pgw-work', 'P2': 'prerequisites-not-pgw-work', 'P3': 'prerequisites-not-pgw-work', 'Open point 1': 'open-points'
+  };
+  function st(id) { return story(id, A[id]); }
+  var TAG = { nc: 'NO CHANGE', chg: 'CHANGED', 'new': 'NEW', gw: 'GATEWAY', async: 'ASYNC', off: 'SKIPPED', und: 'NOT VERIFIED' };
+  function esc(s) { return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;'); }
+  function J(o, hl) { return '<pre class="code">' + D.json(o, hl) + '</pre>'; }
+
+  /* Build the case. Returns {steps, went, obj, objNote, rec, recNote, fee}. */
+  function build() {
+    var g = S.g, b = S.b, x = D.brand[b], on = S.t === 'on', cfg = S.c === 'on', f = S.f, s = S.s;
+    var steps = [], went, obj = null, objNote = '', recNote = '';
+    var rec = { schemeTokenProvider: [null, null], tokenStatus: ['ACTIVE', 'ACTIVE'] };
+    if (g === 'cybs') { rec.cybsInstrumentIdentifierId = [null, null]; rec.networkTokenState = [null, null]; }
+    function add(o) { steps.push(o); }
+    var stS = g === 'mpgs' ? (f === 'save' ? 'NT-M2' : f === 'cit' ? 'NT-M3' : f === 'mit' ? 'NT-M4' : 'NT-M5')
+                           : (f === 'save' ? 'NT-C2' : f === 'cit' ? 'NT-C3' : f === 'mit' ? 'NT-C4' : 'NT-C5');
+    var tokenFlow = f === 'cit' || f === 'mit' || f === 'follow';
+    var initiator = f === 'mit' ? 'Merchant' : 'Payer';
+    var hasII = false;
+    if (g === 'cybs' && tokenFlow && s === 'ii') { rec.cybsInstrumentIdentifierId = [x.ii, x.ii]; rec.networkTokenState = [cfg ? 'ACTIVE' : null, cfg ? 'ACTIVE' : null]; hasII = true; }
+
+    /* ---------- MERCHANT REQUEST ---------- */
+    if (f === 'follow') add({ ph: 'Earlier: the token CIT (see "Token CIT" for its steps)' });
+    if (f === 'save') {
+      add({ ph: 'First payment: the customer enters the card and saves it' });
+      add({ from: 0, to: 1, t: 'nc', l: 'Pay with card number, save card: <code>POST /pgw/api/v2/direct/pay</code> or HPP', d: '<p>The customer enters the card on HPP (or the merchant sends it). Save card is requested, as today.</p>' });
+    } else if (f !== 'follow') {
+      add({ ph: f === 'cit' ? 'Token CIT: the customer pays with the saved card' : 'Token MIT: the merchant charges the saved card' });
+      add({ from: 0, to: 1, t: 'nc', l: '<code>POST /pgw/api/v2/direct/pay/token</code>, <code>initiatedBy</code> = <code>' + initiator + '</code>' + (f === 'cit' ? ' (or HPP with <code>tokenId</code>)' : ''),
+            d: '<p>The merchant sends only the Geidea token:</p>' + J({ tokenId: x.tokenId, initiatedBy: initiator }) + (f === 'cit' ? '<p style="margin-top:8px">3DS runs as today. No change.</p>' : '') });
+    }
+
+    /* ---------- GATEWAY: decide funding source and pay ---------- */
+    var useII = false, nt;
+    if (g === 'mpgs') {
+      if (f === 'save') {
+        add({ from: 1, to: 2, t: 'nc', l: 'Pay with the card number: <code>PUT …/order/{orderId}/transaction/{transactionId}</code>, <code>apiOperation</code> = <code>PAY</code>', d: '<p>MPGS REST API version 80. No change to the request.</p>' });
+        nt = false;
+      } else if (f !== 'follow') {
+        add({ from: 1, to: 2, t: 'nc', l: 'Pay with the MPGS token: <code>sourceOfFunds.token</code> = <code>' + D.mpgsToken(b) + '</code>', s: f === 'cit' ? 'NT-M3' : 'NT-M4',
+              d: '<p>No change to the request. The MPGS token is the Geidea <code>tokenId</code> without dashes, in upper case (merchant-supplied token).</p>' + J({ apiOperation: 'PAY', sourceOfFunds: { token: D.mpgsToken(b) } }, ['sourceOfFunds.token']) });
+        nt = cfg && s === 'ready';
+      }
+    } else {
+      if (f === 'save') {
+        add({ from: 1, to: 2, t: 'nc', l: 'Pay with the card number: <code>POST /pts/v2/payments</code>', d: '<p>No change to the request.</p>' });
+        nt = false;
+      } else if (f !== 'follow') {
+        if (!on) {
+          add({ from: 1, to: 1, t: 'nc', l: 'Toggle OFF: PGW reads the card number from the Geidea vault, as today', s: 'Rule 1', d: '<p>No instrument identifier is used or created. CIT and MIT go out with the card number.</p>' });
+        } else if (s === 'ii') {
+          add({ from: 1, to: 1, t: 'new', l: 'Choose the funding source: <code>cybsInstrumentIdentifierId</code> is stored, use it (1.1)', s: stS });
+          useII = true;
+        } else {
+          add({ from: 1, to: 1, t: 'new', l: 'Choose the funding source: <code>cybsInstrumentIdentifierId</code> = <code>null</code>, create it first (1.2)', s: stS, d: '<p>Covers cards saved before go-live and failed creations after save card.</p>' });
+          iiCreate('T2');
+          useII = s !== 'fail';
+          if (!useII) add({ from: 1, to: 1, t: 'new', l: 'NT-C1 returns "not created": pay with the card number, as today (1.3)', s: stS });
+        }
+        var req;
+        if (useII) {
+          req = { paymentInformation: { instrumentIdentifier: { id: x.ii }, card: { expirationMonth: x.exp.m, expirationYear: x.exp.y } }, tokenInformation: { networkTokenOption: 'prefer' } };
+          if (f === 'cit') req.paymentInformation.card.securityCode = '<CVV>';
+          if (f === 'mit') req.processingInformation = { authorizationOptions: { initiator: { merchantInitiatedTransaction: { previousTransactionId: D.ntid } } } };
+          add({ from: 1, to: 2, t: 'chg', l: 'Pay with the instrument identifier: <code>POST /pts/v2/payments</code>, no card number, <code>networkTokenOption</code> = <code>prefer</code>', s: stS,
+                d: '<p>Only <code>paymentInformation</code> changes and <code>tokenInformation</code> is added. ' + (f === 'cit' ? 'CVV is sent when the cardholder enters it, as today.' : 'No CVV on MIT. <code>previousTransactionId</code> is the stored network transaction ID, as today.') + '</p>' +
+                   J(req, ['paymentInformation.instrumentIdentifier', 'tokenInformation']) +
+                   (f === 'mit' && b === 'mc' ? '<div class="note"><b>P3.</b> In the 11-Nov POC a Mastercard MIT was rejected by Decision Manager until <code>DECISION_SKIP</code> was sent. The Decision Manager rule is set up by Risk & Compliance; it is not a PGW change. ' + st('P3') + '</div>' : '') });
+        } else {
+          add({ from: 1, to: 2, t: 'nc', l: 'Pay with the card number: <code>POST /pts/v2/payments</code>', d: J({ paymentInformation: { card: { number: '<PAN>', expirationMonth: x.exp.m, expirationYear: x.exp.y } } }) });
+        }
+        nt = useII ? (cfg ? true : 'unk') : false;
+      }
+    }
+
+    /* ---------- FOLLOW-ON (refund) ---------- */
+    if (f === 'follow') {
+      var orig = g === 'mpgs' ? (cfg && s === 'ready') : (on && (s !== 'fail') ? (cfg ? true : 'unk') : false);
+      nt = orig;
+      add({ from: 0, to: 1, t: 'nc', l: 'Refund: <code>POST /pgw/api/v2/direct/refund</code>', d: '<p>Capture (<code>/pgw/api/v1/direct/capture</code>) and void (<code>/pgw/api/v3/direct/void</code>) work the same way.</p>' });
+      if (g === 'mpgs') {
+        add({ from: 1, to: 2, t: 'nc', l: '<code>PUT …/transaction/{transactionId}</code>, <code>apiOperation</code> = <code>REFUND</code>', s: 'NT-M5' });
+        add({ from: 2, to: 1, back: 1, t: 'nc', l: 'Response with <code>sourceOfFunds</code> of the original payment', s: 'NT-M5', d: J(D.mpgsResp(b, nt === true, 'TOKEN'), ['sourceOfFunds.type']) + '<p style="margin-top:8px">Tests on 16–17 Nov confirmed capture and refund on network tokens.</p>' });
+        add({ from: 1, to: 1, t: on ? 'new' : 'off', l: on ? 'Fill <code>networkTokenDetails</code> from this response. If it has no <code>sourceOfFunds</code>: copy from the original payment' : 'Toggle OFF: nothing recorded', s: 'NT-M5' });
+      } else {
+        add({ from: 1, to: 2, t: 'nc', l: '<code>POST /pts/v2/payments/{id}/refunds</code> (captures, voids the same)', s: 'NT-C5', d: '<p>No funding source in the request. The CYBS response does not show network token data.</p>' });
+        add({ from: 2, to: 1, back: 1, t: 'nc', l: 'Refund response (no network token data)' });
+        add({ from: 1, to: 1, t: on ? 'new' : 'off', l: on ? 'Copy <code>networkTokenDetails</code> from the original Pay or Authorization' : 'Toggle OFF: nothing recorded', s: 'NT-C5' });
+      }
+      obj = on ? (g === 'mpgs' ? D.mapMpgs(D.mpgsResp(b, nt === true, 'TOKEN')) : D.mapCybs(D.cybsResp(b, nt === true))) : null;
+      objNote = '<div class="info">Same object as the original token CIT. ' + (g === 'mpgs' ? 'MPGS returns <code>sourceOfFunds</code> on the refund (NT-M5 3.1); the copy rule covers a response without it (3.2).' : 'CYBS: always copied from the original (NT-C5).') + '</div>';
+      if (nt === 'unk') objNote += '<div class="undef"><b>Not verified.</b> Depends on what the original payment did on a MID without token permission (open point 1).</div>';
+      rec.schemeTokenProvider = [on && nt === true ? x.provider : null, on && nt === true ? x.provider : null];
+      if (g === 'cybs' && s === 'ii') { rec.cybsInstrumentIdentifierId = [x.ii, x.ii]; }
+      recNote = '<div class="info">Refund, capture and void do not change the Geidea token record.</div>';
+      return finish();
+    }
+
+    /* ---------- GATEWAY → SCHEME ---------- */
+    if (nt === true) {
+      add({ from: 2, to: 3, t: 'gw', l: 'Authorisation with the ' + x.provider + ' network token and a cryptogram', d: '<p>The gateway swaps the gateway token for the network token and gets a cryptogram from ' + x.provider + '. PGW does not see either.</p>' + (g === 'mpgs' ? '<p>Proven through PGW on 16–17 Nov for Visa and Mastercard CIT, MIT and 3DS on the network token.</p>' : '<p>Proven in the 11-Nov POC and the 14-Nov test bench: Visa <code>015</code>, Mastercard <code>014</code>.</p>') });
+    } else if (nt === 'unk') {
+      add({ from: 2, to: 3, t: 'und', l: 'Expected: authorisation with the card number (<code>prefer</code> falls back). Not tested on a Geidea MID.', s: 'Open point 1', d: '<p>CYBS documentation says <code>prefer</code> uses the tokenized card number when no network token is available. The PGW engineering team verifies this on a test MID during build.</p>' });
+    } else {
+      add({ from: 2, to: 3, t: 'nc', l: 'Authorisation with the card number' + (g === 'mpgs' && tokenFlow ? ' stored on the MPGS token' : ''),
+            d: g === 'mpgs' && tokenFlow ? (cfg ? '<p>The repository has network tokens on, but ' + x.provider + ' has not provisioned this card yet. In tests the network token appeared 20–30 seconds after the card was saved. The next payment goes out with the network token.</p>' : '<p>Network tokens are not set up for this MID on MPGS (P1). MPGS pays with the card number, as today.</p>') : '' });
+    }
+    add({ from: 3, to: 2, back: 1, t: 'nc', l: 'Approved' });
+
+    /* ---------- RESPONSE AND RECORDING ---------- */
+    var resp = g === 'mpgs' ? D.mpgsResp(b, nt === true, tokenFlow ? 'TOKEN' : null) : D.cybsResp(b, nt === true);
+    var hl = g === 'mpgs' ? ['sourceOfFunds.type', 'sourceOfFunds.provided.card.brand', 'sourceOfFunds.provided.card.deviceSpecificNumber', 'sourceOfFunds.provided.card.deviceSpecificExpiry', 'sourceOfFunds.provided.card.paymentAccountReference']
+                          : ['processingInformation.paymentSolution', 'paymentInformation.card.bin', 'processorInformation.paymentAccountReferenceNumber'];
+    add({ from: 2, to: 1, back: 1, t: 'nc', l: 'Payment response: ' + (g === 'mpgs' ? '<code>sourceOfFunds.type</code> = <code>' + (nt === true ? 'SCHEME_TOKEN' : 'CARD') + '</code>' : (nt === true ? '<code>paymentSolution</code> = <code>' + x.ps + '</code>' : 'no <code>paymentSolution</code>')),
+          d: '<p>Response excerpt. Highlighted: the fields PGW reads.</p>' + J(resp, hl) });
+    obj = on ? (g === 'mpgs' ? D.mapMpgs(resp) : D.mapCybs(resp)) : null;
+    add({ from: 1, to: 1, t: on ? 'new' : 'off', l: on ? 'Fill <code>transactions[].networkTokenDetails</code> (approved and declined)' : 'Toggle OFF: <code>networkTokenDetails</code> = <code>null</code>', s: on ? stS : 'Rule 1' });
+    if (on && tokenFlow && nt === true) {
+      add({ from: 1, to: 1, t: 'new', l: 'First network token seen: set <code>schemeTokenProvider</code> = <code>' + x.provider + '</code> on the Geidea token (only when it is <code>null</code>)', s: stS });
+      rec.schemeTokenProvider = [null, x.provider];
+    }
+    if (g === 'cybs' && on && tokenFlow) add({ from: 1, to: 1, t: 'new', l: 'Save <code>processorInformation.responseCode</code>, <code>merchantAdvice.code</code>, <code>codeRaw</code> if not saved today (for NT-X)', s: stS });
+    if (g === 'cybs' && useII) add({ from: 1, to: 1, t: 'new', l: 'A decline on the instrument identifier is final: no retry with the card number', s: stS });
+
+    /* ---------- SAVE CARD: gateway token ---------- */
+    if (f === 'save') {
+      add({ from: 1, to: 1, t: 'nc', l: 'Save the card: create the Geidea token', d: '<p>As today. Geidea token: <code>' + x.tokenId + '</code>.</p>' });
+      if (g === 'mpgs') {
+        add({ ph: 'Gateway token (MPGS)' });
+        add({ from: 1, to: 2, t: 'nc', l: '<code>SendToken</code>: <code>PUT /api/rest/version/80/merchant/{merchantId}/token/' + D.mpgsToken(b) + '</code>', s: 'NT-M1', d: '<p>No change to the trigger or request.</p>' });
+        if (cfg) add({ from: 2, to: 3, async: 1, t: 'async', l: 'MPGS asks ' + x.provider + ' for a network token for the card', s: 'P1', d: '<p>In tests: network token within 20 s (Mastercard) and 30 s (Visa) after the save. With synchronous provisioning on the repository it can already exist at the token call.</p>' });
+        var ready = cfg && s === 'ready';
+        add({ from: 2, to: 1, back: 1, t: 'nc', l: 'Token response: ' + (ready ? '<code>schemeToken.provider</code> = <code>' + x.provider + '</code>' : '<code>schemeToken.provider</code> absent'),
+              d: J(ready ? { token: D.mpgsToken(b), schemeToken: { provider: x.provider } } : { token: D.mpgsToken(b) }, ['schemeToken.provider']) + '<p style="margin-top:8px">Version 80 returns no masked network token number, expiry or status here.</p>' });
+        add({ from: 1, to: 1, t: on ? 'chg' : 'off', l: on ? (ready ? 'Set <code>schemeTokenProvider</code> = <code>' + x.provider + '</code> (4.2)' : 'Leave <code>schemeTokenProvider</code> = <code>null</code> (4.3); the first network token payment sets it') : 'Toggle OFF: token record not changed', s: 'NT-M1' });
+        if (on && ready) rec.schemeTokenProvider = [null, x.provider];
+      } else {
+        add({ ph: 'Gateway token (CyberSource): new' });
+        if (!on) add({ from: 1, to: 2, t: 'off', l: 'Toggle OFF: no instrument identifier is created (pre-check 2.2a)', s: 'NT-C1' });
+        else iiCreate('T1');
+      }
+      add({ from: 1, to: 0, back: 1, t: on ? 'new' : 'nc', l: 'Response, callback and order inquiry carry <code>networkTokenDetails</code>' + (on ? '' : ' = <code>null</code>'), s: 'NT-0' });
+      return finish();
+    }
+    add({ from: 1, to: 0, back: 1, t: on ? 'new' : 'nc', l: 'Response, callback and order inquiry carry <code>networkTokenDetails</code>' + (on ? '' : ' = <code>null</code>'), s: 'NT-0' });
+    return finish();
+
+    function iiCreate(trig) {
+      var fail = s === 'fail', known = s === 'ii' && f === 'save';
+      add({ from: 1, to: 2, t: 'new', l: 'NT-C1 trigger ' + trig + ': <code>POST /tms/v1/instrumentidentifiers</code>, type <code>enrollable card</code>', s: 'NT-C1',
+            d: '<p>The only CYBS call in NT-C1. No <code>securityCode</code>. Same signed headers as payments, no <code>profile-id</code>. Not called: <code>/enrollment</code>.</p>' + J({ type: 'enrollable card', card: { number: '<PAN from Geidea vault>', expirationMonth: x.exp.m, expirationYear: x.exp.y } }) });
+      if (fail) {
+        add({ from: 2, to: 1, back: 1, t: 'new', l: 'Failure (timeout, HTTP 4xx or 5xx): adapter returns the failure, not <code>000</code>', s: 'NT-C1', d: '<p>5.3: leave <code>cybsInstrumentIdentifierId</code> = <code>null</code>, log the error. ' + (trig === 'T1' ? 'The save-card payment result does not change.' : 'Return "not created" to the caller.') + '</p>' });
+        return;
+      }
+      if (cfg) add({ from: 2, to: 3, async: 1, t: 'gw', l: 'CYBS provisions the ' + x.provider + ' network token', s: 'P2', d: '<p>In the 11-Nov POC <code>tokenizedCard.state</code> was already <code>ACTIVE</code> in the create response.</p>' });
+      add({ from: 2, to: 1, back: 1, t: 'new', l: 'HTTP ' + (known ? '200 (card already known, same id)' : '201 (new)') + ': <code>id</code> = <code>' + x.ii + '</code>', s: 'NT-C1',
+            d: J({ id: x.ii, tokenizedCard: { state: cfg ? 'ACTIVE' : '(not verified)' } }, ['id', 'tokenizedCard.state']) + (cfg ? '' : '<div class="undef"><b>Not verified.</b> What CYBS returns for a MID without token permission (open point 1).</div>') });
+      add({ from: 1, to: 1, t: 'new', l: 'Save <code>cybsInstrumentIdentifierId</code> and <code>networkTokenState</code> on the Geidea token', s: 'NT-C1' });
+      rec.cybsInstrumentIdentifierId = [known ? x.ii : null, x.ii];
+      rec.networkTokenState = [known && cfg ? 'ACTIVE' : null, cfg ? 'ACTIVE' : '?'];
+    }
+    function finish() {
+      return { steps: steps, went: nt, obj: obj, objNote: objNote, rec: rec, recNote: recNote };
+    }
+  }
+
+  function render() {
+    // Controls
+    var h = '';
+    CTL.forEach(function (c) {
+      var k = c[0], label = c[1], opts = c[2];
+      if (k === 'c') label = S.g === 'mpgs' ? 'MPGS: network tokens set up for the MID (P1)' : 'CYBS: token permission on the MID (P2)';
+      if (k === 's') {
+        if (S.f === 'save') { label = S.g === 'mpgs' ? 'Network token at the token call' : 'Card at CYBS'; opts = S.g === 'mpgs' ? [['ready', 'Already provisioned'], ['pending', 'Not yet (async)']] : [['miss', 'New card'], ['ii', 'Card already known'], ['fail', 'CYBS call fails']]; }
+        else { label = S.g === 'mpgs' ? 'Saved card on MPGS' : 'Saved card on PGW'; opts = ST[S.g]; }
+      }
+      h += '<div class="f"><span class="lbl">' + label + '</span><div class="chips" role="group" aria-label="' + esc(label) + '">' + opts.map(function (o) {
+        return '<button class="chip" data-k="' + k + '" data-v="' + o[0] + '" aria-pressed="' + (S[k] === o[0]) + '">' + o[1] + '</button>';
+      }).join('') + '</div></div>';
+    });
+    h += '<p class="hint">' + (S.g === 'mpgs' ? 'MPGS: the gateway set-up decides if the network token is used. The PGW toggle decides only what PGW records.' : 'CYBS: the PGW toggle decides if PGW creates and pays with the instrument identifier. Token permission decides if CYBS then uses a network token.') + ' ' + st('Rule 1') + '</p>';
+    document.getElementById('ctl').innerHTML = h;
+    document.getElementById('lane-gw').innerHTML = GW[S.g] + '<small>' + D.mid[S.g] + '</small>';
+
+    var r = build(), x = D.brand[S.b];
+    // Result
+    var went = r.went === true ? '<span class="out nt"><svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8.5l3 3 7-7"/></svg>Network token (' + x.provider + ')</span>'
+             : r.went === 'unk' ? '<span class="out unk">Not verified: expected card number (open point 1)</span>'
+             : '<span class="out card">Card number</span>';
+    var fee = S.b === 'visa' && r.went !== true ? '<span class="out fee">Visa PAN Integrity Fee applies (not network-tokenized)</span>' : S.b === 'visa' ? '<span class="out nt">No Visa PAN Integrity Fee</span>' : '<span class="out card">Visa fee: not applicable (Mastercard)</span>';
+    var recd = S.t === 'on' ? '<span class="out nt">PGW records it</span>' : '<span class="out card">PGW records nothing (<code>null</code>)</span>';
+    var out = '<div class="outrow"><span class="k">went to the scheme with</span>' + went + '</div>' +
+              '<div class="outrow" style="margin-top:12px"><span class="k">fee exposure · PGW record</span>' + fee + recd + '</div>';
+    if (S.f === 'save') out += '<div class="note"><b>Phase 1 is card on file.</b> The first payment, when the customer types the card, always goes with the card number. For Visa this is guest-checkout scope (fee since 17-Oct-2026). See <a href="not-yet-defined.html#guest-checkout-poc">guest checkout POC</a>.</div>';
+    if (S.g === 'mpgs' && S.t === 'off' && r.went === true) out += '<div class="info">MPGS already pays with the network token: the payment request does not change. With the toggle OFF, PGW just does not record it.</div>';
+    document.getElementById('out').innerHTML = out;
+    document.getElementById('out-who').textContent = GW[S.g] + ' · ' + x.name;
+
+    // Sequence
+    var n = 0, sq = '';
+    r.steps.forEach(function (p, i) {
+      if (p.ph) { sq += '<div class="phase">' + p.ph + '</div>'; return; }
+      n++;
+      var a = Math.min(p.from, p.to), b2 = Math.max(p.from, p.to), cls = p.t === 'off' ? ' skip' : '';
+      var arrow = p.from === p.to
+        ? '<div style="grid-column:' + (a + 1) + '"><div class="box ' + (p.t === 'new' ? 'new' : p.t === 'chg' ? 'chg' : p.t === 'off' ? 'skip' : p.async ? 'async' : '') + '"></div></div>'
+        : '<div class="ar ' + (p.to > p.from ? 'r' : 'l') + (p.back ? ' back' : '') + (p.async ? ' async' : '') + '" style="grid-column:' + (a + 1) + '/' + (b2 + 2) + ';margin:0 ' + (50 / (b2 - a + 1)) + '%"></div>';
+      sq += '<div class="srow' + cls + '" data-i="' + i + '"><button class="lab" aria-expanded="false"><span class="n">' + n + '</span><span class="tx">' + p.l + '</span><span class="tg ' + p.t + '">' + TAG[p.t] + '</span>' + (p.s ? st(p.s) : '') + '</button>' +
+            '<div class="ar-row" aria-hidden="true">' + arrow + '</div>' + (p.d ? '<div class="det">' + p.d + '</div>' : '') + '</div>';
+    });
+    document.getElementById('seq').innerHTML = sq;
+
+    // Record
+    document.getElementById('obj').innerHTML = r.obj ? D.json(r.obj) : '<span class="cm">null</span>';
+    var on2 = S.t === 'on';
+    document.getElementById('obj-note').innerHTML = r.objNote || (on2 ? (S.g === 'cybs' && r.went === true ? '<div class="info">CYBS returns only the token BIN, so <code>maskedTokenNumber</code> = BIN + 10 zeros; expiry is <code>null</code> on CYBS.</div>' : '') : '<div class="info">Toggle OFF: <code>networkTokenDetails</code> = <code>null</code> on all new transactions (NT-0 criterion 5).</div>') + (r.went === 'unk' ? '<div class="undef"><b>Not verified.</b> Shown as it would be if the payment goes out with the card number.</div>' : '');
+    var tr = '<thead><tr><th>Field</th><th>Before</th><th>After</th></tr></thead><tbody>';
+    Object.keys(r.rec).forEach(function (k) {
+      var v = r.rec[k], ch = v[0] !== v[1];
+      tr += '<tr class="' + (v[1] === '?' ? 'unk' : ch ? 'chg' : '') + '"><td><code>' + k + '</code></td><td><code>' + (v[0] === null ? 'null' : v[0]) + '</code></td><td><code>' + (v[1] === null ? 'null' : v[1] === '?' ? 'not verified' : v[1]) + '</code></td></tr>';
+    });
+    document.getElementById('trec').innerHTML = tr + '</tbody>';
+    document.getElementById('trec-note').innerHTML = r.recNote || '<p class="hint"><code>tokenStatus</code> is added now; nothing reads or changes it in this release (NT-X). Green rows changed in this case.</p>';
+
+    // Tries
+    var key = '';
+    TRIES.forEach(function (t) { var c = t[2], m = true; for (var k in c) if (c[k] !== S[k]) m = false; if (m) key = t[0]; });
+    document.querySelectorAll('#tries a').forEach(function (a) { a.classList.toggle('on', a.dataset.k === key); });
+    var hash = key ? '#try=' + key : '#' + Object.keys(S).map(function (k) { return k + '=' + S[k]; }).join('&');
+    if (location.hash !== hash) history.replaceState(null, '', hash);
+  }
+
+  function fixState() {
+    var ok = (S.f === 'save') ? (S.g === 'mpgs' ? ['ready', 'pending'] : ['miss', 'ii', 'fail']) : ST[S.g].map(function (o) { return o[0]; });
+    if (ok.indexOf(S.s) < 0) S.s = ok[0];
+  }
+  function fromHash() {
+    var h = location.hash.slice(1);
+    if (h.indexOf('try=') === 0) {
+      var t = TRIES.filter(function (x) { return x[0] === h.slice(4); })[0];
+      if (t) { for (var k in t[2]) S[k] = t[2][k]; return; }
+    }
+    h.split('&').forEach(function (kv) { var p = kv.split('='); if (p[0] in S && p[1]) S[p[0]] = p[1]; });
+    fixState();
+  }
+  document.getElementById('tries').innerHTML = '<span>try</span>' + TRIES.map(function (t) { return '<a href="#try=' + t[0] + '" data-k="' + t[0] + '">' + t[1] + '</a>'; }).join('');
+  document.getElementById('ctl').addEventListener('click', function (e) {
+    var b = e.target.closest('.chip'); if (!b) return;
+    S[b.dataset.k] = b.dataset.v; fixState(); render();
+  });
+  document.getElementById('seq').addEventListener('click', function (e) {
+    var b = e.target.closest('.lab'); if (!b || e.target.closest('a')) return;
+    var row = b.parentNode; if (!row.querySelector('.det')) return;
+    row.classList.toggle('open'); b.setAttribute('aria-expanded', row.classList.contains('open'));
+  });
+  window.addEventListener('hashchange', function () { fromHash(); render(); });
+  fromHash(); render();
+  window.__ntx = { S: S, build: build, render: render, TRIES: TRIES };
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+</body>
+</html>

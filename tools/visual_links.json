@@ -246,7 +246,7 @@
         "../simulator.html#s2"
       ],
       [
-        "What can go wrong: checks 3.1\u20133.9",
+        "What can go wrong: checks 3.1–3.9",
         "../what-can-go-wrong.html#stage-cs"
       ]
     ],
@@ -312,7 +312,7 @@
     ],
     "checks": [
       [
-        "What can go wrong: checks 2.1\u20132.6",
+        "What can go wrong: checks 2.1–2.6",
         "../what-can-go-wrong.html#stage-api"
       ]
     ],
@@ -504,6 +504,132 @@
       [
         "Simulator: customer in the UAE",
         "../hpp-simulator.html#try=uae"
+      ]
+    ]
+  },
+  "network-tokenization/docs/stories.html": {
+    "story-map": [
+      [
+        "Payment explorer",
+        "../payment-explorer.html"
+      ],
+      [
+        "Token layers",
+        "../token-layers.html"
+      ]
+    ],
+    "rules-for-every-story": [
+      [
+        "Switches and rollout",
+        "../switches-and-rollout.html#who-decides"
+      ]
+    ],
+    "nt-0-network-token-data-model-and-merchant-apis": [
+      [
+        "What PGW records",
+        "../what-pgw-records.html"
+      ]
+    ],
+    "nt-m1-update-mpgs-token-generation": [
+      [
+        "Explorer: MPGS save card",
+        "../payment-explorer.html#try=mpgs-save"
+      ]
+    ],
+    "nt-m2-mpgs-pay-card-number": [
+      [
+        "Mapper: MPGS card",
+        "../what-pgw-records.html#try=mpgs-card"
+      ]
+    ],
+    "nt-m3-mpgs-token-cit": [
+      [
+        "Explorer: MPGS CIT",
+        "../payment-explorer.html#try=mpgs-cit"
+      ],
+      [
+        "Mapper",
+        "../what-pgw-records.html#try=mpgs-cit-visa"
+      ]
+    ],
+    "nt-m4-mpgs-token-mit": [
+      [
+        "Explorer: MPGS MIT",
+        "../payment-explorer.html#try=mpgs-mit"
+      ],
+      [
+        "Mapper",
+        "../what-pgw-records.html#try=mpgs-mit-mc"
+      ]
+    ],
+    "nt-m5-mpgs-capture-refund-void": [
+      [
+        "Explorer: MPGS refund",
+        "../payment-explorer.html#try=mpgs-refund"
+      ]
+    ],
+    "nt-c1-create-cybs-instrument-identifier": [
+      [
+        "Explorer: save card (T1)",
+        "../payment-explorer.html#try=cybs-save"
+      ],
+      [
+        "On demand (T2)",
+        "../payment-explorer.html#try=cybs-old-card"
+      ],
+      [
+        "Failure",
+        "../payment-explorer.html#try=cybs-ii-fail"
+      ]
+    ],
+    "nt-c2-cybs-pay-card-number": [
+      [
+        "Mapper: CYBS card",
+        "../what-pgw-records.html#try=cybs-card"
+      ]
+    ],
+    "nt-c3-cybs-token-cit": [
+      [
+        "Explorer: CYBS CIT",
+        "../payment-explorer.html#try=cybs-cit"
+      ],
+      [
+        "Mapper",
+        "../what-pgw-records.html#try=cybs-cit-mc"
+      ]
+    ],
+    "nt-c4-cybs-token-mit": [
+      [
+        "Explorer: CYBS MIT",
+        "../payment-explorer.html#try=cybs-mit"
+      ],
+      [
+        "Mapper",
+        "../what-pgw-records.html#try=cybs-mit-visa"
+      ]
+    ],
+    "nt-c5-cybs-capture-refund-void": [
+      [
+        "Explorer: CYBS refund",
+        "../payment-explorer.html#try=cybs-refund"
+      ]
+    ],
+    "nt-a1-apex-network-token-keys-waiting-on-apex-team": [
+      [
+        "Not yet defined",
+        "../not-yet-defined.html#nt-a1-apex-network-token-keys"
+      ]
+    ],
+    "nt-x-token-status-and-retry-control-waiting-on-risk-compliance": [
+      [
+        "Not yet defined",
+        "../not-yet-defined.html#nt-x-token-status-and-retry-control"
+      ]
+    ],
+    "open-points": [
+      [
+        "Open point 1",
+        "../not-yet-defined.html#open-point-1-no-token-permission-on-cybs"
       ]
     ]
   }

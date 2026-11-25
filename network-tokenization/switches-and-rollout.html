@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT Switches and rollout · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<link rel="stylesheet" href="nt.css">
+<style>
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.mx td, .mx th { text-align: center; vertical-align: middle; }
+.mx td:first-child, .mx th:first-child { text-align: left; }
+.mx td .out { font-size: 12px; padding: 3px 8px; }
+.mx tr.on td { background: var(--accent-bg); }
+.mx tr { cursor: pointer; }
+.sw { display: grid; grid-template-columns: repeat(auto-fill, minmax(230px, 1fr)); gap: 12px; }
+.sw .s { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+.sw .s .k { font: 500 11px var(--mono); color: var(--muted); }
+.sw .s h3 { font: 700 15px var(--head); color: var(--ink); margin: 4px 0 6px; }
+.sw .s p { margin: 0; font-size: 13.5px; color: var(--text-2); }
+.sw .s.master { border: 2px solid var(--accent); }
+.sw .s.unused { border-style: dashed; opacity: .75; }
+ol.roll { list-style: none; margin: 0; padding: 0; counter-reset: r; display: grid; gap: 10px; }
+ol.roll li { counter-increment: r; position: relative; background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 12px 16px 12px 52px; }
+ol.roll li::before { content: counter(r); position: absolute; left: 14px; top: 12px; width: 26px; height: 26px; border-radius: 50%; background: var(--ink); color: #fff; font: 500 12px/26px var(--mono); text-align: center; }
+ol.roll li b { color: var(--ink); }
+ol.roll li p { margin: 2px 0 0; font-size: 13.5px; color: var(--text-2); }
+@media (max-width: 1000px) { .two { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Network Tokenization</a> / Switches and rollout</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual page</p>
+<h1 class="page">Switches and rollout: who decides if a network token is used</h1>
+<p class="lead">Two switches decide the outcome: one in PGW, one at the gateway. They do different things on MPGS and on CyberSource. The PGW switch is a safety switch for the rollout, per MID, default OFF.</p>
+<div class="vp-meta"><span class="tag warn">Illustrative</span><span class="tag grey">Reflects PGW dev stories v1.1 · 19-Nov-2026</span><a href="docs/stories.html#rules-for-every-story">Rule 1: master toggle</a><a href="docs/stories.html#prerequisites-not-pgw-work">Prerequisites P1–P3</a></div>
+
+<h2 id="the-switches" class="section-title" style="margin-top:8px">The switches</h2>
+<div class="sw">
+<div class="s master"><span class="k">PGW configuration · per MID · default OFF</span><h3 id="generate-and-use-network-token">Generate and Use Network Token</h3><p>The one master toggle for all NT work (Rule 1). Exists today; v1.1 gives it this meaning. A later release can remove it.</p></div>
+<div class="s"><span class="k">PGW configuration · existing, unchanged</span><h3 id="enable-tokenization-cit-mit">Enable tokenization, CIT, MIT</h3><p><i>Enable tokenization</i>, <i>CUSTOMER_INITIATED_TRANSACTIONS</i>, <i>MERCHANT_INITIATED_TRANSACTIONS</i> still apply as today.</p></div>
+<div class="s"><span class="k">MPGS · per MID and token repository (P1)</span><h3 id="network-tokens-on-mpgs">Network tokens on MPGS</h3><p>MDES onboarding, Visa VTS via an existing TRID, <i>Enable Network Tokens</i> per merchant. Set by the merchant integration team.</p></div>
+<div class="s"><span class="k">CYBS · per MID (P2)</span><h3 id="token-permission-on-cybs">Token permission on CYBS</h3><p>Network token provisioning on the vault; Visa and Mastercard token permission per MID.</p></div>
+<div class="s unused"><span class="k">PGW configuration · not used</span><h3 id="use-network-token-send-nt-to-merchant">Use Network Token, Send NT to merchant</h3><p>Exist from an earlier project. Not used in this release.</p></div>
+</div>
+
+<h2 id="who-decides" class="section-title">Who decides: click a row</h2>
+<div class="two">
+<section class="card"><header><h3 id="mpgs-matrix">MPGS</h3><span class="who">token CIT or MIT</span></header><div class="in tblwrap">
+<table class="tbl mx" id="mx-mpgs"><thead><tr><th>PGW toggle</th><th>MPGS set-up (P1)</th><th>Payment goes with</th><th>PGW records</th></tr></thead><tbody></tbody></table>
+<div id="mx-mpgs-note"></div></div></section>
+<section class="card"><header><h3 id="cybs-matrix">CyberSource</h3><span class="who">token CIT or MIT</span></header><div class="in tblwrap">
+<table class="tbl mx" id="mx-cybs"><thead><tr><th>PGW toggle</th><th>Token permission (P2)</th><th>Payment goes with</th><th>PGW records</th></tr></thead><tbody></tbody></table>
+<div id="mx-cybs-note"></div></div></section>
+</div>
+<p class="hint">Both tables assume the existing tokenization, CIT and MIT toggles are ON. <a href="payment-explorer.html#try=mpgs-toggle-off">See a case in the Payment explorer</a>.</p>
+
+<h2 id="rollout" class="section-title">Rollout</h2>
+<ol class="roll">
+<li><b>Release with the toggle OFF on every MID.</b><p>PGW behaves exactly as today: no instrument identifiers, CYBS CIT and MIT with the card number, <code>networkTokenDetails</code> = <code>null</code>.</p></li>
+<li><b>Switch ON for the production test MID and test in production.</b><p>Without the toggle, a fault would hit every card-on-file merchant at release and the only fix would be a code rollback.</p></li>
+<li><b>Switch ON per card-on-file MID.</b><p>The MID list is reviewed with Business and Risk & Compliance first. Gateway set-up (P1, P2) must be in place for the MID.</p></li>
+<li><b>New card-on-file merchants: network tokens are mandatory.</b><p>Agreed in the 19-Nov mandate alignment meeting.</p></li>
+<li><b>A later release removes the toggle.</b><p>Network tokens then apply wherever save card, CIT or MIT is enabled.</p></li>
+</ol>
+
+<h2 id="partners" class="section-title">Partners that connect to the gateway directly</h2>
+<div class="two">
+<div class="card"><div class="in"><h3 id="on-geidea-s-mso" style="margin:0 0 6px;font:700 15px var(--head);color:var(--ink)">On Geidea's MSO</h3><p style="margin:0;font-size:14px;color:var(--text-2)">Geidea switches network tokens on for their MIDs at the gateway, sends an advisory, and spot-checks their CIT and MIT. The PGW toggle does not apply: these partners do not pay through PGW.</p></div></div>
+<div class="card"><div class="in"><h3 id="on-their-own-mso" style="margin:0 0 6px;font:700 15px var(--head);color:var(--ink)">On their own MSO</h3><p style="margin:0;font-size:14px;color:var(--text-2)">Risk & Compliance sends an advisory. The partner generates and uses network tokens on its own set-up.</p></div></div>
+</div>
+</main>
+<footer class="lab-footer">Illustrative. Requirements are in the <a href="docs/stories.html">PGW dev stories v1.1</a>.</footer>
+<script>
+(function () {
+  var NT = '<span class="out nt">Network token</span>', CARD = '<span class="out card">Card number</span>', UNK = '<span class="out unk">Expected card (not verified)</span>';
+  var REC = '<span class="out nt">Yes</span>', NO = '<span class="out card">null</span>';
+  var M = {
+    mpgs: [
+      ['ON', 'Yes', NT, REC, 'The target state. MPGS already pays with the network token; PGW records it (NT-M3, NT-M4). <a href="payment-explorer.html#try=mpgs-cit">Try it</a>'],
+      ['OFF', 'Yes', NT, NO, 'The payment request does not change on MPGS, so the network token is used anyway. The toggle only decides what PGW records. <a href="payment-explorer.html#try=mpgs-toggle-off">Try it</a>'],
+      ['ON', 'No', CARD, REC, 'MPGS pays with the card number. PGW records <code>isNetworkToken</code> = <code>false</code> and the PAR. <a href="payment-explorer.html#try=mpgs-no-nt">Try it</a>'],
+      ['OFF', 'No', CARD, NO, 'Today.']
+    ],
+    cybs: [
+      ['ON', 'Yes', NT, REC, 'The target state. PGW creates the instrument identifier and pays with it; CYBS uses the network token (NT-C1, NT-C3, NT-C4). <a href="payment-explorer.html#try=cybs-cit">Try it</a>'],
+      ['OFF', 'Yes', CARD, NO, 'PGW sends the card number, as today, so CYBS cannot use a network token. <a href="payment-explorer.html#try=cybs-toggle-off">Try it</a>'],
+      ['ON', 'No', UNK, REC, '<span class="undef" style="display:block"><b>Open point 1.</b> PGW pays with the instrument identifier and <code>prefer</code>. CYBS documentation says it falls back to the card; not tested on a Geidea MID. <a href="not-yet-defined.html#open-point-1-no-token-permission-on-cybs">Details</a></span>'],
+      ['OFF', 'No', CARD, NO, 'Today.']
+    ]
+  };
+  ['mpgs', 'cybs'].forEach(function (g) {
+    var tb = document.querySelector('#mx-' + g + ' tbody'), sel = 0;
+    function draw() {
+      tb.innerHTML = M[g].map(function (r, i) { return '<tr tabindex="0" class="' + (i === sel ? 'on' : '') + '" data-i="' + i + '"><td><code>' + r[0] + '</code></td><td>' + r[1] + '</td><td>' + r[2] + '</td><td>' + r[3] + '</td></tr>'; }).join('');
+      document.getElementById('mx-' + g + '-note').innerHTML = '<div class="info">' + M[g][sel][4] + '</div>';
+    }
+    function pick(e) { var tr = e.target.closest('tr[data-i]'); if (!tr) return; if (e.type === 'keydown' && e.key !== 'Enter' && e.key !== ' ') return; sel = +tr.dataset.i; draw(); }
+    tb.addEventListener('click', pick); tb.addEventListener('keydown', pick);
+    draw();
+  });
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+</body>
+</html>

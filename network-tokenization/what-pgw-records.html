@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT What PGW records · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<link rel="stylesheet" href="nt.css">
+<style>
+.m3 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.2fr); gap: 16px; align-items: start; }
+.m3 > :first-child { grid-row: span 2; }
+.rule td code { overflow-wrap: anywhere; }
+@media (min-width: 1700px) { .m3 { grid-template-columns: minmax(0, 1fr) minmax(0, 1.25fr) minmax(0, 0.9fr); } .m3 > :first-child { grid-row: auto; } }
+.rule td:nth-child(2) { font-size: 12.5px; color: var(--text-2); }
+.rule td.res code { color: var(--money); font-weight: 600; }
+.rule td.res code.nul { color: var(--muted); font-weight: 400; }
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+@media (max-width: 1000px) { .m3 { grid-template-columns: minmax(0, 1fr); } .m3 > :first-child { grid-row: auto; } }
+@media (max-width: 900px) { .two { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Network Tokenization</a> / What PGW records</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual page</p>
+<h1 class="page">What PGW records: gateway response to <code style="font-size:.8em">networkTokenDetails</code></h1>
+<p class="lead">Both gateways fill the same six-field object, from different response fields. Pick a response and follow each field through its rule. The object is written once per transaction and returned to the merchant.</p>
+<div class="vp-meta"><span class="tag warn">Illustrative</span><span class="tag grey">Reflects PGW dev stories v1.1 · 19-Nov-2026</span><a href="docs/stories.html#nt-0-network-token-data-model-and-merchant-apis">NT-0</a><a href="docs/stories.html#nt-m3-mpgs-token-cit">NT-M3 mapping</a><a href="docs/stories.html#nt-c3-cybs-token-cit">NT-C3 mapping</a></div>
+
+<h2 id="mapper" class="section-title" style="margin-top:8px">Mapper</h2>
+<div class="tries" id="tries"></div>
+<div class="m3">
+<section class="card"><header><h3 id="h-resp">Gateway response</h3><span class="who" id="resp-who"></span></header><div class="in"><div id="resp"></div></div></section>
+<section class="card"><header><h3 id="rules-2">Rules</h3><span class="who" id="rule-who"></span></header><div class="in tblwrap"><table class="tbl rule" id="rules"></table><div id="rnote"></div></div></section>
+<section class="card"><header><h3 id="pgw-transaction">PGW transaction</h3></header><div class="in"><pre class="code" id="obj"></pre><div id="onote"></div></div></section>
+</div>
+
+<h2 id="the-object" class="section-title">The object</h2>
+<div class="card"><div class="in tblwrap"><table class="tbl">
+<thead><tr><th>Field</th><th>Type</th><th>Values</th><th>MPGS source</th><th>CYBS source</th></tr></thead><tbody>
+<tr><td><code>isNetworkToken</code></td><td>Boolean</td><td><code>true</code> / <code>false</code></td><td><code>sourceOfFunds.type</code> = <code>SCHEME_TOKEN</code></td><td><code>processingInformation.paymentSolution</code> = <code>015</code> or <code>014</code></td></tr>
+<tr><td><code>tokenProvider</code></td><td>String</td><td><code>VTS</code> / <code>MDES</code> / <code>null</code></td><td><code>…card.brand</code>: <code>VISA</code> → <code>VTS</code>, <code>MASTERCARD</code> → <code>MDES</code></td><td><code>015</code> → <code>VTS</code>, <code>014</code> → <code>MDES</code></td></tr>
+<tr><td><code>maskedTokenNumber</code></td><td>String</td><td>masked / <code>null</code></td><td><code>…card.deviceSpecificNumber</code>, copied</td><td><code>paymentInformation.card.bin</code> + 10 zeros</td></tr>
+<tr><td><code>tokenExpiryMonth</code></td><td>String</td><td>e.g. <code>11</code> / <code>null</code></td><td><code>…card.deviceSpecificExpiry.month</code></td><td>not returned: <code>null</code></td></tr>
+<tr><td><code>tokenExpiryYear</code></td><td>String</td><td>e.g. <code>28</code> / <code>null</code></td><td><code>…card.deviceSpecificExpiry.year</code></td><td>not returned: <code>null</code></td></tr>
+<tr><td><code>paymentAccountReference</code></td><td>String</td><td>PAR / <code>null</code></td><td><code>…card.paymentAccountReference</code></td><td><code>processorInformation.paymentAccountReferenceNumber</code></td></tr>
+</tbody></table><p class="src"><code>…card</code> = <code>sourceOfFunds.provided.card</code>. MPGS REST API version 80. <a href="docs/stories.html#requirements">NT-0 requirement 1</a></p></div></div>
+
+<div class="two">
+<div>
+<h2 id="which-transactions-carry-it" class="section-title">Which transactions carry it</h2>
+<div class="card"><div class="in tblwrap"><table class="tbl"><thead><tr><th>Transaction</th><th>Object</th><th>MPGS</th><th>CYBS</th></tr></thead><tbody>
+<tr><td>Pay, Authorization (card number)</td><td>yes</td><td>from the response (NT-M2)</td><td>from the response (NT-C2)</td></tr>
+<tr><td>Pay, Authorization (token CIT, MIT)</td><td>yes</td><td>from the response (NT-M3, NT-M4)</td><td>from the response (NT-C3, NT-C4)</td></tr>
+<tr><td>Capture, Refund, Void</td><td>yes</td><td>from the response; no <code>sourceOfFunds</code>: copy from the original</td><td>always copied from the original</td></tr>
+<tr><td>Authentication</td><td>no</td><td colspan="2">never carries the object</td></tr>
+<tr><td>Before this release, or toggle OFF</td><td><code>null</code></td><td colspan="2">NT-0 2.4 and criterion 5</td></tr>
+</tbody></table><p class="hint">Approved and declined transactions both get the object. Written once; never updated.</p></div></div>
+</div>
+<div>
+<h2 id="where-the-merchant-sees-it" class="section-title">Where the merchant sees it</h2>
+<div class="card"><div class="in tblwrap"><table class="tbl"><thead><tr><th>Merchant API</th><th>Path</th></tr></thead><tbody>
+<tr><td>Order inquiry <code>GET /pgw/api/v1/direct/order/{orderId}</code></td><td><code>order.transactions[].networkTokenDetails</code></td></tr>
+<tr><td>Callback to <code>callbackUrl</code></td><td><code>order.transactions[].networkTokenDetails</code></td></tr>
+<tr><td><code>POST /pgw/api/v2/direct/pay</code> response</td><td><code>order.transactions[].networkTokenDetails</code></td></tr>
+<tr><td><code>POST /pgw/api/v2/direct/pay/token</code> response</td><td><code>order.transactions[].networkTokenDetails</code></td></tr>
+</tbody></table><p class="hint">An addition only: existing fields do not change. The token record fields below are not returned.</p></div></div>
+</div>
+</div>
+
+<h2 id="the-geidea-token-record" class="section-title">The Geidea token record (internal)</h2>
+<div class="card"><div class="in tblwrap"><table class="tbl"><thead><tr><th>Field</th><th>Values</th><th>Default</th><th>Written by</th><th>Update rule</th></tr></thead><tbody>
+<tr><td><code>schemeTokenProvider</code></td><td><code>VTS</code> / <code>MDES</code> / <code>null</code></td><td><code>null</code></td><td>NT-M1 at token creation; NT-M3, NT-M4, NT-C3, NT-C4 at the first network token payment</td><td>Once set, never changed</td></tr>
+<tr><td><code>cybsInstrumentIdentifierId</code></td><td>19 digits / <code>null</code></td><td><code>null</code></td><td>NT-C1</td><td>Replaced if CYBS returns a different id (logged)</td></tr>
+<tr><td><code>networkTokenState</code></td><td>e.g. <code>ACTIVE</code> / <code>null</code></td><td><code>null</code></td><td>NT-C1 (<code>tokenizedCard.state</code>)</td><td>With the identifier</td></tr>
+<tr><td><code>tokenStatus</code></td><td><code>ACTIVE</code> / <code>INACTIVE</code></td><td><code>ACTIVE</code></td><td>nothing in this release</td><td>For NT-X (<a href="not-yet-defined.html#nt-x-token-status-and-retry-control">not yet defined</a>)</td></tr>
+<tr><td><code>tokenStatusReason</code>, <code>tokenStatusDate</code></td><td>text, UAE time</td><td><code>null</code></td><td>nothing in this release</td><td>For NT-X</td></tr>
+</tbody></table><p class="src"><a href="docs/stories.html#requirements">NT-0 requirements 4 and 5</a></p></div></div>
+</main>
+<footer class="lab-footer">Illustrative. Response excerpts use dummy values. Requirements are in the <a href="docs/stories.html">PGW dev stories v1.1</a>.</footer>
+<script src="nt-data.js"></script>
+<script>
+(function () {
+  var D = window.NT;
+  var CASES = [
+    ['mpgs-cit-visa', 'MPGS token CIT, Visa', 'mpgs', function () { return D.mpgsResp('visa', true, 'TOKEN'); }, 'NT-M3'],
+    ['mpgs-mit-mc', 'MPGS token MIT, Mastercard', 'mpgs', function () { return D.mpgsResp('mc', true, 'TOKEN'); }, 'NT-M4'],
+    ['mpgs-card', 'MPGS Pay with card number', 'mpgs', function () { return D.mpgsResp('visa', false); }, 'NT-M2'],
+    ['mpgs-no-sof', 'MPGS response without sourceOfFunds', 'mpgs', function () { return { result: 'SUCCESS', response: { gatewayCode: 'APPROVED' } }; }, 'NT-M2'],
+    ['cybs-cit-mc', 'CYBS token CIT, Mastercard (014)', 'cybs', function () { return D.cybsResp('mc', true); }, 'NT-C3'],
+    ['cybs-mit-visa', 'CYBS token MIT, Visa (015)', 'cybs', function () { return D.cybsResp('visa', true); }, 'NT-C4'],
+    ['cybs-card', 'CYBS Pay with card number', 'cybs', function () { return D.cybsResp('visa', false); }, 'NT-C2']
+  ];
+  var cur = CASES[0];
+  function esc(s) { return String(s).replace(/</g, '&lt;'); }
+  function v(x) { return x === null ? '<code class="nul">null</code>' : '<code>' + esc(JSON.stringify(x)) + '</code>'; }
+  function get(o, p) { return p.split('.').reduce(function (a, k) { return a && a[k] !== undefined ? a[k] : undefined; }, o); }
+  function render() {
+    var resp = cur[3](), g = cur[2], obj = g === 'mpgs' ? D.mapMpgs(resp) : D.mapCybs(resp);
+    var R = g === 'mpgs' ? [
+      ['isNetworkToken', 'sourceOfFunds.type', 'true if SCHEME_TOKEN, else false'],
+      ['tokenProvider', 'sourceOfFunds.provided.card.brand', 'if network token: VISA → VTS, MASTERCARD → MDES; else null'],
+      ['maskedTokenNumber', 'sourceOfFunds.provided.card.deviceSpecificNumber', 'copy; null if absent'],
+      ['tokenExpiryMonth', 'sourceOfFunds.provided.card.deviceSpecificExpiry.month', 'copy; null if absent'],
+      ['tokenExpiryYear', 'sourceOfFunds.provided.card.deviceSpecificExpiry.year', 'copy; null if absent'],
+      ['paymentAccountReference', 'sourceOfFunds.provided.card.paymentAccountReference', 'copy; null if absent']
+    ] : [
+      ['isNetworkToken', 'processingInformation.paymentSolution', 'true if 015 or 014; else false (also if absent)'],
+      ['tokenProvider', 'processingInformation.paymentSolution', '015 → VTS, 014 → MDES; else null'],
+      ['maskedTokenNumber', 'paymentInformation.card.bin', 'if network token: BIN + 10 zeros; else null'],
+      ['tokenExpiryMonth', '(not in the CYBS response)', 'null'],
+      ['tokenExpiryYear', '(not in the CYBS response)', 'null'],
+      ['paymentAccountReference', 'processorInformation.paymentAccountReferenceNumber', 'copy; null if absent']
+    ];
+    var hl = R.map(function (r) { return r[1]; });
+    hl.push('sourceOfFunds.provided.card.deviceSpecificExpiry');
+    document.getElementById('resp').innerHTML = '<pre class="code" style="margin:0">' + D.json(resp, hl) + '</pre>';
+    document.getElementById('resp-who').textContent = (g === 'mpgs' ? 'MPGS v80' : 'CYBS /pts/v2/payments') + ' · excerpt';
+    document.getElementById('rule-who').innerHTML = '<a href="docs/stories.html#' + { 'NT-M2': 'nt-m2-mpgs-pay-card-number', 'NT-M3': 'nt-m3-mpgs-token-cit', 'NT-M4': 'nt-m4-mpgs-token-mit', 'NT-C2': 'nt-c2-cybs-pay-card-number', 'NT-C3': 'nt-c3-cybs-token-cit', 'NT-C4': 'nt-c4-cybs-token-mit' }[cur[4]] + '">' + cur[4] + '</a>';
+    var noSof = g === 'mpgs' && !resp.sourceOfFunds;
+    document.getElementById('rules').innerHTML = '<thead><tr><th>Source value</th><th>Rule</th><th>PGW field</th></tr></thead><tbody>' + R.map(function (r) {
+      var sv = r[1].charAt(0) === '(' ? '<span class="hint">' + r[1] + '</span>' : (get(resp, r[1]) === undefined ? '<code class="nul">absent</code>' : v(get(resp, r[1])));
+      return '<tr><td>' + sv + '</td><td>' + esc(r[2]) + '</td><td class="res"><code>' + r[0] + '</code><br>' + (obj ? v(obj[r[0]]) : '') + '</td></tr>';
+    }).join('') + '</tbody>';
+    document.getElementById('rnote').innerHTML = noSof ? '<div class="note"><b>No <code>sourceOfFunds</code>.</b> Pay, Authorize, CIT, MIT: the whole object is <code>null</code>. Capture, refund, void: copy from the original payment (NT-M5 3.2).</div>' : '';
+    document.getElementById('obj').innerHTML = '"networkTokenDetails": ' + (obj ? D.json(obj) : '<span class="cm">null</span>');
+    var n = '';
+    if (obj && obj.isNetworkToken) n = '<div class="info">If the Geidea token has <code>schemeTokenProvider</code> = <code>null</code>, PGW sets it to <code>' + obj.tokenProvider + '</code> on a token CIT or MIT.</div>';
+    if (obj && !obj.isNetworkToken) n = '<div class="info">Card-number payment: not a network token, but the PAR is still recorded.</div>';
+    document.getElementById('onote').innerHTML = n;
+    document.querySelectorAll('#tries a').forEach(function (a) { a.classList.toggle('on', a.dataset.k === cur[0]); });
+    if (location.hash !== '#try=' + cur[0]) history.replaceState(null, '', '#try=' + cur[0]);
+  }
+  document.getElementById('tries').innerHTML = '<span>try</span>' + CASES.map(function (c) { return '<a href="#try=' + c[0] + '" data-k="' + c[0] + '">' + c[1] + '</a>'; }).join('');
+  function fromHash() { var k = location.hash.replace('#try=', ''); CASES.forEach(function (c) { if (c[0] === k) cur = c; }); }
+  window.addEventListener('hashchange', function () { fromHash(); render(); });
+  fromHash(); render();
+  window.__ntm = { CASES: CASES };
+})();
+</script>
+<script src="../assets/search.js" defer></script>
+</body>
+</html>

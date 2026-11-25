@@ -1,0 +1,61 @@
+/* Network Tokenization pages: shared styles (on top of assets/lab.css). */
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.tries { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 20px; }
+.tries a { font: 500 13px var(--sans); text-decoration: none; border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 999px; padding: 5px 12px; }
+.tries a:hover { border-color: var(--accent); color: var(--accent); }
+.tries a.on { background: var(--ink); border-color: var(--ink); color: #fff; }
+.tries span { font: 11px var(--mono); color: var(--muted); align-self: center; margin-right: 4px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; min-width: 0; }
+.card > header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.card > header h2, .card > header h3 { margin: 0; font: 700 17px var(--head); color: var(--ink); }
+.card > header .who { font: 11px var(--mono); color: var(--muted); margin-left: auto; }
+.card > header .who a { color: inherit; }
+.card .in { padding: 16px 18px; }
+.f { margin-bottom: 14px; }
+.f > label, .f > .lbl { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 13px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.chip:hover { background: #F1F5F9; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.chip:disabled { opacity: .4; cursor: not-allowed; }
+.hint { font-size: 13px; color: var(--text-2); margin: 6px 0 0; }
+.src { font: 11px var(--mono); color: var(--muted); margin-top: 10px; }
+.src a { color: inherit; }
+.note, .info, .bad, .undef { font-size: 13px; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.note { background: #FFFBEB; border-left: 3px solid var(--warn-fg); }
+.note b { color: var(--warn-fg); }
+.info { background: var(--accent-bg); border-left: 3px solid var(--accent); }
+.bad { background: var(--s-rejected-bg); border-left: 3px solid var(--s-rejected); }
+.undef { background: repeating-linear-gradient(135deg, #F8FAFC 0 8px, #EEF2F6 8px 16px); border: 1px dashed var(--border-2); border-radius: 8px; }
+.undef b { color: var(--ink); }
+pre.code { background: var(--code-bg); color: var(--code-fg); padding: 12px 14px; border-radius: 10px; overflow-x: auto; font-size: 12.5px; line-height: 1.5; margin: 8px 0 0; }
+pre.code .hl { background: #1E3A8A; color: #fff; border-radius: 3px; padding: 0 2px; }
+pre.code .cm { color: #94A3B8; }
+.tbl { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+.tbl th { text-align: left; font: 500 11px var(--mono); color: var(--muted); padding: 6px 8px; border-bottom: 1px solid var(--border-2); background: #F8FAFC; }
+.tbl td { padding: 7px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.tbl code { font-size: 12px; }
+.tblwrap { overflow-x: auto; }
+/* Step tags (same meaning on every NT page) */
+.tg { display: inline-block; font: 500 10.5px var(--mono); padding: 2px 7px; border-radius: 5px; border: 1px solid transparent; white-space: nowrap; }
+.tg.nc { background: #F1F5F9; color: var(--text-2); border-color: var(--border); }
+.tg.new { background: var(--money-bg); color: var(--money); border-color: #A7F3D0; }
+.tg.chg { background: var(--warn-bg); color: var(--warn-fg); border-color: #FCD34D; }
+.tg.async { background: var(--s-released-bg); color: var(--s-released); border-color: #C7D2FE; border-style: dashed; }
+.tg.gw { background: #F0F9FF; color: #075985; border-color: #BAE6FD; }
+.tg.und { background: #fff; color: var(--s-undef); border: 1px dashed var(--border-2); }
+.tg.off { background: #fff; color: var(--muted); border: 1px solid var(--border); text-decoration: line-through; }
+.story { display: inline-block; font: 500 11px var(--mono); padding: 2px 7px; border-radius: 999px; background: var(--accent-bg); color: var(--accent); text-decoration: none; }
+.story:hover { background: #DBEAFE; }
+/* Outcome badges: network token = green (the outcome we want), card = rose-free slate, unknown = dashed */
+.out { display: inline-flex; align-items: center; gap: 6px; font: 600 13px var(--sans); padding: 4px 10px; border-radius: 8px; border: 1px solid; }
+.out.nt { background: var(--money-bg); color: var(--money); border-color: #A7F3D0; }
+.out.card { background: #F1F5F9; color: var(--text-2); border-color: var(--border-2); }
+.out.unk { background: #fff; color: var(--s-undef); border-style: dashed; border-color: var(--border-2); }
+.out.fee { background: var(--s-held-bg); color: var(--s-held); border-color: #FCD34D; }
+.out svg { width: 14px; height: 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 14px; align-items: center; font-size: 12.5px; color: var(--text-2); }
+@media (max-width: 700px) { .card .in { padding: 14px; } pre.code { font-size: 11.5px; } }

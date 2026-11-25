@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NT Not yet defined · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<link rel="stylesheet" href="nt.css">
+<style>
+.blk { background: var(--card); border: 1px dashed var(--border-2); border-radius: 14px; padding: 18px 22px; margin-bottom: 20px; }
+.blk.poc { border-style: solid; border-left: 4px solid var(--s-released); }
+.blk > .hd { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-bottom: 8px; }
+.blk h2 { font: 700 19px var(--head); color: var(--ink); margin: 0; flex: 1 1 300px; }
+.blk p { max-width: 900px; margin: 6px 0; }
+.blk h3 { font: 600 14px var(--sans); color: var(--ink); margin: 14px 0 6px; }
+.decode { display: flex; flex-wrap: wrap; gap: 4px; font: 500 14px var(--mono); margin: 8px 0; }
+.decode span { border: 1px solid var(--border-2); border-radius: 6px; padding: 3px 7px; background: #F8FAFC; }
+.decode span small { display: block; font: 10px var(--mono); color: var(--muted); }
+.runs { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 14px; margin-top: 10px; }
+.run { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
+.run .k { font: 500 11px var(--mono); color: var(--muted); }
+.bar { position: relative; height: 34px; margin: 10px 0 4px; background: #F8FAFC; border: 1px solid var(--border); border-radius: 6px; }
+.bar i { position: absolute; top: 6px; height: 20px; border-radius: 4px; font: 500 10.5px/20px var(--mono); color: #fff; padding: 0 6px; white-space: nowrap; font-style: normal; }
+@media (max-width: 900px) { .runs { grid-template-columns: minmax(0, 1fr); } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">Network Tokenization</a> / Not yet defined</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual page</p>
+<h1 class="page">Not yet defined: parked stories, open point, guest checkout</h1>
+<p class="lead">What is outside the agreed stories today. Proposals are shown as proposals; nothing on this page is a requirement until the stories say so.</p>
+<div class="vp-meta"><span class="tag warn">Illustrative</span><span class="tag grey">Reflects PGW dev stories v1.1 · 19-Nov-2026, and tests to 25-Nov-2026</span><a href="docs/stories.html#open-points">Open points</a></div>
+
+<section class="blk" aria-labelledby="nt-a1-apex-network-token-keys"><div class="hd"><h2 id="nt-a1-apex-network-token-keys">NT-A1: APEX network token keys</h2><span class="tg und">PARKED · waiting on APEX team</span><a class="story" href="docs/stories.html#nt-a1-apex-network-token-keys-waiting-on-apex-team">NT-A1</a></div>
+<p>Proposal to discuss: send network token data to APEX in <code>userData</code>, in the format of the existing keys (<code>TOKEN</code>, <code>CHANNEL_TYPE</code>, <code>AUTH_PERFORMED</code>, <code>AUTH_TXN_ID</code>).</p>
+<div class="tblwrap"><table class="tbl"><thead><tr><th>Key</th><th>Values</th><th>Example</th></tr></thead><tbody>
+<tr><td><code>NETWORK_TOKEN</code></td><td><code>Y</code> / <code>N</code></td><td><code>213NETWORK_TOKEN11Y</code></td></tr>
+<tr><td><code>NT_PROVIDER</code></td><td><code>VTS</code> / <code>MDES</code></td><td><code>211NT_PROVIDER13VTS</code></td></tr>
+</tbody></table></div>
+<h3 id="how-the-example-reads-our-reading-to-confirm-with-the-apex-t">How the example reads (our reading; to confirm with the APEX team)</h3>
+<div class="decode"><span>2<small>digits in key length</small></span><span>13<small>key length</small></span><span>NETWORK_TOKEN<small>key</small></span><span>1<small>digits in value length</small></span><span>1<small>value length</small></span><span>Y<small>value</small></span></div>
+<h3 id="questions">Questions</h3>
+<p>Is PAR needed? Should it show in the Merchant Portal or reports? Does next-day clearing already carry a token indicator?</p>
+</section>
+
+<section class="blk" aria-labelledby="nt-x-token-status-and-retry-control"><div class="hd"><h2 id="nt-x-token-status-and-retry-control">NT-X: token status and retry control</h2><span class="tg und">PARKED · waiting on Risk & Compliance</span><a class="story" href="docs/stories.html#nt-x-token-status-and-retry-control-waiting-on-risk-compliance">NT-X</a></div>
+<p>PGW stops using a Geidea token after a "do not retry" decline. NT-0 already adds <code>tokenStatus</code> (default <code>ACTIVE</code>), <code>tokenStatusReason</code> and <code>tokenStatusDate</code>; nothing reads or changes them in this release. The CYBS stories save <code>processorInformation.responseCode</code> and <code>merchantAdvice.code</code> / <code>codeRaw</code> so NT-X can use them.</p>
+<h3 id="proposal-for-mpgs-to-be-confirmed">Proposal for MPGS (to be confirmed)</h3>
+<div class="tblwrap"><table class="tbl"><thead><tr><th>On token CIT or MIT</th><th>Codes</th><th>Proposed action</th></tr></thead><tbody>
+<tr><td>Merchant advice code</td><td><code>03</code>, <code>21</code></td><td>Set the token <code>INACTIVE</code></td></tr>
+<tr><td>DE 39 response code</td><td><code>04</code>, <code>14</code>, <code>15</code>, <code>41</code>, <code>43</code>, <code>46</code>, <code>62</code>, <code>78</code></td><td>Set the token <code>INACTIVE</code></td></tr>
+<tr><td>DE 39 response code</td><td><code>54</code>, <code>63</code>, <code>88</code></td><td>Excluded: token stays <code>ACTIVE</code></td></tr>
+<tr><td>Payment on an <code>INACTIVE</code> token</td><td>new PGW code</td><td>Reject: "Token inactive. Use another card."</td></tr>
+</tbody></table></div>
+<div class="undef"><b>Not defined:</b> CYBS fields and values, CIT versus MIT differences, soft-decline retry limits.</div>
+</section>
+
+<section class="blk" aria-labelledby="open-point-1-no-token-permission-on-cybs"><div class="hd"><h2 id="open-point-1-no-token-permission-on-cybs">Open point 1: no token permission on CYBS</h2><span class="tg und">TO VERIFY · PGW engineering team, during build</span><a class="story" href="docs/stories.html#open-points">Open point 1</a></div>
+<p>With the PGW toggle ON, PGW creates an instrument identifier and pays with it and <code>networkTokenOption</code> = <code>prefer</code>. On a MID <b>without</b> CYBS token permission (P2), the payment must go out as the card, so P2 stays the control. CYBS documentation says <code>prefer</code> falls back to the card. This is not tested on a Geidea MID yet.</p>
+<p><a href="payment-explorer.html#try=cybs-no-permission">See the case in the Payment explorer</a> · <a href="switches-and-rollout.html#who-decides">Switches</a></p>
+</section>
+
+<section class="blk poc" aria-labelledby="guest-checkout-poc"><div class="hd"><h2 id="guest-checkout-poc">Guest checkout: tokenize before pay</h2><span class="tg async">IN POC · not a work item</span></div>
+<p>Phase 1 covers saved cards (CIT and MIT). Visa's PAN Integrity Fee also applies to guest-checkout Visa payments that are not network-tokenized (from 17-Oct-2026 in the UAE). Visa's answer for guest checkout is Click to Pay. A POC on MPGS tests another route: create the gateway token for every new card <b>before</b> the payment, so the first payment can already go out with a network token.</p>
+<p>The question: can the network token exist in time when the payment follows straight after the token is created?</p>
+<div class="runs">
+<div class="run"><span class="k">run 1 · repository provisioning: asynchronous</span>
+<div class="bar" aria-label="Run 1 timeline"><i style="left:2%;background:#475569">token</i><i style="left:14%;background:#475569">pay 0.6 s: CARD</i><i style="left:70%;background:var(--money)">NT ~30 s</i></div>
+<p style="font-size:13.5px">Payment approved but sent with the card number. The network token (VTS) appeared about 30 seconds later. Asynchronous provisioning loses the race.</p><span class="out card">Card number</span></div>
+<div class="run"><span class="k">run 2 · repository provisioning: attempt synchronous</span>
+<div class="bar" aria-label="Run 2 timeline"><i style="left:2%;background:var(--money)">token + NT ~1 s</i><i style="left:36%;background:var(--money)">pay: SCHEME_TOKEN</i></div>
+<p style="font-size:13.5px">Token creation took about 1 second and returned with the network token. The payment straight after went out as <code>SCHEME_TOKEN</code>.</p><span class="out nt">Network token</span></div>
+</div>
+<div class="note"><b>Context.</b> Geidea e-commerce payments run 3DS, so in a real flow the customer's 3DS time sits between token creation and payment. Visa test card, MPGS test MID <code>TEST-MPGS-01</code>, 25-Nov-2026. Not tested on CyberSource. Whether this meets the guest-checkout requirement is not confirmed.</div>
+</section>
+
+<section class="blk" aria-labelledby="not-in-this-release"><div class="hd"><h2 id="not-in-this-release">Not in this release</h2><span class="tg nc">OUT OF SCOPE</span></div>
+<p>Token inquiry or token-state check before payment · CYBS network token webhooks and lifecycle updates · returning gateway tokens to merchants, or accepting them · MPGS API upgrade (version 80 is enough) · creating the instrument identifier inside the payment (<code>actionList: ["TOKEN_CREATE"]</code>) · CYBS customer and payment instrument tokens.</p>
+</section>
+</main>
+<footer class="lab-footer">Illustrative. Requirements are in the <a href="docs/stories.html">PGW dev stories v1.1</a>.</footer>
+<script src="../assets/search.js" defer></script>
+</body>
+</html>
