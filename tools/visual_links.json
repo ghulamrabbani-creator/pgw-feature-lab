@@ -404,6 +404,10 @@
     ],
     "s5-be-mcp-payment-and-transaction-record": [
       [
+        "Order model: after the purchase",
+        "../order-model.html#try=after-pay"
+      ],
+      [
         "Simulator: Apple Pay",
         "../hpp-simulator.html#try=wallet"
       ],
@@ -418,6 +422,10 @@
     ],
     "s6-be-mcp-refunds": [
       [
+        "Order model: refunds 60 + 40",
+        "../order-model.html#try=gbp-60-40"
+      ],
+      [
         "Calculator: refunds AED 60 + 40",
         "../calculator.html#try=refund-60-40"
       ],
@@ -427,6 +435,10 @@
       ]
     ],
     "s7-be-merchant-facing-outputs-in-aed": [
+      [
+        "Order model: merchant sees AED",
+        "../order-model.html#try=gbp-60-40"
+      ],
       [
         "Simulator: after Pay",
         "../hpp-simulator.html#try=wallet"

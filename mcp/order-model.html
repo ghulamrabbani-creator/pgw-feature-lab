@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP Order model · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 20px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.tries { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 20px; }
+.tries a { font: 500 13px var(--sans); text-decoration: none; border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 999px; padding: 5px 12px; }
+.tries a:hover { border-color: var(--money); color: var(--money); }
+.tries a.on { background: var(--money); border-color: var(--money); color: #fff; }
+.tries span { font: 11px var(--mono); color: var(--muted); align-self: center; margin-right: 4px; }
+.grid { display: grid; grid-template-columns: 340px minmax(0, 1fr); gap: 20px; align-items: start; }
+.col { display: flex; flex-direction: column; gap: 20px; min-width: 0; }
+.sticky { position: sticky; top: 72px; }
+.card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; min-width: 0; }
+.card > header { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; padding: 14px 18px; border-bottom: 1px solid var(--border); }
+.card > header .num { width: 24px; height: 24px; border-radius: 50%; background: var(--ink); color: #fff; font: 500 12px/24px var(--mono); text-align: center; flex: none; }
+.card > header h2 { margin: 0; font-size: 17px; font-weight: 600; color: var(--ink); }
+.card > header .who { font: 11px var(--mono); color: var(--muted); margin-left: auto; }
+.card > header .who a { color: inherit; }
+.card .in { padding: 16px 18px; }
+.f { margin-bottom: 14px; }
+.f > label { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 6px; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font: 500 13px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
+.chip:hover { background: #F1F5F9; }
+.chip[aria-pressed="true"] { background: var(--ink); border-color: var(--ink); color: #fff; }
+.hint { font-size: 13px; color: var(--text-2); margin: 6px 0 0; }
+.src { font: 11px var(--mono); color: var(--muted); margin-top: 10px; }
+.src a { color: inherit; }
+.note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.note b { color: var(--warn-fg); }
+.info { font-size: 13px; background: #EFF6FF; border-left: 3px solid #1D4ED8; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.bad { font-size: 13px; background: #FEF2F2; border-left: 3px solid #B91C1C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.st { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
+.st.ok { background: var(--money-bg); color: var(--money); }
+.st.grey { background: #F1F5F9; color: var(--muted); }
+.st.hold { background: var(--warn-bg); color: var(--warn-fg); }
+.btn { font: 500 14px var(--sans); border-radius: 8px; padding: 7px 12px; cursor: pointer; border: 1px solid var(--border-2); background: var(--card); color: var(--ink); }
+.btn:hover:not(:disabled) { background: #F1F5F9; }
+.btn:disabled { opacity: .4; cursor: not-allowed; }
+.btn.pri { background: var(--money); border-color: var(--money); color: #fff; }
+.btn.pri:hover:not(:disabled) { background: #0B6553; }
+
+/* Stepper */
+ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
+ol.steps li { position: relative; padding: 0 0 14px 34px; cursor: pointer; }
+ol.steps li::before { counter-increment: s; content: counter(s); position: absolute; left: 0; top: 0; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border-2); background: #fff; font: 500 11px/18px var(--mono); text-align: center; color: var(--muted); }
+ol.steps li::after { content: ''; position: absolute; left: 10px; top: 24px; bottom: 2px; width: 2px; background: var(--border); }
+ol.steps li:last-child::after { display: none; }
+ol.steps li.done::before { background: var(--money); border-color: var(--money); color: #fff; }
+ol.steps li.cur::before { background: var(--ink); border-color: var(--ink); color: #fff; }
+ol.steps li .t { font-size: 14px; font-weight: 600; color: var(--ink); line-height: 22px; }
+ol.steps li .d { font: 12px var(--mono); color: var(--text-2); }
+ol.steps li.todo .t, ol.steps li.todo .d { color: var(--muted); font-weight: 400; }
+.nav { display: flex; gap: 8px; margin-top: 6px; }
+
+/* What happened */
+.now h3 { margin: 0 0 6px; font-size: 18px; color: var(--ink); }
+.now p { margin: 0 0 8px; font-size: 14px; }
+.calc { font: 13px var(--mono); background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-top: 8px; line-height: 1.8; overflow-x: auto; }
+.calc b { color: var(--money); }
+
+/* Record tables */
+.tw { overflow-x: auto; }
+table.rec { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.rec th { text-align: left; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; padding: 8px; border-bottom: 1px solid var(--border-2); vertical-align: bottom; white-space: nowrap; }
+table.rec td { padding: 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
+table.rec td.fn { font-family: var(--mono); color: var(--ink); white-space: nowrap; }
+table.rec td.fn .tg { display: block; width: max-content; }
+table.rec td.v { font-family: var(--mono); white-space: nowrap; color: var(--ink); }
+table.rec td.v.e { color: var(--muted); }
+table.rec td.v.fresh { background: #ECFDF5; box-shadow: inset 3px 0 0 var(--money); }
+table.rec tr.grp td { background: #F8FAFC; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; padding: 6px 8px; }
+table.rec th.txcol { min-width: 120px; }
+table.rec th.txcol .ty { display: block; font-size: 13px; color: var(--ink); text-transform: none; letter-spacing: 0; }
+table.rec th.txcol.fresh { box-shadow: inset 0 -3px 0 var(--money); }
+.tg { display: inline-block; font: 500 10.5px var(--mono); padding: 2px 6px; border-radius: 5px; margin-top: 3px; }
+.t-ex { background: #F1F5F9; color: var(--muted); } .t-nw { background: var(--money-bg); color: var(--money); } .t-ch { background: var(--warn-bg); color: var(--warn-fg); }
+.legend { display: flex; flex-wrap: wrap; gap: 10px 16px; font-size: 12px; color: var(--text-2); margin-top: 12px; align-items: center; }
+.legend .sw { display: inline-block; width: 14px; height: 14px; border-radius: 3px; background: #ECFDF5; box-shadow: inset 3px 0 0 var(--money); vertical-align: -2px; margin-right: 4px; }
+
+/* Totals */
+.tot { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
+.tbox { border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; min-width: 0; }
+.tbox .k { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .05em; }
+.tbox .v { font: 500 20px var(--mono); color: var(--ink); margin-top: 4px; }
+.tbox .s { font: 12px var(--mono); color: var(--text-2); margin-top: 4px; }
+.tbox.hl { border-color: var(--money); background: var(--money-bg); }
+.tbox.hl .v { color: var(--money); }
+
+/* Views */
+.views { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+pre.json { margin: 0; font: 12.5px/1.6 var(--mono); background: #0F172A; color: #E2E8F0; border-radius: 8px; padding: 12px 14px; overflow-x: auto; }
+pre.json .k { color: #93C5FD; } pre.json .s { color: #86EFAC; } pre.json .n { color: #FCD34D; }
+table.pv { width: 100%; border-collapse: collapse; font-size: 13px; }
+table.pv th { text-align: left; font: 500 11px var(--mono); color: var(--muted); padding: 6px; border-bottom: 1px solid var(--border-2); }
+table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-family: var(--mono); }
+.chk { list-style: none; margin: 0; padding: 0; }
+.chk li { display: flex; gap: 10px; align-items: flex-start; font-size: 13px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.chk li:last-child { border-bottom: 0; }
+.chk li .st { flex: none; }
+
+@media (max-width: 1080px) { .grid, .views { grid-template-columns: minmax(0, 1fr); } .sticky { position: static; } }
+@media (max-width: 640px) { .tot { grid-template-columns: minmax(0, 1fr); } h1.page { font-size: 28px; } }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">MCP</a> / Order model</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">mcp · visual page</p>
+<h1 class="page">Order model: one MCP order, from purchase to the last refund</h1>
+<p class="lead">Follow one AED 100.00 order through PGW. Step through the HPP offer, the purchase in the customer's currency and the refunds that close the order. See which fields PGW writes at each step, how order totals stay in AED, and what the merchant and the processor see.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects PGW stories v0.1 (25-Nov-2026)</span>
+<a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">Stories: S5 →</a>
+<a href="docs/stories.html#s6-be-mcp-refunds">S6 →</a>
+<a href="docs/stories.html#s7-be-merchant-facing-outputs-in-aed">S7 →</a>
+<a href="calculator.html#try=refund-60-40">Calculator</a>
+<a href="hpp-simulator.html#try=gb-card">HPP simulator</a>
+<a href="end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial">End-to-end view</a>
+<a href="./">Back to MCP</a>
+</div>
+
+<div class="terms"><b>Terms.</b> <b>Order currency</b>: what the merchant priced in (AED). <b>Transaction currency</b>: what the customer pays in and what the scheme clears in. <b>Order view</b> of a transaction: <code>mcpBaseAmount</code> + <code>mcpBaseCurrency</code> (AED). <b>Transaction view</b>: <code>amount</code> + <code>currency</code> (paid currency). Rates are dummy (Visa section of a file dated 20261124, version 01). New field names are the stories' proposals, except <code>mcpBaseAmount</code> and <code>mcpBaseCurrency</code> (agreed). PGW engineering can rename them.</div>
+
+<div class="tries" id="tries"><span>Try</span></div>
+
+<div class="grid">
+<div class="col"><div class="col sticky">
+<section class="card" id="c-set">
+<header><span class="num">1</span><h2>The order</h2><span class="who">merchant offers GBP, EUR, INR</span></header>
+<div class="in">
+<div class="f"><label>Customer pays in</label><div class="chips" id="payChips"></div>
+<p class="hint" id="payHint"></p></div>
+<div class="f"><label>Merchant refunds (AED)</label><div class="chips" id="rfChips"></div></div>
+<p class="src">Order: AED 100.00 from Create Session. MID with MCP on (<a href="docs/stories.html#s1-febe-mcp-configuration">S1</a>).</p>
+</div>
+</section>
+<section class="card" id="c-steps">
+<header><span class="num">2</span><h2>Steps</h2></header>
+<div class="in">
+<ol class="steps" id="steps"></ol>
+<div class="nav"><button class="btn" id="prev">← Back</button><button class="btn pri" id="next">Next step →</button></div>
+</div>
+</section>
+</div></div>
+
+<div class="col">
+<section class="card now" id="c-now">
+<header><span class="num">3</span><h2>What happened</h2><span class="who" id="nowWho"></span></header>
+<div class="in" id="nowOut"></div>
+</section>
+
+<section class="card" id="c-order">
+<header><span class="num">4</span><h2>PGW order and HPP session</h2><span class="who"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5 section 3</a></span></header>
+<div class="in">
+<div class="tw"><table class="rec" id="orderTbl"></table></div>
+<h3 style="font-size:15px;margin:20px 0 10px;color:var(--ink)">Order totals <span class="tg t-ex">existing · computed from <code>mcpBaseAmount</code></span></h3>
+<div class="tot" id="totOut"></div>
+<p class="src">S5 section 4: compute every order total from <code>mcpBaseAmount</code>. Never add <code>amount</code> values of transactions in different currencies.</p>
+<div id="wrongOut"></div>
+</div>
+</section>
+
+<section class="card" id="c-txn">
+<header><span class="num">5</span><h2>Transactions of the order</h2><span class="who"><a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · <a href="docs/stories.html#s6-be-mcp-refunds">S6</a></span></header>
+<div class="in">
+<div class="tw"><table class="rec" id="txnTbl"></table></div>
+<div class="legend"><span><span class="sw"></span>written at this step</span><span><span class="tg t-ex">existing</span> as today</span><span><span class="tg t-ch">existing · paid currency</span> same field, holds the transaction view for MCP</span><span><span class="tg t-nw">new</span> MCP field</span></div>
+</div>
+</section>
+
+<div class="views">
+<section class="card" id="c-merch">
+<header><span class="num">6</span><h2>Merchant sees</h2><span class="who"><a href="docs/stories.html#s7-be-merchant-facing-outputs-in-aed">S7</a></span></header>
+<div class="in" id="merchOut"></div>
+</section>
+<section class="card" id="c-proc">
+<header><span class="num">7</span><h2>Processor receives</h2><span class="who">MPGS or CyberSource</span></header>
+<div class="in" id="procOut"></div>
+</section>
+</div>
+
+<section class="card" id="c-chk">
+<header><span class="num">8</span><h2>Checks on the order</h2><span class="who">S5 section 4 · S6 goal 2</span></header>
+<div class="in"><ul class="chk" id="chkOut"></ul>
+<div class="note"><b>Not on this page.</b> The same purchase and refunds as sent to APEX (<a href="docs/stories.html#s8-be-federation-to-apex-parked-waiting-on-p4">S8</a>) and in the enrichment file to Postilion (<a href="docs/stories.html#s9-be-enrichment-file-to-postilion-parked-waiting-on-p5">S9</a>): parked until APEX gives the field names and the enrichment format is agreed. Void and chargebacks: not covered here.</div>
+</div>
+</section>
+</div>
+</div>
+</main>
+<footer class="lab-footer">PGW Feature Lab · MCP · Order model</footer>
+
+<script>
+/* ---------- data (dummy, same as the HPP simulator: Visa section, file 20261124 v01) ---------- */
+const FILE = { date: '2026-11-24', ver: '01' };
+const CUR = {
+  GBP: { rate: '0.2137000', rateId: '2001', country: 'GB', cname: 'United Kingdom' },
+  EUR: { rate: '0.2489000', rateId: '2002', country: 'FR', cname: 'France' },
+  INR: { rate: '23.1200000', rateId: '2003', country: 'IN', cname: 'India' }
+};
+const OFFERED = ['GBP', 'EUR', 'INR'];
+const PAY = [['gbp', 'GBP'], ['eur', 'EUR'], ['inr', 'INR'], ['aed', 'AED (UK customer picks AED)']];
+const PLANS = { '60-40': ['60.00', '40.00'], 'thirds': ['33.33', '33.33', '33.34'], 'full': ['100.00'], 'none': [] };
+const PLAN_LBL = [['60-40', '60 + 40'], ['thirds', '33.33 × 2 + 33.34'], ['full', '100 in one'], ['none', 'none']];
+const ORDER_AED = 10000n; // AED 100.00 in fils
+const E7 = 10000000n;
+const TRIES = [
+  ['offered', 'HPP offer', { pay: 'gbp', rf: '60-40', step: 1 }],
+  ['after-pay', 'After the purchase', { pay: 'gbp', rf: '60-40', step: 2 }],
+  ['gbp-60-40', 'GBP, refunds 60 + 40', { pay: 'gbp', rf: '60-40', step: 4 }],
+  ['gbp-thirds', 'GBP, refunds in thirds', { pay: 'gbp', rf: 'thirds', step: 5 }],
+  ['gbp-full', 'GBP, one full refund', { pay: 'gbp', rf: 'full', step: 3 }],
+  ['eur-60-40', 'EUR, 60 + 40', { pay: 'eur', rf: '60-40', step: 4 }],
+  ['inr-60-40', 'INR, 60 + 40', { pay: 'inr', rf: '60-40', step: 4 }],
+  ['aed-paid', 'Customer picks AED', { pay: 'aed', rf: '60-40', step: 4 }]
+];
+
+/* ---------- exact arithmetic ---------- */
+const p7 = s => { const [i, f = ''] = s.split('.'); return BigInt(i) * E7 + BigInt((f + '0000000').slice(0, 7)); };
+const p2 = s => { const [i, f = ''] = s.split('.'); return BigInt(i) * 100n + BigInt((f + '00').slice(0, 2)); };
+const ceilDiv = (n, d) => (n + d - 1n) / d;
+function fm(v) { const neg = v < 0n; if (neg) v = -v; const i = (v / 100n).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); return (neg ? '−' : '') + i + '.' + (v % 100n).toString().padStart(2, '0'); }
+function fx(n) { let f = (n % 1000000000n).toString().padStart(9, '0').replace(/0+$/, ''); if (f.length < 2) f = f.padEnd(2, '0'); return (n / 1000000000n).toString() + '.' + f; }
+function rs(r) { let s = r.replace(/0+$/, ''); return s.endsWith('.') ? s.slice(0, -1) : s; }
+
+/* ---------- state ---------- */
+const st = { pay: 'gbp', rf: '60-40', step: 4 };
+
+/* ---------- model (exposed for tests) ---------- */
+function model() {
+  const mcp = st.pay !== 'aed';
+  const cur = mcp ? st.pay.toUpperCase() : 'AED';
+  const c = mcp ? CUR[cur] : null;
+  const country = mcp ? c.country : 'GB';
+  const proposed = mcp ? cur : 'GBP';
+  const quotes = OFFERED.map(k => { const r = p7(CUR[k].rate); const ex = ORDER_AED * r; return { currency: k, exact: ex, amount: ceilDiv(ex, E7), rate: CUR[k].rate, rateId: CUR[k].rateId }; });
+  const q = mcp ? quotes.find(x => x.currency === cur) : null;
+  const txns = [];
+  txns.push({ type: 'Pay', amount: mcp ? q.amount : ORDER_AED, currency: cur, isMcp: mcp, base: ORDER_AED, calc: mcp ? 'AED 100.00 × ' + q.rate + ' = ' + fx(q.exact) + ' ' + cur + ' → round up → <b>' + cur + ' ' + fm(q.amount) + '</b>' : 'AED selected: processed as today, no conversion' });
+  let rAed = 0n, rTxn = 0n;
+  (PLANS[st.rf] || []).forEach((s, i, arr) => {
+    const a = p2(s);
+    const final = rAed + a === ORDER_AED;
+    let amt, calc;
+    if (!mcp) { amt = a; calc = 'Purchase not MCP: refund as today, AED ' + fm(a); }
+    else if (final) { amt = q.amount - rTxn; calc = 'Final refund (AED already refunded ' + fm(rAed) + ' + ' + fm(a) + ' = AED 100.00): ' + cur + ' ' + fm(q.amount) + (rTxn ? ' − ' + fm(rTxn) : '') + ' = <b>' + cur + ' ' + fm(amt) + '</b>'; }
+    else { const ex = a * p7(q.rate); amt = ex / E7; calc = 'AED ' + fm(a) + ' × ' + q.rate + ' = ' + fx(ex) + ' ' + cur + ' → round down → <b>' + cur + ' ' + fm(amt) + '</b>'; }
+    rAed += a; rTxn += amt;
+    txns.push({ type: 'Refund', n: i + 1, of: arr.length, amount: amt, currency: cur, isMcp: mcp, base: a, final, calc });
+  });
+  const steps = [{ k: 'create', t: 'Order created', d: 'Create Session · AED 100.00' }, { k: 'hpp', t: 'HPP opens', d: mcp ? 'Customer in ' + c.cname + ' · ' + cur + ' proposed' : 'Customer in United Kingdom · GBP proposed' }];
+  txns.forEach(t => steps.push(t.type === 'Pay' ? { k: 'pay', t: 'Purchase', d: cur + ' ' + fm(t.amount) + (mcp ? ' (AED 100.00)' : '') } : { k: 'rf', t: 'Refund ' + t.n + (t.final ? ' (final)' : ''), d: 'AED ' + fm(t.base) + (mcp ? ' → ' + cur + ' ' + fm(t.amount) : '') }));
+  const step = Math.max(0, Math.min(st.step, steps.length - 1));
+  const shown = txns.slice(0, Math.max(0, step - 1));
+  const paid = shown.length ? shown[0].base : 0n;
+  const refAed = shown.slice(1).reduce((s, t) => s + t.base, 0n);
+  const refTxn = shown.slice(1).reduce((s, t) => s + t.amount, 0n);
+  return { mcp, cur, country, proposed, quotes, q, txns, steps, step, shown, paid, refAed, refTxn, remain: paid - refAed, paidTxn: shown.length ? shown[0].amount : 0n };
+}
+
+/* ---------- render ---------- */
+const $ = id => document.getElementById(id);
+const esc = s => String(s).replace(/[&<>"]/g, ch => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[ch]));
+const tg = (cls, t) => '<span class="tg ' + cls + '">' + t + '</span>';
+
+function renderSet() {
+  $('payChips').innerHTML = PAY.map(([k, l]) => '<button class="chip" data-pay="' + k + '" aria-pressed="' + (st.pay === k) + '">' + l + '</button>').join('');
+  $('rfChips').innerHTML = PLAN_LBL.map(([k, l]) => '<button class="chip" data-rf="' + k + '" aria-pressed="' + (st.rf === k) + '">' + l + '</button>').join('');
+  $('payHint').textContent = st.pay === 'aed' ? 'MCP offered (GBP proposed), but the customer selects AED in "Paying in". The order is still MCP-offered; the purchase is not MCP.' : 'Customer location gives ' + st.pay.toUpperCase() + ', which the merchant offers. HPP proposes it and the customer pays in it.';
+}
+
+function renderSteps(m) {
+  $('steps').innerHTML = m.steps.map((s, i) => '<li data-step="' + i + '" class="' + (i < m.step ? 'done' : i === m.step ? 'cur' : 'todo') + '"><div class="t">' + esc(s.t) + '</div><div class="d">' + esc(s.d) + '</div></li>').join('');
+  $('prev').disabled = m.step === 0; $('next').disabled = m.step === m.steps.length - 1;
+}
+
+function renderNow(m) {
+  const s = m.steps[m.step]; let h = '';
+  if (s.k === 'create') {
+    $('nowWho').textContent = 'Create Session';
+    h = '<h3>The merchant creates an AED 100.00 order</h3><p>Nothing about MCP yet. The order holds the order currency and amount as today. Whether MCP is offered is decided only when HPP loads.</p>';
+  } else if (s.k === 'hpp') {
+    $('nowWho').innerHTML = '<a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a>';
+    h = '<h3>HPP loads: PGW decides the offer and fixes the quotes</h3><p>The customer\'s IP address gives ' + m.country + ' → ' + m.proposed + '. The merchant offers ' + m.proposed + ' and a Visa rate is valid, so PGW proposes ' + m.proposed + ' and sets <code>isMcpOffered</code> = true. It builds one quote for each offered currency and stores them on the session. A reload or a newer rate file does not change them.</p>';
+    h += '<div class="calc">' + m.quotes.map(x => 'AED 100.00 × ' + x.rate + ' = ' + fx(x.exact) + ' → round up → <b>' + x.currency + ' ' + fm(x.amount) + '</b>').join('<br>') + '</div>';
+  } else {
+    const t = m.txns[m.step - 2];
+    if (t.type === 'Pay') {
+      $('nowWho').innerHTML = '<a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a>';
+      h = m.mcp ? '<h3>The customer pays ' + m.cur + ' ' + fm(t.amount) + '</h3><p>PGW sends ' + m.cur + ' ' + fm(t.amount) + ' to the processor, as for any non-AED payment. The new transaction holds both views: <code>amount</code>/<code>currency</code> = what was paid, <code>mcpBaseAmount</code>/<code>mcpBaseCurrency</code> = the AED order view. The rate and its source are copied from the quote.</p>'
+        : '<h3>The customer pays AED 100.00</h3><p>MCP was offered, but the customer selected AED. The purchase is processed as today. <code>isMcp</code> = false; the rate fields stay empty. <code>mcpBaseAmount</code>/<code>mcpBaseCurrency</code> are still filled (= <code>amount</code>/<code>currency</code>), so totals read one field for every transaction. <code>isMcpOffered</code> on the order stays true.</p>';
+    } else {
+      $('nowWho').innerHTML = '<a href="docs/stories.html#s6-be-mcp-refunds">S6</a>';
+      h = '<h3>The merchant refunds AED ' + fm(t.base) + (t.final ? ' (final refund)' : '') + '</h3>';
+      h += m.mcp ? (t.final ? '<p>This refund brings the AED refunded to AED 100.00, so it is the final refund. PGW does not multiply by the rate. It sends what is left of the amount paid, so the refunds add up exactly to ' + m.cur + ' ' + fm(m.q.amount) + '.</p>' : '<p>The merchant refunds in AED with the existing refund API. PGW converts at the rate stored on the purchase (never a new rate) and rounds down.</p>') : '<p>The purchase was not MCP, so the refund is processed as today.</p>';
+    }
+    h += '<div class="calc">' + t.calc + '</div>';
+  }
+  $('nowOut').innerHTML = h;
+}
+
+function renderOrder(m) {
+  const at = m.step, fresh = k => (k === 'create' && at === 0) || (k === 'hpp' && at === 1) ? ' fresh' : '';
+  const v = (val, k) => val == null ? '<td class="v e">—</td>' : '<td class="v' + fresh(k) + '">' + val + '</td>';
+  let h = '<thead><tr><th>Field</th><th>Value</th><th>Note</th></tr></thead><tbody>';
+  h += '<tr class="grp"><td colspan="3">Order</td></tr>';
+  h += '<tr><td class="fn">amount' + tg('t-ex', 'existing') + '</td>' + v('100.00', 'create') + '<td>Order amount. Not changed by MCP.</td></tr>';
+  h += '<tr><td class="fn">currency' + tg('t-ex', 'existing') + '</td>' + v('AED', 'create') + '<td>Order currency.</td></tr>';
+  h += '<tr><td class="fn">isMcpOffered' + tg('t-nw', 'new · internal') + '</td>' + v(at >= 1 ? 'true' : null, 'hpp') + '<td>Set when HPP loads. Never sent to the merchant.</td></tr>';
+  h += '<tr class="grp"><td colspan="3">HPP session (S4)</td></tr>';
+  h += '<tr><td class="fn">mcpCountry' + tg('t-nw', 'new') + '</td>' + v(at >= 1 ? m.country : null, 'hpp') + '<td>From the IP lookup. Kept for support.</td></tr>';
+  h += '<tr><td class="fn">mcpProposedCurrency' + tg('t-nw', 'new') + '</td>' + v(at >= 1 ? m.proposed : null, 'hpp') + '<td>First currency shown on HPP.</td></tr>';
+  h += '<tr><td class="fn">mcpQuotes[]' + tg('t-nw', 'new') + '</td>' + v(at >= 1 ? m.quotes.map(x => x.currency + ' ' + fm(x.amount) + ' @ ' + x.rate + ' (rateId ' + x.rateId + ')').join('<br>') : null, 'hpp') + '<td>One per offered currency. Fixed for the session. Each also holds <code>rateFileDate</code> ' + FILE.date + ', <code>rateFileVersion</code> ' + FILE.ver + '.</td></tr>';
+  h += '</tbody>';
+  $('orderTbl').innerHTML = h;
+  const box = (k, val, s, hl) => '<div class="tbox' + (hl ? ' hl' : '') + '"><div class="k">' + k + '</div><div class="v">AED ' + fm(val) + '</div><div class="s">' + s + '</div></div>';
+  const sumB = m.shown.slice(1).map(t => fm(t.base)).join(' + ');
+  $('totOut').innerHTML = box('Paid', m.paid, m.shown.length ? 'purchase mcpBaseAmount' : 'nothing paid yet') + box('Refunded', m.refAed, sumB ? sumB : 'no refund yet') + box('Remaining to refund', m.remain, m.shown.length && m.remain === 0n ? 'order fully refunded' : 'paid − refunded', m.shown.length > 1 && m.remain === 0n);
+  if (m.mcp && m.shown.length > 1) {
+    const amts = m.shown.slice(1).map(t => fm(t.amount)).join(' + ');
+    $('wrongOut').innerHTML = '<div class="bad"><b>Why not <code>amount</code>?</b> The refunds\' <code>amount</code> values are ' + m.cur + ': ' + amts + ' = ' + fm(m.refTxn) + '. Read as AED, the order would show AED ' + fm(m.refTxn) + ' refunded and allow AED ' + fm(m.paid - m.refTxn) + ' more. The purchase <code>amount</code> (' + fm(m.paidTxn) + ') is ' + m.cur + ' too.</div>';
+  } else $('wrongOut').innerHTML = '';
+}
+
+function renderTxn(m) {
+  if (!m.shown.length) { $('txnTbl').innerHTML = '<tbody><tr><td><p class="hint">No transaction yet. The first transaction is written when the customer pays.</p></td></tr></tbody>'; return; }
+  const last = m.shown.length - 1, fr = i => i === last ? ' fresh' : '';
+  let h = '<thead><tr><th>Field</th>' + m.shown.map((t, i) => '<th class="txcol' + fr(i) + '"><span class="ty">' + (t.type === 'Pay' ? 'Purchase' : 'Refund ' + t.n + (t.final ? ' · final' : '')) + '</span>type ' + t.type + '</th>').join('') + '</tr></thead><tbody>';
+  const row = (name, tag, fn) => '<tr><td class="fn">' + name + tag + '</td>' + m.shown.map((t, i) => { const val = fn(t); return val == null ? '<td class="v e' + fr(i) + '">empty</td>' : '<td class="v' + fr(i) + '">' + val + '</td>'; }).join('') + '</tr>';
+  const rate = (t, s) => t.isMcp ? s : null;
+  h += '<tr class="grp"><td colspan="' + (m.shown.length + 1) + '">Transaction view (what the processor and scheme use)</td></tr>';
+  h += row('amount', tg('t-ch', 'existing · paid currency'), t => fm(t.amount));
+  h += row('currency', tg('t-ch', 'existing · paid currency'), t => t.currency);
+  h += '<tr class="grp"><td colspan="' + (m.shown.length + 1) + '">Order view (what totals, merchant outputs and APEX read)</td></tr>';
+  h += row('mcpBaseAmount', tg('t-nw', 'new · agreed name'), t => fm(t.base));
+  h += row('mcpBaseCurrency', tg('t-nw', 'new · agreed name'), () => 'AED');
+  h += '<tr class="grp"><td colspan="' + (m.shown.length + 1) + '">Conversion</td></tr>';
+  h += row('isMcp', tg('t-nw', 'new'), t => String(t.isMcp));
+  h += row('mcpRate', tg('t-nw', 'new'), t => rate(t, m.q && m.q.rate));
+  h += row('mcpRateId', tg('t-nw', 'new'), t => rate(t, m.q && m.q.rateId));
+  h += row('mcpRateFileDate', tg('t-nw', 'new'), t => rate(t, FILE.date));
+  h += row('mcpRateFileVersion', tg('t-nw', 'new'), t => rate(t, FILE.ver));
+  h += '</tbody>';
+  $('txnTbl').innerHTML = h;
+}
+
+function jv(o, ind) {
+  ind = ind || '';
+  if (Array.isArray(o)) return '[\n' + o.map(x => ind + '  ' + jv(x, ind + '  ')).join(',\n') + '\n' + ind + ']';
+  if (typeof o === 'object') { const ks = Object.keys(o); return '{ ' + ks.map(k => '<span class="k">"' + k + '"</span>: ' + jv(o[k], ind)).join(', ') + ' }'; }
+  if (typeof o === 'string' && o.startsWith('#')) return '<span class="n">' + o.slice(1) + '</span>';
+  return '<span class="s">"' + esc(o) + '"</span>';
+}
+function renderViews(m) {
+  if (!m.shown.length) {
+    $('merchOut').innerHTML = '<p class="hint">Order of AED 100.00. No transaction yet.</p>';
+    $('procOut').innerHTML = '<p class="hint">Nothing sent yet.</p>'; return;
+  }
+  const tx = m.shown.map(t => ({ type: t.type, amount: '#' + fm(t.base).replace(/,/g, ''), currency: 'AED', status: 'Success' }));
+  let h = '<p class="hint" style="margin:0 0 8px">Callback and order inquiry, <code>transactions</code>:</p><pre class="json">"transactions": ' + jv(tx) + '</pre>';
+  h += '<p class="src">For <code>isMcp</code> = true, PGW fills <code>amount</code> with <code>mcpBaseAmount</code> and <code>currency</code> with <code>mcpBaseCurrency</code>. No rate, no MCP field, no transaction currency. Other field names as in today\'s payload. Merchant Portal shows APEX data (no PGW change).</p>';
+  $('merchOut').innerHTML = h;
+  let p = '<table class="pv"><thead><tr><th>Call</th><th>amount</th><th>currency</th></tr></thead><tbody>';
+  m.shown.forEach(t => { p += '<tr><td>' + (t.type === 'Pay' ? 'Payment' : 'Refund ' + t.n) + '</td><td>' + fm(t.amount) + '</td><td>' + t.currency + '</td></tr>'; });
+  p += '</tbody></table><p class="src">Existing processor fields only. No new processor fields. MPGS and CyberSource are set up for the full ISO currency list.</p>';
+  $('procOut').innerHTML = p;
+}
+
+function renderChecks(m) {
+  const li = (ok, txt) => '<li><span class="st ' + (ok === true ? 'ok' : ok === false ? 'hold' : 'grey') + '">' + (ok === true ? 'pass' : ok === false ? 'open' : 'n/a') + '</span><span>' + txt + '</span></li>';
+  let h = '';
+  if (!m.shown.length) { $('chkOut').innerHTML = li(null, 'Checks apply once the customer has paid.'); return; }
+  const closed = m.remain === 0n && m.shown.length > 1;
+  h += li(true, 'Order totals in AED, from <code>mcpBaseAmount</code>: paid ' + fm(m.paid) + ', refunded ' + fm(m.refAed) + ', remaining ' + fm(m.remain) + '.');
+  if (m.mcp) {
+    h += li(true, 'Every transaction of the order carries the purchase rate ' + m.q.rate + ' (rateId ' + m.q.rateId + '). No new rate is looked up for a refund.');
+    if (m.shown.length > 1) h += li(closed ? true : false, closed ? 'Refunds add up to the amount paid in both currencies: AED ' + fm(m.refAed) + ' = AED ' + fm(m.paid) + ', ' + m.cur + ' ' + fm(m.refTxn) + ' = ' + m.cur + ' ' + fm(m.paidTxn) + '.' : 'Not closed yet: ' + m.cur + ' ' + fm(m.paidTxn - m.refTxn) + ' (AED ' + fm(m.remain) + ') can still be refunded. The final refund sends exactly that ' + m.cur + ' amount.');
+    else h += li(null, 'No refund yet.');
+  } else {
+    h += li(true, 'Purchase not MCP: rate fields empty, refunds as today. Only <code>isMcpOffered</code> on the order shows that MCP was offered.');
+  }
+  h += li(true, 'Merchant outputs show AED only (' + m.shown.length + ' transaction' + (m.shown.length > 1 ? 's' : '') + ').');
+  $('chkOut').innerHTML = h;
+}
+
+function renderTries() {
+  const cur = TRIES.find(([, , s]) => s.pay === st.pay && s.rf === st.rf && s.step === st.step);
+  $('tries').innerHTML = '<span>Try</span>' + TRIES.map(([k, l]) => '<a href="#try=' + k + '"' + (cur && cur[0] === k ? ' class="on"' : '') + '>' + l + '</a>').join('');
+}
+
+let writing = false;
+function writeHash() {
+  const h = '#pay=' + st.pay + '&rf=' + st.rf + '&step=' + st.step;
+  if (location.hash !== h) { writing = true; history.replaceState(null, '', h); writing = false; }
+}
+function readHash() {
+  const p = new URLSearchParams(location.hash.slice(1));
+  const t = TRIES.find(x => x[0] === p.get('try'));
+  if (t) { Object.assign(st, t[2]); return; }
+  if (PAY.some(x => x[0] === p.get('pay'))) st.pay = p.get('pay');
+  if (PLANS[p.get('rf')]) st.rf = p.get('rf');
+  const s = parseInt(p.get('step'), 10); if (!isNaN(s)) st.step = s;
+}
+function render() {
+  const m = model(); st.step = m.step;
+  renderSet(); renderSteps(m); renderNow(m); renderOrder(m); renderTxn(m); renderViews(m); renderChecks(m); renderTries();
+  writeHash(); window.__om.last = m;
+}
+
+document.addEventListener('click', e => {
+  const b = e.target.closest('[data-pay],[data-rf],[data-step]'); if (!b) return;
+  if (b.dataset.pay) { st.pay = b.dataset.pay; }
+  else if (b.dataset.rf) { st.rf = b.dataset.rf; st.step = Math.min(st.step, (PLANS[st.rf].length) + 2); }
+  else st.step = +b.dataset.step;
+  render();
+});
+$('prev').addEventListener('click', () => { st.step--; render(); });
+$('next').addEventListener('click', () => { st.step++; render(); });
+window.addEventListener('hashchange', () => { if (writing) return; readHash(); render(); });
+
+window.__om = { st, model, TRIES, last: null };
+readHash(); render();
+</script>
+</body>
+</html>
