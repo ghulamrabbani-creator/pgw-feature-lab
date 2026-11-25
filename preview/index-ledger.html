@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex">
+<title>PGW Feature Lab · preview: Clearing Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Newsreader:opsz,wght@6..72,500;6..72,600&family=Plus+Jakarta+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+*{box-sizing:border-box}
+html{scroll-behavior:smooth;scroll-padding-top:120px}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}*{transition:none!important}}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.6 var(--body)}
+a{color:var(--link)}
+a:focus-visible,button:focus-visible{outline:2px solid var(--focus);outline-offset:2px}
+.inner{max-width:1440px;margin:0 auto;padding:0 24px}
+.hdr{position:sticky;top:0;z-index:20}
+.hdr .inner{display:flex;align-items:center;gap:20px;flex-wrap:wrap;padding-top:12px;padding-bottom:12px}
+.brand{font-weight:600;text-decoration:none;white-space:nowrap}
+.brand span{font-family:var(--mono);font-weight:400;margin-right:6px}
+.nav{display:flex;gap:18px;font-size:14px;flex:1}
+.nav a{text-decoration:none}
+.lens-sw{display:flex;align-items:center;gap:4px;padding:3px;border-radius:999px}
+.lens-lbl{font:12px var(--mono);padding:0 8px}
+.lens-sw button{font:500 13px var(--body);border:0;border-radius:999px;padding:6px 12px;cursor:pointer;background:transparent;transition:background .2s,color .2s}
+.lens-note{margin:0;padding:8px 24px;text-align:center;font-size:14px}
+.hero .inner{display:grid;grid-template-columns:minmax(0,5fr) minmax(0,6fr);gap:48px;align-items:center;padding-top:56px;padding-bottom:56px}
+.hero h1{margin:0 0 16px}
+.eyebrow{font:13px var(--mono);margin:0 0 10px}
+.lead{font-size:18px;max-width:640px;margin:0 0 24px}
+.hero-stats{list-style:none;padding:0;margin:0 0 28px;display:flex;flex-wrap:wrap;gap:10px 24px;font-size:14px}
+.hero-stats b{font:600 22px var(--head);margin-right:4px}
+.hero-cta{display:flex;flex-wrap:wrap;gap:12px;margin:0}
+.btn{display:inline-block;padding:10px 18px;text-decoration:none;font-weight:600;font-size:15px;transition:background .2s,border-color .2s}
+.hero-vis{margin:0}
+.hero-vis img,.hero-vis svg{display:block;width:100%;height:auto}
+.hero-vis figcaption{font:12px var(--mono);margin-top:8px}
+.sec .inner{padding-top:56px;padding-bottom:16px}
+.sec h2{margin:0 0 6px}
+.sec-lead{margin:0 0 24px;max-width:760px}
+.feats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.feat{padding:24px;display:flex;flex-direction:column}
+.feat-head{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap}
+.feat-meta{font:12px var(--mono);margin:0}
+.feat h3{margin:2px 0 0}
+.feat h3 a{text-decoration:none;color:inherit}
+.feat-line{margin:12px 0 4px}
+.feat-count{font:13px var(--mono);margin:0 0 16px}
+.feat-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:24px;flex:1}
+.feat h4{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;margin:0 0 6px}
+.eps{list-style:none;margin:0;padding:0}
+.ep{display:flex;align-items:center;gap:8px;flex-wrap:wrap;padding:6px 8px;margin:0 -8px;border-radius:6px;transition:opacity .2s,background .2s}
+.ep a{font-weight:500}
+.ver{font:12px var(--mono)}
+.auds{margin-left:auto;display:flex;gap:4px}
+.aud{font:11px var(--mono);padding:1px 6px;border-radius:4px;white-space:nowrap}
+.planned{font-size:13px;margin:10px 0 0}
+.feat-foot{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-top:18px;padding-top:14px}
+.lbl{font:12px var(--mono)}
+.sys{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.sys li{font:12px var(--mono);padding:2px 8px}
+.open{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px;text-decoration:none}
+.open .ic{width:14px;height:14px}
+.soons{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px}
+.soon{padding:20px;display:flex;flex-direction:column}
+.soon-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.soon h3{margin:0}
+.soon p{margin:10px 0 0;flex:1}
+.lenses{list-style:none;margin:0 0 32px;padding:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:20px;counter-reset:l}
+.lens{padding:20px;position:relative;transition:opacity .2s}
+.lens h3{margin:0 0 6px}
+.lens p{margin:0 0 10px;font-size:15px}
+.lens .auds{margin:0}
+.legend-t{margin:0 0 4px}
+.legend{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:10px}
+.st{display:inline-flex;align-items:center;gap:6px;font:500 13px var(--body);padding:4px 10px;border-width:1.5px;border-style:solid;white-space:nowrap}
+.st .ic{width:14px;height:14px;flex:none}
+.tbl{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:15px}
+th,td{text-align:left;padding:10px 12px;vertical-align:top}
+td.d{font:13px var(--mono);white-space:nowrap}
+td.f{white-space:nowrap;font-weight:500}
+.ftr .inner{padding-top:40px;padding-bottom:40px;font-size:13px}
+.dim{opacity:.45}
+.dim:hover,.dim:focus-within{opacity:1}
+@media (max-width:1100px){.feats{grid-template-columns:minmax(0,1fr)}.soons,.lenses{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:900px){.hero .inner{grid-template-columns:minmax(0,1fr);gap:32px;padding-top:36px}.nav{display:none}.lens-sw{margin-left:auto}}
+@media (max-width:640px){.feat-cols{grid-template-columns:minmax(0,1fr)}.lens-lbl{display:none}.lens-sw button{padding:6px 9px;font-size:12px}
+ .hdr .inner{gap:8px}.lens-sw{margin-left:0;width:100%;justify-content:space-between}
+ table,thead,tbody,tr,th,td{display:block}thead{display:none}tr{padding:10px 0}td{padding:2px 0}td.d,td.f{display:inline-block;margin-right:10px}
+ .feat,.soon,.lens{padding:18px}}
+
+:root{--bg:#FAF8F5;--card:#fff;--ink:#181A1F;--text-2:#4E5460;--accent:#0F6E58;--rule:#E4DDD1;--link:#0F6E58;--focus:#0F6E58;
+--body:'Plus Jakarta Sans',system-ui,sans-serif;--head:'Newsreader',Georgia,serif;--mono:'IBM Plex Mono',ui-monospace,monospace}
+.hdr{background:rgba(250,248,245,.96);border-bottom:1px solid var(--ink);backdrop-filter:blur(6px)}
+.brand{color:var(--ink);font-family:var(--head);font-size:20px;font-weight:600}.brand span{font-family:var(--mono);font-size:14px;color:var(--accent)}
+.nav a{color:var(--text-2)}.nav a:hover{color:var(--ink);text-decoration:underline}
+.lens-sw{border:1px solid var(--rule);background:#fff}.lens-lbl{color:var(--text-2)}.lens-sw button{color:var(--text-2)}
+.lens-sw button[aria-pressed=true]{background:var(--ink);color:#fff}
+.lens-note{background:#EEF5F2;color:#0B4F40;border-bottom:1px solid var(--rule)}
+h1,h2,h3{font-family:var(--head);font-weight:600;letter-spacing:-.01em}
+.hero{border-bottom:1px solid var(--rule)}
+.hero h1{font-size:52px;line-height:1.05;font-weight:500}
+.eyebrow{color:var(--accent);text-transform:uppercase;letter-spacing:.12em;font-size:12px}
+.lead{color:var(--text-2)}
+.hero-stats{border-top:1px solid var(--rule);border-bottom:1px solid var(--rule);padding:12px 0;color:var(--text-2)}
+.hero-stats b{font-family:var(--head);color:var(--ink);font-size:26px;font-weight:500}
+.btn{background:var(--ink);color:#fff;border:1px solid var(--ink);border-radius:2px}.btn:hover{background:var(--accent);border-color:var(--accent)}
+.btn.ghost{background:transparent;color:var(--ink)}.btn.ghost:hover{background:#fff;border-color:var(--accent);color:var(--accent)}
+.hero-vis figcaption{color:var(--text-2)}
+.sec h2{font-size:34px;font-weight:500;border-bottom:1px solid var(--ink);padding-bottom:10px;margin-bottom:12px;display:flex;align-items:baseline;gap:14px}
+.num{font:500 14px var(--mono);color:var(--accent)}
+.sec-lead{color:var(--text-2)}
+.feat,.lens{background:var(--card);border:1px solid var(--rule);border-radius:2px}
+.feat{border-left:4px solid var(--accent)}
+.feat h3{font-size:30px;font-weight:500}.feat-meta,.feat-count,.ver,.lbl,.feat h4{color:var(--text-2)}.feat-line{color:var(--ink);font-family:var(--head);font-size:19px;font-style:italic}
+.ep{border-bottom:1px dotted var(--rule);border-radius:0}.ep a{color:var(--ink);text-decoration:none}.ep a:hover{color:var(--accent);text-decoration:underline}
+.ep.hit{background:#EEF5F2}
+.aud{border:1px solid var(--rule);color:var(--text-2);border-radius:2px}.aud-e{color:#3B5B78;border-color:#BCC9D6}.aud-b{color:#9A4D06;border-color:#E3C9A8}
+.planned{color:var(--text-2);font-style:italic}
+.feat-foot{border-top:1px solid var(--rule)}.sys li{border:1px solid var(--rule);color:var(--ink);border-radius:2px}.open{color:var(--accent)}
+.soon{border-top:2px solid var(--ink);padding:16px 0 0}.soon h3{font-size:24px;font-weight:500}.soon p{color:var(--text-2)}
+.lens{border-top:3px solid var(--ink)}.lens h3{font-size:22px;font-weight:500}.lens p{color:var(--text-2)}.lens.hit{border-top-color:var(--accent);background:#F5FAF8}
+.legend-t{font-size:22px;font-weight:500}
+.st{border-radius:2px;background:#fff}
+.st-pass{color:#0D6E52;border-color:#0D6E52}
+.st-released{color:#3B5B78;border-color:#3B5B78}
+.st-held{color:#9A4D06;border-color:#9A4D06;border-style:double;border-width:3px}
+.st-rejected{color:#B42318;border-color:#B42318}
+.st-undef{color:#5C5346;border-color:#B5A88F;background:#F3EEE5;border-style:dashed}
+th{font:500 12px var(--mono);text-transform:uppercase;letter-spacing:.08em;color:var(--text-2);border-bottom:1px solid var(--ink)}
+td{border-bottom:1px solid var(--rule)}td.d{color:var(--text-2)}td.f{font-family:var(--head);font-size:17px}
+td a{color:var(--ink);text-decoration-color:var(--rule);text-underline-offset:3px}td a:hover{color:var(--accent)}
+.ftr{border-top:1px solid var(--ink);color:var(--text-2);margin-top:40px}
+@media (max-width:640px){.hero h1{font-size:38px}.sec h2{font-size:28px}}
+</style>
+</head>
+<body data-lens="all" class="opt-ledger">
+<header class="hdr"><div class="inner">
+<a class="brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="nav" aria-label="Sections"><a href="#live">Features</a><a href="#coming">Coming</a><a href="#read">How to read</a><a href="#new">What's new</a></nav>
+<div class="lens-sw" role="group" aria-label="Audience lens">
+<span class="lens-lbl">Lens</span>
+<button type="button" data-lens="all" aria-pressed="true">All</button>
+<button type="button" data-lens="e" aria-pressed="false">Engineering</button>
+<button type="button" data-lens="b" aria-pressed="false">Business &amp; Ops</button>
+</div>
+</div></header>
+<p class="lens-note" id="lens-note" aria-live="polite" hidden></p>
+<main>
+<section class="hero"><div class="inner">
+<div class="hero-copy">
+<p class="eyebrow">payment gateway · new features</p>
+<h1>How new PGW features work, end to end</h1>
+<p class="lead">Each feature has its documents and visual pages: flows, simulators and scenarios that show the configuration, the calls between systems and what can go wrong. The documents are the reference; the visual pages illustrate them.</p>
+<ul class="hero-stats"><li><b>2</b> features live</li><li><b>10</b> visual pages</li><li><b>4</b> documents</li><li><b>3</b> coming</li></ul>
+<p class="hero-cta"><a class="btn" href="#live">See the features</a><a class="btn ghost" href="#read">How to read this Lab</a></p>
+</div>
+<figure class="hero-vis"><img src="../assets/img/hero-ledger.webp" width="1376" height="768" alt="Drafting-style drawing: one dark line splits into green, blue and amber channels across ledger tables." loading="eager"><figcaption>One payment, three channels. Illustration.</figcaption></figure>
+</div></section>
+
+<section class="sec" id="live"><div class="inner">
+<h2><span class="num">01</span>Live features</h2>
+<p class="sec-lead">Use the lens at the top to highlight the best entry points for your role. Nothing is hidden.</p>
+<div class="feats"><article class="feat" id="f-split-payout">
+<div class="feat-head">
+<div><p class="feat-meta">MVP · in build</p><h3><a href="../split-payout/">Split Payout</a></h3></div>
+<span class="st st-pass"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7" /></svg>Lab section complete</span>
+</div>
+<p class="feat-line">One partner order, paid out to the partner and its vendors from one transaction.</p>
+<p class="feat-count">7 visual pages · 2 documents</p>
+<div class="feat-cols">
+<div><h4>Documents</h4><ul class="eps"><li class="ep" data-aud="eb"><a href="../split-payout/docs/product.html">Product document</a><span class="ver">v1.6</span><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="e"><a href="../split-payout/docs/stories.html">PGW dev stories</a><span class="ver">v0.5</span><span class="auds"><span class="aud aud-e">Eng</span></span></li></ul></div>
+<div><h4>Visual pages</h4><ul class="eps"><li class="ep" data-aud="eb"><a href="../split-payout/end-to-end.html">End-to-end view</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="b"><a href="../split-payout/money-flow.html">Money flow</a><span class="auds"><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="b"><a href="../split-payout/onboarding.html">Onboarding</a><span class="auds"><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="eb"><a href="../split-payout/split-modes.html">Split modes</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="e"><a href="../split-payout/simulator.html">Config &amp; Payment Simulator</a><span class="auds"><span class="aud aud-e">Eng</span></span></li><li class="ep" data-aud="e"><a href="../split-payout/advice-lifecycle.html">Advice lifecycle</a><span class="auds"><span class="aud aud-e">Eng</span></span></li><li class="ep" data-aud="eb"><a href="../split-payout/what-can-go-wrong.html">What can go wrong</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li></ul></div>
+</div>
+<div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>PGW</li><li>APEX</li><li>MA</li><li>Merchant Portal</li></ul>
+<a class="open" href="../split-payout/">Open Split Payout hub <svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg></a></div>
+</article>
+<article class="feat" id="f-mcp">
+<div class="feat-head">
+<div><p class="feat-meta">Jan-2027 · in build</p><h3><a href="../mcp/">MCP</a></h3></div>
+<span class="st st-released"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg>In build · pages added as docs land</span>
+</div>
+<p class="feat-line">The customer pays on HPP in their own currency; the merchant stays in AED.</p>
+<p class="feat-count">3 visual pages · 2 documents (drafts)</p>
+<div class="feat-cols">
+<div><h4>Documents</h4><ul class="eps"><li class="ep" data-aud="eb"><a href="../mcp/docs/requirements.html">Solution requirements</a><span class="ver">v3.0</span><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="e"><a href="../mcp/docs/stories.html">PGW dev stories</a><span class="ver">v0.1</span><span class="auds"><span class="aud aud-e">Eng</span></span></li></ul></div>
+<div><h4>Visual pages</h4><ul class="eps"><li class="ep" data-aud="eb"><a href="../mcp/end-to-end.html">End-to-end view</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="eb"><a href="../mcp/hpp-simulator.html">HPP simulator</a><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="ep" data-aud="e"><a href="../mcp/calculator.html">Calculator</a><span class="auds"><span class="aud aud-e">Eng</span></span></li></ul><p class="planned">Planned: Order model, Rate file lifecycle, What can go wrong. Parked: Federation and enrichment.</p></div>
+</div>
+<div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>PGW</li><li>HPP</li><li>MA</li><li>APEX</li><li>Planet</li></ul>
+<a class="open" href="../mcp/">Open MCP hub <svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg></a></div>
+</article></div>
+</div></section>
+
+<section class="sec" id="coming"><div class="inner">
+<h2><span class="num">02</span>Coming to the Lab</h2>
+<p class="sec-lead">Next features to be explained here. Systems from each feature's scope notes.</p>
+<div class="soons"><article class="soon">
+<div class="soon-head"><h3>Pay by Bank</h3><span class="st st-undef"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 6a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.4M8 12.6v.2" /></svg>Not in the Lab yet</span></div>
+<p>Account-to-account payment through Lean (Open Finance); the customer approves in their bank app.</p>
+<div class="feat-foot"><span class="lbl">Systems touched</span><ul class="sys"><li>PGW</li><li>APEX</li><li>MA</li><li>Merchant Portal</li><li>Lean (new)</li></ul></div>
+</article>
+<article class="soon">
+<div class="soon-head"><h3>Direct Debit</h3><span class="st st-undef"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 6a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.4M8 12.6v.2" /></svg>Not in the Lab yet</span></div>
+<p>Recurring bank-to-bank collections through the UAE Direct Debit Marketplace (DDS).</p>
+<div class="feat-foot"><span class="lbl">Systems touched</span><ul class="sys"><li>DD Backend (new)</li><li>DDS</li><li>Merchant Portal</li><li>APEX</li><li>MA</li><li>PGW config</li></ul></div>
+</article>
+<article class="soon">
+<div class="soon-head"><h3>Network Tokenization</h3><span class="st st-undef"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 6a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.4M8 12.6v.2" /></svg>Not in the Lab yet</span></div>
+<p>Repeat and merchant-initiated card payments sent with the scheme token.</p>
+<div class="feat-foot"><span class="lbl">Systems touched</span><ul class="sys"><li>PGW</li><li>MA config</li><li>MPGS</li><li>CyberSource</li></ul></div>
+</article></div>
+</div></section>
+
+<section class="sec" id="read"><div class="inner">
+<h2><span class="num">03</span>How to read this Lab</h2>
+<ol class="lenses"><li class="lens" data-aud="eb"><h3>Visual flows</h3><p>Swimlanes, money flows and lifecycles. Switch the settings and the flow redraws.</p><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li><li class="lens" data-aud="e"><h3>Simulators</h3><p>Try a scenario and see each check, decision and record. Marked Illustrative; numbers are fictional.</p><span class="auds"><span class="aud aud-e">Eng</span></span></li><li class="lens" data-aud="eb"><h3>Documents and stories</h3><p>The reference. Published from the final .docx; headings carry buttons to the matching visual page.</p><span class="auds"><span class="aud aud-e">Eng</span><span class="aud aud-b">Biz & Ops</span></span></li></ol>
+<h3 class="legend-t">Status legend</h3>
+<p class="sec-lead">Every state has a colour, an icon, a word and a border style, so it reads without colour too.</p>
+<ul class="legend"><li><span class="st st-pass"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7" /></svg>Pass / money moving</span></li><li><span class="st st-released"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4" /></svg>Released / kept by Geidea</span></li><li><span class="st st-held"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 3.5v9M10.5 3.5v9" /></svg>Held at APEX</span></li><li><span class="st st-rejected"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 4l8 8M12 4l-8 8" /></svg>Rejected</span></li><li><span class="st st-undef"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M5.5 6a2.5 2.5 0 1 1 3.5 2.3c-.6.3-1 .8-1 1.5v.4M8 12.6v.2" /></svg>Not defined / waiting</span></li></ul>
+</div></section>
+
+<section class="sec" id="new"><div class="inner">
+<h2><span class="num">04</span>What's new</h2>
+<div class="tbl"><table><thead><tr><th>Date</th><th>Feature</th><th>Update</th></tr></thead><tbody><tr><td class="d">25-Nov-2026</td><td class="f">MCP</td><td><a href="../mcp/docs/requirements.html">Solution requirements v3.0 and PGW stories v0.1 published, with buttons to the visual pages</a></td></tr><tr><td class="d">25-Nov-2026</td><td class="f">MCP</td><td><a href="../mcp/calculator.html">Calculator: quote rounded up, refund planner with the last-cent rule</a></td></tr><tr><td class="d">25-Nov-2026</td><td class="f">MCP</td><td><a href="../mcp/end-to-end.html">End-to-end view: rate file, HPP offer, payment, clearing, settlement and refunds in one swimlane</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">MCP</td><td><a href="../mcp/hpp-simulator.html">Section opened: hub page and HPP simulator</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">Split Payout</td><td><a href="../split-payout/advice-lifecycle.html">Rule of 24-Nov: an UPDATE is accepted on the transaction date only</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">Split Payout</td><td><a href="../split-payout/end-to-end.html">Updates reach APEX only through the day-end file (APEX alignment of 23-Nov)</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">Split Payout</td><td><a href="../split-payout/end-to-end.html">End-to-end view, Advice lifecycle and What can go wrong added; story and page links both ways</a></td></tr><tr><td class="d">24-Nov-2026</td><td class="f">Split Payout</td><td><a href="../split-payout/onboarding.html">Onboarding swimlane and Split modes added</a></td></tr></tbody></table></div>
+</div></section>
+</main>
+<footer class="ftr"><div class="inner">Pages marked Illustrative use fictional numbers. The published documents are the reference.</div></footer>
+<script>
+(function () {
+  var btns = document.querySelectorAll('.lens-sw button');
+  var note = document.getElementById('lens-note');
+  var names = { e: 'Engineering', b: 'Business & Ops' };
+  function apply(l) {
+    document.body.setAttribute('data-lens', l);
+    btns.forEach(function (b) { b.setAttribute('aria-pressed', b.dataset.lens === l ? 'true' : 'false'); });
+    document.querySelectorAll('[data-aud]').forEach(function (el) {
+      el.classList.toggle('hit', l !== 'all' && el.dataset.aud.indexOf(l) > -1);
+      el.classList.toggle('dim', l !== 'all' && el.dataset.aud.indexOf(l) === -1);
+    });
+    note.hidden = l === 'all';
+    note.textContent = l === 'all' ? '' : 'Highlighting entry points for ' + names[l] + '. Everything else stays available.';
+    try { localStorage.setItem('lab-lens', l); } catch (e) {}
+  }
+  btns.forEach(function (b) { b.addEventListener('click', function () { apply(b.dataset.lens); }); });
+  var saved = 'all';
+  try { saved = localStorage.getItem('lab-lens') || 'all'; } catch (e) {}
+  apply(['all', 'e', 'b'].indexOf(saved) > -1 ? saved : 'all');
+  window.__home = { apply: apply };
+})();
+</script>
+</body>
+</html>
