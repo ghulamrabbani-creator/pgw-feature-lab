@@ -107,6 +107,34 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 .chk li:last-child { border-bottom: 0; }
 .chk li .st { flex: none; }
 
+/* View switch + JSON model */
+.viewbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.viewbar .lbl { font: 500 11px var(--mono); color: var(--muted); }
+.seg2 { display: inline-flex; border: 1px solid var(--border-2); border-radius: 8px; overflow: hidden; }
+.seg2 button { font: 500 13px var(--sans); border: 0; background: #fff; color: var(--text); padding: 6px 14px; cursor: pointer; }
+.seg2 button + button { border-left: 1px solid var(--border-2); }
+.seg2 button[aria-pressed="true"] { background: var(--ink); color: #fff; }
+.viewbar .hint { margin: 0; }
+.code { font: 13px/1.65 var(--mono); background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 10px 0; overflow-x: auto; }
+.code .ln { white-space: pre; padding: 0 14px 0 30px; position: relative; color: var(--ink); min-width: max-content; }
+.code .ln::before { content: ''; position: absolute; left: 10px; top: 0; width: 12px; text-align: center; color: var(--money); font-weight: 600; }
+.code .ln.fr::before { content: '+'; }
+.code .ln.fr { background: #ECFDF5; }
+.code .ln.ctx { color: var(--muted); font-style: italic; }
+.code .ln.cap { color: var(--muted); font-size: 11px; padding-top: 6px; }
+.code .key { color: #334155; }
+.code .ln.mcp .key, .code .ln.mcp .val { color: #6D28D9; font-weight: 600; }
+.code .ln.mcp .val { background: #EDE9FE; border-radius: 3px; padding: 0 3px; }
+.code .ln.chg .key, .code .ln.chg .val { color: #B45309; font-weight: 600; }
+.code .ln.chg .val { background: #FEF3C7; border-radius: 3px; padding: 0 3px; }
+.code .val.nul { color: var(--muted) !important; font-weight: 400 !important; }
+.lg { display: flex; flex-wrap: wrap; gap: 8px 18px; font-size: 12px; color: var(--text-2); margin-top: 12px; align-items: center; }
+.lg i { font-style: normal; font: 600 12px var(--mono); border-radius: 3px; padding: 0 4px; }
+.lg i.mcp { color: #6D28D9; background: #EDE9FE; } .lg i.chg { color: #B45309; background: #FEF3C7; } .lg i.fr { color: var(--money); background: #ECFDF5; }
+.totline { font: 13px var(--mono); margin-top: 12px; color: var(--text-2); }
+.totline b { color: var(--ink); }
+.hide { display: none !important; }
+
 @media (max-width: 1080px) { .grid, .views { grid-template-columns: minmax(0, 1fr); } .sticky { position: static; } }
 @media (max-width: 640px) { .tot { grid-template-columns: minmax(0, 1fr); } h1.page { font-size: 28px; } }
 </style>
@@ -162,7 +190,18 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 <div class="in" id="nowOut"></div>
 </section>
 
-<section class="card" id="c-order">
+<div class="viewbar" id="viewbar"><span class="lbl">View the order model as</span><span class="seg2"><button data-view="json" aria-pressed="true">JSON</button><button data-view="table" aria-pressed="false">Table</button></span><p class="hint">JSON for developers, table for everyone else. Same data.</p></div>
+
+<section class="card vj" id="c-model">
+<header><span class="num">4</span><h2>PGW order model</h2><span class="who"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · <a href="docs/stories.html#s6-be-mcp-refunds">S6</a></span></header>
+<div class="in">
+<div id="jsonOut"></div>
+<div class="lg"><span><i class="mcp">"isMcp"</i> new MCP field</span><span><i class="chg">"amount"</i> existing field, holds the paid currency for an MCP transaction</span><span><i class="fr">+</i> written at this step</span></div>
+<p class="src">Structure and MCP fields only. Other fields are as today and not shown. New names are the stories' proposals, except <code>mcpBaseAmount</code> and <code>mcpBaseCurrency</code> (agreed).</p>
+</div>
+</section>
+
+<section class="card vt" id="c-order">
 <header><span class="num">4</span><h2>PGW order and HPP session</h2><span class="who"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5 section 3</a></span></header>
 <div class="in">
 <div class="tw"><table class="rec" id="orderTbl"></table></div>
@@ -173,7 +212,7 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 </div>
 </section>
 
-<section class="card" id="c-txn">
+<section class="card vt" id="c-txn">
 <header><span class="num">5</span><h2>Transactions of the order</h2><span class="who"><a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · <a href="docs/stories.html#s6-be-mcp-refunds">S6</a></span></header>
 <div class="in">
 <div class="tw"><table class="rec" id="txnTbl"></table></div>
@@ -237,7 +276,7 @@ function fx(n) { let f = (n % 1000000000n).toString().padStart(9, '0').replace(/
 function rs(r) { let s = r.replace(/0+$/, ''); return s.endsWith('.') ? s.slice(0, -1) : s; }
 
 /* ---------- state ---------- */
-const st = { pay: 'gbp', rf: '60-40', step: 4 };
+const st = { pay: 'gbp', rf: '60-40', step: 4, view: 'json' };
 
 /* ---------- model (exposed for tests) ---------- */
 function model() {
@@ -357,6 +396,70 @@ function renderTxn(m) {
   $('txnTbl').innerHTML = h;
 }
 
+function renderJson(m) {
+  const L = [], at = m.step;
+  const k = n => '<span class="key">"' + n + '"</span>';
+  const sv = v => '<span class="val">' + v + '</span>';
+  const nul = '<span class="val nul">null</span>';
+  const add = (ind, html, cls, f) => L.push('<div class="ln' + (cls ? ' ' + cls : '') + (f ? ' fr' : '') + '">' + '  '.repeat(ind) + html + '</div>');
+  const kv = (ind, n, v, cls, f, last) => add(ind, k(n) + ': ' + v + (last ? '' : ','), cls, f);
+  if (at >= 1) {
+    add(0, '// HPP session (S4): fixed when HPP first loads', 'cap');
+    add(0, '{', '', at === 1);
+    kv(1, 'mcpCountry', sv('"' + m.country + '"'), 'mcp', at === 1);
+    kv(1, 'mcpProposedCurrency', sv('"' + m.proposed + '"'), 'mcp', at === 1);
+    kv(1, 'isMcpOffered', sv('true'), 'mcp', at === 1);
+    add(1, k('mcpQuotes') + ': [', 'mcp', at === 1);
+    m.quotes.forEach((q, i) => {
+      add(2, '{ ' + k('currency') + ': ' + sv('"' + q.currency + '"') + ', ' + k('amount') + ': ' + sv(fm(q.amount).replace(/,/g, '')) + ', ' + k('rate') + ': ' + sv(q.rate) + ',', 'mcp', at === 1);
+      add(2, '  ' + k('rateId') + ': ' + sv('"' + q.rateId + '"') + ', ' + k('rateFileDate') + ': ' + sv('"' + FILE.date + '"') + ', ' + k('rateFileVersion') + ': ' + sv('"' + FILE.ver + '"') + ' }' + (i < m.quotes.length - 1 ? ',' : ''), 'mcp', at === 1);
+    });
+    add(1, ']', 'mcp', at === 1);
+    add(0, '}', '', at === 1);
+    add(0, ' ', 'cap');
+  }
+  add(0, '// PGW order', 'cap');
+  add(0, '{', '', at === 0);
+  kv(1, 'orderId', sv('"…"'), '', at === 0);
+  kv(1, 'amount', sv('100.00'), '', at === 0);
+  kv(1, 'currency', sv('"AED"'), '', at === 0);
+  if (at >= 1) kv(1, 'isMcpOffered', sv('true'), 'mcp', at === 1);
+  add(1, '// other order fields as today', 'ctx');
+  if (!m.shown.length) add(1, k('transactions') + ': []', '', at === 0);
+  else {
+    add(1, k('transactions') + ': [');
+    m.shown.forEach((t, i) => {
+      const f = i === m.shown.length - 1 && at >= 2, c = t.isMcp ? 'chg' : '', r = v => t.isMcp ? sv(v) : nul;
+      add(2, '{' + (t.type === 'Pay' ? '   // purchase' : '   // refund ' + t.n + (t.final ? ', final' : '')), '', f);
+      kv(3, 'type', sv('"' + t.type + '"'), '', f);
+      kv(3, 'status', sv('"Success"'), '', f);
+      kv(3, 'amount', sv(fm(t.amount).replace(/,/g, '')), c, f);
+      kv(3, 'currency', sv('"' + t.currency + '"'), c, f);
+      kv(3, 'isMcp', sv(String(t.isMcp)), 'mcp', f);
+      kv(3, 'mcpBaseAmount', sv(fm(t.base).replace(/,/g, '')), 'mcp', f);
+      kv(3, 'mcpBaseCurrency', sv('"AED"'), 'mcp', f);
+      kv(3, 'mcpRate', r(m.q && m.q.rate), 'mcp', f);
+      kv(3, 'mcpRateId', r(m.q && '"' + m.q.rateId + '"'), 'mcp', f);
+      kv(3, 'mcpRateFileDate', r('"' + FILE.date + '"'), 'mcp', f);
+      kv(3, 'mcpRateFileVersion', r('"' + FILE.ver + '"'), 'mcp', f, true);
+      add(3, '// other transaction fields as today', 'ctx', f);
+      add(2, '}' + (i < m.shown.length - 1 ? ',' : ''), '', f);
+    });
+    add(1, ']');
+  }
+  add(0, '}');
+  let h = '<div class="code">' + L.join('') + '</div>';
+  if (m.shown.length) h += '<div class="totline">Order totals, computed from <code>mcpBaseAmount</code>: paid <b>AED ' + fm(m.paid) + '</b> · refunded <b>AED ' + fm(m.refAed) + '</b> · remaining <b>AED ' + fm(m.remain) + '</b></div>' + $('wrongOut').innerHTML;
+  $('jsonOut').innerHTML = h;
+}
+
+function renderView() {
+  document.querySelectorAll('[data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === st.view)));
+  document.querySelectorAll('.vj').forEach(e => e.classList.toggle('hide', st.view !== 'json'));
+  document.querySelectorAll('.vt').forEach(e => e.classList.toggle('hide', st.view !== 'table'));
+  let n = 3; document.querySelectorAll('main section.card').forEach(c => { if (c.id === 'c-set' || c.id === 'c-steps' || c.id === 'c-now') return; if (!c.classList.contains('hide')) c.querySelector('.num').textContent = ++n; });
+}
+
 function jv(o, ind) {
   ind = ind || '';
   if (Array.isArray(o)) return '[\n' + o.map(x => ind + '  ' + jv(x, ind + '  ')).join(',\n') + '\n' + ind + ']';
@@ -403,12 +506,13 @@ function renderTries() {
 
 let writing = false;
 function writeHash() {
-  const h = '#pay=' + st.pay + '&rf=' + st.rf + '&step=' + st.step;
+  const h = '#pay=' + st.pay + '&rf=' + st.rf + '&step=' + st.step + (st.view === 'table' ? '&view=table' : '');
   if (location.hash !== h) { writing = true; history.replaceState(null, '', h); writing = false; }
 }
 function readHash() {
   const p = new URLSearchParams(location.hash.slice(1));
   const t = TRIES.find(x => x[0] === p.get('try'));
+  st.view = p.get('view') === 'table' ? 'table' : 'json';
   if (t) { Object.assign(st, t[2]); return; }
   if (PAY.some(x => x[0] === p.get('pay'))) st.pay = p.get('pay');
   if (PLANS[p.get('rf')]) st.rf = p.get('rf');
@@ -416,13 +520,14 @@ function readHash() {
 }
 function render() {
   const m = model(); st.step = m.step;
-  renderSet(); renderSteps(m); renderNow(m); renderOrder(m); renderTxn(m); renderViews(m); renderChecks(m); renderTries();
+  renderSet(); renderSteps(m); renderNow(m); renderOrder(m); renderTxn(m); renderJson(m); renderView(); renderViews(m); renderChecks(m); renderTries();
   writeHash(); window.__om.last = m;
 }
 
 document.addEventListener('click', e => {
-  const b = e.target.closest('[data-pay],[data-rf],[data-step]'); if (!b) return;
-  if (b.dataset.pay) { st.pay = b.dataset.pay; }
+  const b = e.target.closest('[data-pay],[data-rf],[data-step],[data-view]'); if (!b) return;
+  if (b.dataset.view) { st.view = b.dataset.view; }
+  else if (b.dataset.pay) { st.pay = b.dataset.pay; }
   else if (b.dataset.rf) { st.rf = b.dataset.rf; st.step = Math.min(st.step, (PLANS[st.rf].length) + 2); }
   else st.step = +b.dataset.step;
   render();
