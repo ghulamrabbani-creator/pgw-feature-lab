@@ -54,7 +54,7 @@ Solutioning complete (green, check) · In the works (indigo, arrow) · To work o
 - Index: `assets/search-index.js`, built by `python3 tools/build_search_index.py` from the rendered pages (includes content built by JavaScript and every `#try=` scenario link). Re-run after any page or doc change. It also adds missing ids to h2–h4 and the script tag to new pages.
 
 ## Sensitive data
-The site is public. Never show real MIDs, OIC numbers, TRIDs, merchant names, emails, account numbers or real documents/screenshots. Use dummy values, and the SAME dummy value everywhere it repeats (keep a per-feature table of dummy values in the feature's hub source comment or handover).
+The site is public. Never show real MIDs, OIC numbers, TRIDs, merchant names, emails, account numbers or real documents/screenshots. No people's names: use team names (APEX team, PGW engineering team, Risk & Compliance...). `tools/public_names.json` maps names to teams; `tools/build_docs.py` applies it on every publish and `python3 tools/apply_public_names.py` re-applies it to all pages and lists any name left. Use dummy values, and the SAME dummy value everywhere it repeats (keep a per-feature table of dummy values in the feature's hub source comment or handover).
 
 ## Quality checklist
 - Text contrast 4.5:1 minimum; visible focus states; keyboard reachable.
@@ -63,6 +63,6 @@ The site is public. Never show real MIDs, OIC numbers, TRIDs, merchant names, em
 - SVG icons only, no emoji.
 
 ## Document publishing
-- The .docx is the master. Publish with `tools/build_docs.py` (pandoc), wording unchanged.
+- The .docx is the master. Publish with `tools/build_docs.py` (pandoc), wording unchanged except people's names (see Sensitive data).
 - Anchors are pandoc heading ids; visual pages link to them (e.g. `docs/product.html#money-flow`).
 - After re-publishing, re-check that every "View it visually" link still points to an existing anchor, then rebuild the search index.

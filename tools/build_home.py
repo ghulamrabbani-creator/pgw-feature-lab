@@ -52,7 +52,7 @@ SECTIONS = [
             "name": "Network Tokenization", "href": "network-tokenization/", "meta": "Visa network token mandate",
             "line": "Saved-card (CIT and MIT) payments sent with the scheme token on MPGS and CyberSource; PGW records it on every transaction.",
             "systems": ["PGW", "MPGS", "CyberSource", "PGW config", "APEX (parked)"],
-            "docs": [("PGW dev stories", "v1.1", "network-tokenization/docs/stories.html")],
+            "docs": [("PGW dev stories", "v1.2", "network-tokenization/docs/stories.html")],
             "pages": [("Token layers", "network-tokenization/token-layers.html"),
                       ("Payment explorer", "network-tokenization/payment-explorer.html"),
                       ("What PGW records", "network-tokenization/what-pgw-records.html"),

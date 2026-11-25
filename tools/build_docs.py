@@ -34,7 +34,7 @@ TEMPLATE = """<!DOCTYPE html>
 </article>
 </main>
 </div>
-<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged except that people's names are shown as team names; the .docx stays the master.</footer>
 <script src="../../assets/search.js" defer></script>
 </body>
 </html>
@@ -82,6 +82,10 @@ def main():
     sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
     import add_visual_links
     add_visual_links.main(a.out)
+    # Public site: people's names -> team names (tools/public_names.json)
+    import apply_public_names
+    from pathlib import Path
+    apply_public_names.apply(Path(a.out).resolve())
 
 
 if __name__ == "__main__":

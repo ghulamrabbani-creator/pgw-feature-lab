@@ -29,11 +29,11 @@
 <li class="l1"><a href="#requirements">8. Requirements</a></li>
 <li class="l2"><a href="#pgw-pgw-engineering-team">8.1 PGW: PGW engineering team</a></li>
 <li class="l2"><a href="#mpgs-and-cybersource-technical-integration-team">8.2 MPGS and CyberSource: technical integration team</a></li>
-<li class="l2"><a href="#apex-arulraj-panchamoorthy-spoc-talha-ahmed-parked">8.3 APEX: Arulraj Panchamoorthy (SPOC), Talha Ahmed — parked</a></li>
-<li class="l2"><a href="#postilion-musaad-haider-parked">8.4 Postilion: Musaad Haider — parked</a></li>
+<li class="l2"><a href="#apex-team-parked">8.3 APEX: APEX team — parked</a></li>
+<li class="l2"><a href="#postilion-team-parked">8.4 Postilion: Postilion team — parked</a></li>
 <li class="l2"><a href="#planet-payment-jose-albarran-sierra">8.5 Planet Payment: Jose Albarran Sierra</a></li>
 <li class="l2"><a href="#operations-owner-to-confirm">8.6 Operations: owner to confirm</a></li>
-<li class="l2"><a href="#merchant-portal-badr-elhosseiny">8.7 Merchant Portal: Badr Elhosseiny</a></li>
+<li class="l2"><a href="#merchant-portal-team">8.7 Merchant Portal: Merchant Portal team</a></li>
 <li class="l2"><a href="#reporting-operations-finance-to-provide">8.8 Reporting: Operations &amp; Finance to provide</a></li>
 <li class="l1"><a href="#end-to-end-flow">9. End-to-end flow</a></li>
 <li class="l1"><a href="#open-items">10. Open items</a></li>
@@ -474,9 +474,9 @@ CyberSource: technical integration team</h2>
 non-AED payment. MPGS and CyberSource are already set up for the full
 list of ISO currencies.</li>
 </ul>
-<h2 id="apex-arulraj-panchamoorthy-spoc-talha-ahmed-parked">8.3 APEX:
-Arulraj Panchamoorthy (SPOC), Talha Ahmed — parked</h2>
-<p>Agreed approach (Arul, 23-Nov-2026). The exact field names and
+<h2 id="apex-team-parked">8.3 APEX:
+APEX team — parked</h2>
+<p>Agreed approach (APEX team, 23-Nov-2026). The exact field names and
 formats are awaited from APEX. The PGW federation story (S8) waits on
 them.</p>
 <table>
@@ -552,7 +552,7 @@ and the PTLF; currency format (alpha <code>GBP</code> or numeric
 uses 7); value of the identifier for non-MCP transactions. - Rounding
 for partial chargebacks (AED = transaction amount ÷ rate). - Exception
 handling for MCP mismatches.</p>
-<h2 id="postilion-musaad-haider-parked">8.4 Postilion: Musaad Haider —
+<h2 id="postilion-team-parked">8.4 Postilion: Postilion team —
 parked</h2>
 <p>The enrichment file format and its data set are being finalized. The
 PGW enrichment story (S9) waits on this.</p>
@@ -646,8 +646,7 @@ currencies.</li>
 <li>Markup changes for a merchant go through Planet and take effect from
 the rate file.</li>
 </ul>
-<h2 id="merchant-portal-badr-elhosseiny">8.7 Merchant Portal: Badr
-Elhosseiny</h2>
+<h2 id="merchant-portal-team">8.7 Merchant Portal: Merchant Portal team</h2>
 <ul>
 <li>No change. The portal shows what APEX returns: order currency and
 settlement currency. To validate in UAT with an MCP transaction.</li>
@@ -655,7 +654,7 @@ settlement currency. To validate in UAT with an MCP transaction.</li>
 <h2 id="reporting-operations-finance-to-provide">8.8 Reporting:
 Operations &amp; Finance to provide</h2>
 <p>Merchant reports need no change. Internal reporting is defined by
-Operations &amp; Finance (FinOps: Sherly Sadanandan), then built by
+Operations &amp; Finance (FinOps), then built by
 APEX. Areas: MCP activity (both currencies, rate, flag), markup revenue
 from Planet’s reports, Planet invoice reconciliation, scheme funding in
 the transaction currency, refunds and chargebacks with both currencies,
@@ -710,7 +709,7 @@ partial-chargeback rounding; MCP mismatch exception; MCP rows in the
 DTF</td>
 <td>8.3</td>
 <td>APEX</td>
-<td>Arulraj Panchamoorthy</td>
+<td>APEX team</td>
 </tr>
 <tr class="even">
 <td>2</td>
@@ -718,7 +717,7 @@ DTF</td>
 MPGS matching</td>
 <td>8.4</td>
 <td>Postilion, PGW</td>
-<td>Musaad Haider, Ghulam Rabbani</td>
+<td>Postilion team, Ghulam Rabbani</td>
 </tr>
 <tr class="odd">
 <td>3</td>
@@ -748,7 +747,7 @@ its agreement to do it for MCP</td>
 <td>Internal MCP reporting requirements</td>
 <td>8.8</td>
 <td>Operations &amp; Finance</td>
-<td>Sherly Sadanandan</td>
+<td>FinOps</td>
 </tr>
 <tr class="odd">
 <td>7</td>
@@ -764,7 +763,7 @@ Planet</td>
 </article>
 </main>
 </div>
-<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged except that people's names are shown as team names; the .docx stays the master.</footer>
 <script src="../../assets/search.js" defer></script>
 </body>
 </html>

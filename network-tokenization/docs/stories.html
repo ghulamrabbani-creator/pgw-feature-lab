@@ -88,13 +88,18 @@
 <li class="l1"><a href="#open-points">Open points</a></li>
 </ol></aside>
 <main>
-<div class="doc-meta"><span class="tag">v1.1</span><span class="tag grey">19-Nov-2026</span><span class="tag grey">Source: NT PGW Dev Stories v1.1 (Lab copy).docx</span></div>
+<div class="doc-meta"><span class="tag">v1.2</span><span class="tag grey">25-Nov-2026</span><span class="tag grey">Source: NT PGW Dev Stories v1.2 (Lab copy).docx</span></div>
 <article class="doc">
 <h1
 id="network-tokenization-pgw-dev-stories-mpgs-and-cybersource">Network
 Tokenization — PGW Dev Stories (MPGS and CyberSource)</h1>
-<p>Version 1.1 · 19-Nov-2026 · Prepared by Ghulam Rabbani (Product)
+<p>Version 1.2 · 25-Nov-2026 · Prepared by Ghulam Rabbani (Product)
 Team: PGW engineering team</p>
+<p><strong>Changes in v1.2 (25-Nov-2026):</strong> Open point 1 and the
+closed-points note now refer to the master toggle <em>Generate and Use
+Network Token</em>. Team names in place of people's names. NT-C1
+acceptance criteria renumbered (5a, 5b → 6, 7; old 6 → 8). No change to
+any requirement.</p>
 <p><strong>Changes in v1.1 (19-Nov-2026):</strong> Rule 1 now uses one
 master toggle, <em>Generate and Use Network Token</em>, per MID, default
 OFF. NT-C1: one CYBS call only (no enrollment call), no
@@ -2532,11 +2537,12 @@ Compliance.</p>
 <tbody>
 <tr class="odd">
 <td>1</td>
-<td>At release, every CYBS MID with <em>Enable tokenization</em> ON
-starts to create instrument identifiers and pay CIT/MIT with them.
-Confirm that a payment with an instrument identifier on a MID
-<strong>without</strong> CYBS token permission (P2) goes out as the
-card, so P2 is the PVT control.</td>
+<td>When <em>Generate and Use Network Token</em> is switched ON for a
+CYBS MID (with <em>Enable tokenization</em> ON), PGW starts to create
+instrument identifiers and pay CIT/MIT with them. Confirm that a payment
+with an instrument identifier on a MID <strong>without</strong> CYBS
+token permission (P2) goes out as the card, so P2 is the PVT
+control.</td>
 <td>NT-C1, NT-C3, NT-C4</td>
 <td>Merchant integration team / PGW engineering team to verify on a test
 MID</td>
@@ -2547,15 +2553,15 @@ MID</td>
 fill. CYBS capture, refund and void endpoints (refund and void proven on
 the test bench 14-Nov). Decision Manager MIT rule = operational, with
 Risk (P3). TMS headers and HTTP status (headers proven 11-Nov;
-<code>201</code> new / <code>200</code> existing per CYBS docs). No new
-toggle: CYBS follows the existing tokenization toggles. Closed 19-Nov:
-master toggle = <em>Generate and Use Network Token</em> (rule 1). NT-C1
-= one CYBS call only.</p>
+<code>201</code> new / <code>200</code> existing per CYBS docs). Closed
+19-Nov: master toggle = <em>Generate and Use Network Token</em> per MID,
+default OFF (rule 1); this replaces the 17-Nov decision "no new toggle".
+NT-C1 = one CYBS call only.</p>
 
 </article>
 </main>
 </div>
-<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+<footer class="lab-footer">Published copy of the master Word document. Wording is unchanged except that people's names are shown as team names; the .docx stays the master.</footer>
 <script src="../../assets/search.js" defer></script>
 </body>
 </html>
