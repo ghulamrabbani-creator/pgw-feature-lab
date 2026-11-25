@@ -31,7 +31,7 @@
 .legend span { display: inline-flex; align-items: center; gap: 7px; }
 .sw { width: 20px; height: 13px; border-radius: 4px; display: inline-block; border: 1.5px solid var(--border-2); background: #fff; }
 .sw.act { border-style: dashed; } .sw.money { border-color: var(--money); background: var(--money-bg); } .sw.held { border-color: #B45309; background: #FFF7ED; }
-.sw.fail { border-color: #B91C1C; background: #FEF2F2; } .sw.wait { border: 1.5px dashed #D97706; background: var(--warn-bg); } .sw.rel { border-color: #475569; background: #F1F5F9; }
+.sw.fail { border-color: #BE123C; background: #FFF1F2; } .sw.wait { border: 1.5px dashed #D97706; background: var(--warn-bg); } .sw.rel { border-color: #475569; background: #F1F5F9; }
 .lane-wrap { position: relative; overflow-x: auto; padding-bottom: 4px; }
 .lanes { position: relative; display: grid; }
 .lane-label { grid-column: 1; display: flex; align-items: center; font: 500 12px var(--mono); color: var(--muted); padding: 0 10px 0 0; border-top: 1px solid var(--border); text-transform: uppercase; letter-spacing: .03em; }
@@ -44,7 +44,7 @@
 .card.act { border-style: dashed; }
 .card.money { border-color: var(--money); background: var(--money-bg); } .card.money .n { color: var(--money); }
 .card.held { border-color: #B45309; background: #FFF7ED; } .card.held .n { color: #B45309; }
-.card.fail { border-color: #B91C1C; background: #FEF2F2; } .card.fail .n { color: #B91C1C; }
+.card.fail { border-color: #BE123C; background: #FFF1F2; } .card.fail .n { color: #BE123C; }
 .card.wait { border: 1.5px dashed #D97706; background: var(--warn-bg); } .card.wait .n { color: var(--warn-fg); }
 .card.rel { border-color: #475569; background: #F1F5F9; }
 .card.link { border: 1.5px dashed var(--link); background: #EFF6FF; color: #1E3A8A; }
@@ -112,7 +112,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
 <div class="ctrl bleed" id="ctrl" role="group" aria-label="Simulation settings"></div>
 
 <section class="panel bleed" id="flowA" aria-label="Flow A">
-<div class="fh"><h2>A. From Create Session to payout</h2><span class="start" id="aStart"></span></div>
+<div class="fh"><h2 id="a-from-create-session-to-payout">A. From Create Session to payout</h2><span class="start" id="aStart"></span></div>
 <p class="fdesc" id="aDesc"></p>
 <div class="legend">
 <span><i class="sw act"></i>Action by the customer or partner</span><span><i class="sw"></i>PGW or APEX processing</span><span><i class="sw held"></i>Held at APEX</span>
@@ -127,7 +127,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
 
 <div style="height:26px"></div>
 <section class="panel bleed" id="flowB" aria-label="Flow B">
-<div class="fh"><h2>B. Deferred split: from the Payout Advice API to payout</h2><span class="start" id="bStart"></span></div>
+<div class="fh"><h2 id="b-deferred-split-from-the-payout-advice-api-to-payout">B. Deferred split: from the Payout Advice API to payout</h2><span class="start" id="bStart"></span></div>
 <div id="bBody">
 <p class="fdesc" id="bDesc"></p>
 <div class="lane-wrap" id="bWrap"><div class="lanes" id="bLanes"></div></div>
@@ -465,5 +465,6 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
   window.__e2e = { O, FL, update, flowA, flowB };
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

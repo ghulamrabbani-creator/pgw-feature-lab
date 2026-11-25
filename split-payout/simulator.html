@@ -26,9 +26,9 @@
 .btn { font: 500 14px var(--sans); border-radius: 8px; padding: 8px 14px; cursor: pointer; border: 1px solid var(--border-2); background: var(--card); color: var(--ink); }
 .btn:hover { background: #F1F5F9; }
 .btn.pri { background: var(--money); border-color: var(--money); color: #fff; }
-.btn.pri:hover { background: #0B6655; }
+.btn.pri:hover { background: #065F46; }
 .btn.ink { background: var(--ink); border-color: var(--ink); color: #fff; }
-.btn.bad { color: #B91C1C; border-color: #FCA5A5; }
+.btn.bad { color: #BE123C; border-color: #FDA4AF; }
 .btns { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .grid2 { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
 .sub { font: 500 11px var(--mono); color: var(--muted); letter-spacing: .05em; text-transform: uppercase; margin: 0 0 8px; }
@@ -37,7 +37,7 @@
 .kv dd { margin: 0; font-family: var(--mono); font-size: 13px; color: var(--ink); word-break: break-word; }
 .st { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; display: inline-block; }
 .st.ok { background: var(--money-bg); color: var(--money); }
-.st.bad { background: #FEE2E2; color: #991B1B; }
+.st.bad { background: #FFE4E6; color: #9F1239; }
 .st.hold { background: var(--warn-bg); color: var(--warn-fg); }
 .st.grey { background: #F1F5F9; color: var(--muted); }
 .st.info { background: #DBEAFE; color: #1E40AF; }
@@ -49,8 +49,8 @@ table.t td.m { font-family: var(--mono); font-size: 12.5px; }
 .empty { color: var(--muted); font-size: 14px; }
 .note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
 .note b { color: var(--warn-fg); }
-.tryb { margin: 16px 0 0; padding: 12px 16px; border: 1.5px solid #B91C1C; background: #FEF2F2; border-radius: 10px; font-size: 14px; color: var(--text); }
-.tryb b { color: #991B1B; } .tryb a { margin-left: 8px; }
+.tryb { margin: 16px 0 0; padding: 12px 16px; border: 1.5px solid #BE123C; background: #FFF1F2; border-radius: 10px; font-size: 14px; color: var(--text); }
+.tryb b { color: #9F1239; } .tryb a { margin-left: 8px; }
 .info { font-size: 13px; background: #EFF6FF; border-left: 3px solid #1D4ED8; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
 .src { font: 11px var(--mono); color: var(--muted); margin-top: 10px; }
 .src a { color: var(--muted); }
@@ -64,12 +64,12 @@ textarea.code:focus { outline: 2px solid var(--link); }
 .chk td.n { font-family: var(--mono); color: var(--muted); white-space: nowrap; width: 1%; }
 .chk td.r { white-space: nowrap; width: 1%; font: 500 12px var(--mono); text-align: right; }
 .chk tr.pass td.r { color: var(--money); }
-.chk tr.fail td { background: #FEF2F2; } .chk tr.fail td.r { color: #B91C1C; }
+.chk tr.fail td { background: #FFF1F2; } .chk tr.fail td.r { color: #BE123C; }
 .chk tr.na td { color: var(--muted); }
-.chk .msg { display: block; color: #991B1B; font-size: 12px; margin-top: 2px; font-family: var(--mono); }
+.chk .msg { display: block; color: #9F1239; font-size: 12px; margin-top: 2px; font-family: var(--mono); }
 .rows2 td { font-size: 12.5px; }
 .rows2 tr.hit td { background: var(--money-bg); font-weight: 500; }
-.rows2 tr.hit.rej td { background: #FEF2F2; }
+.rows2 tr.hit.rej td { background: #FFF1F2; }
 .form { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-bottom: 14px; }
 .f label { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 4px; }
 .f input, .f select { width: 100%; font: 14px var(--sans); padding: 7px 9px; border: 1px solid var(--border-2); border-radius: 7px; background: #fff; color: var(--ink); }
@@ -80,7 +80,7 @@ textarea.code:focus { outline: 2px solid var(--link); }
 .legs td { padding: 4px 6px 4px 0; border: 0; }
 .legs input { width: 100%; font: 13px var(--mono); padding: 6px 8px; border: 1px solid var(--border-2); border-radius: 6px; }
 .x { background: none; border: 0; color: var(--muted); cursor: pointer; font-size: 18px; line-height: 1; padding: 4px 6px; }
-.x:hover { color: #B91C1C; }
+.x:hover { color: #BE123C; }
 .lnk { background: none; border: 0; color: var(--link); font: 500 13px var(--sans); cursor: pointer; padding: 4px 0; }
 .chkbox { display: inline-flex; gap: 8px; align-items: center; font-size: 14px; cursor: pointer; }
 .res-line { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-bottom: 14px; font-size: 14px; }
@@ -88,7 +88,7 @@ textarea.code:focus { outline: 2px solid var(--link); }
 .ev h3 { margin: 0 0 6px; font-size: 15px; color: var(--ink); font-weight: 600; display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .ev p { margin: 0 0 8px; font-size: 14px; }
 .pill { display: inline-block; font: 12px var(--mono); background: #F1F5F9; border-radius: 5px; padding: 2px 7px; margin: 1px 4px 1px 0; }
-.toastL { position: fixed; top: 76px; right: 24px; background: var(--money-bg); color: var(--money); border: 1px solid #A7D7CB; padding: 9px 16px; border-radius: 8px; font-weight: 500; display: none; z-index: 45; }
+.toastL { position: fixed; top: 76px; right: 24px; background: var(--money-bg); color: var(--money); border: 1px solid #A7F3D0; padding: 9px 16px; border-radius: 8px; font-weight: 500; display: none; z-index: 45; }
 .trail td { font-weight: 600; background: #F8FAFC; }
 @media (max-width: 900px) { .grid2 { grid-template-columns: minmax(0, 1fr); } }
 
@@ -180,14 +180,14 @@ textarea.code:focus { outline: 2px solid var(--link); }
 
 <div id="tryBanner" class="tryb" role="status" hidden></div>
 <section class="sec" id="s1">
-<header><span class="num">1</span><h2>Split Payout PGW Configuration</h2><span class="who">PGW configuration · Split Payout tab · SP-1 to SP-5</span><span class="sp"></span>
+<header><span class="num">1</span><h2 id="split-payout-pgw-configuration">Split Payout PGW Configuration</h2><span class="who">PGW configuration · Split Payout tab · SP-1 to SP-5</span><span class="sp"></span>
 <label class="hsel"><span>load example</span><select id="preset"><option value="">—</option><option value="off">Split off</option><option value="dynamic">Dynamic</option><option value="fixed">Fixed</option><option value="profile">Profile</option></select></label>
 <button class="btn ink" id="openCfg" type="button">Open PGW configuration</button></header>
 <div class="in" id="cfgView"></div>
 </section>
 
 <section class="sec" id="s2">
-<header><span class="num">2</span><h2>Update Create Session API</h2><span class="who">Merchant → PGW · POST /payment-intent/api/v2/direct/session · SP-6</span></header>
+<header><span class="num">2</span><h2 id="update-create-session-api">Update Create Session API</h2><span class="who">Merchant → PGW · POST /payment-intent/api/v2/direct/session · SP-6</span></header>
 <div class="in">
 <div class="grid2">
 <div>
@@ -206,32 +206,32 @@ textarea.code:focus { outline: 2px solid var(--link); }
 <span class="btns"><button class="lnk" id="editRaw" type="button">Edit JSON</button><button class="lnk" id="resetRaw" type="button" style="display:none">Back to form</button></span></div>
 <pre class="code" id="reqPreview"></pre>
 <textarea class="code" id="reqRaw" spellcheck="false" style="display:none" aria-label="Request body JSON"></textarea>
-<div class="btns" style="margin-top:12px"><button class="btn pri" id="fire" type="button">Create session</button><span class="empty" id="fireNote" style="color:#B91C1C"></span></div>
+<div class="btns" style="margin-top:12px"><button class="btn pri" id="fire" type="button">Create session</button><span class="empty" id="fireNote" style="color:#BE123C"></span></div>
 </div>
 </div>
 </div>
 </section>
 
 <section class="sec locked" id="s3">
-<header><span class="num">2</span><h2>Create Session result: checks and order</h2><span class="who">PGW · SP-6 sections 1 to 5</span><span class="sp"></span>
+<header><span class="num">2</span><h2 id="create-session-result-checks-and-order">Create Session result: checks and order</h2><span class="who">PGW · SP-6 sections 1 to 5</span><span class="sp"></span>
 <label class="hsel"><span>order</span><select id="orderSel"></select></label></header>
 <div class="in" id="resView"><p class="empty">Send a Create Session to see the checks.</p></div>
 </section>
 
 <section class="sec locked" id="s4">
-<header><span class="num">3</span><h2>Update APEX Create Transaction Federation</h2><span class="who">Customer → PGW → APEX · SP-6 section 6, SP-7</span><span class="sp"></span>
+<header><span class="num">3</span><h2 id="update-apex-create-transaction-federation">Update APEX Create Transaction Federation</h2><span class="who">Customer → PGW → APEX · SP-6 section 6, SP-7</span><span class="sp"></span>
 <label class="hsel"><span>APEX response</span><select class="apexSel" aria-label="APEX response"><option value="accept">Accepts (checks pass)</option><option value="reject">Rejects: Partner ID inactive at APEX</option><option value="down">Not reachable (timeout)</option></select></label></header>
 <div class="in" id="rtView"><p class="empty">Create a session first.</p></div>
 </section>
 
 <section class="sec locked" id="s4b">
-<header><span class="num">4</span><h2>Payout Advice Create/Update API</h2><span class="who">Merchant → PGW → APEX · independent API · SP-8, SP-7</span><span class="sp"></span>
+<header><span class="num">4</span><h2 id="payout-advice-create-update-api">Payout Advice Create/Update API</h2><span class="who">Merchant → PGW → APEX · independent API · SP-8, SP-7</span><span class="sp"></span>
 <label class="hsel"><span>APEX response</span><select class="apexSel" aria-label="APEX response"><option value="accept">Accepts (checks pass)</option><option value="reject">Rejects: Partner ID inactive at APEX</option><option value="down">Not reachable (timeout)</option></select></label></header>
 <div class="in" id="apiView"><p class="empty">Create a session first.</p></div>
 </section>
 
 <section class="sec" id="s5">
-<header><span class="num">5</span><h2>Day-End Split Advice File Generation</h2><span class="who">PGW → APEX · SP-9 · after the Ecomm cut-off (midnight, UAE)</span><span class="sp"></span>
+<header><span class="num">5</span><h2 id="day-end-split-advice-file-generation">Day-End Split Advice File Generation</h2><span class="who">PGW → APEX · SP-9 · after the Ecomm cut-off (midnight, UAE)</span><span class="sp"></span>
 <span class="st grey" id="dayLbl">Day 1</span><button class="btn ink" id="runEod" type="button">Run day-end</button></header>
 <div class="in" id="eodView"></div>
 </section>
@@ -939,5 +939,6 @@ if (t0) runTry(t0);
 window.__sim = { S, createSession, PRESETS, TRY, runTry };
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

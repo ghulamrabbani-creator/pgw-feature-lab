@@ -51,7 +51,7 @@
 .out p { margin: 0; font-size: 14px; color: var(--text-2); }
 .st { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 5px; }
 .st.paid { background: var(--money-bg); color: var(--money); }
-.st.held { background: #FEE2E2; color: #991B1B; }
+.st.held { background: #FFE4E6; color: #9F1239; }
 .st.rel { background: #DBEAFE; color: #1E40AF; }
 .st.wait { background: var(--warn-bg); color: var(--warn-fg); }
 .open { margin-top: 20px; border-left: 3px solid var(--warn-fg); background: #FFFBEB; border-radius: 0 10px 10px 0; padding: 14px 18px; font-size: 14px; }
@@ -69,7 +69,7 @@
 .ngrid { display: grid; grid-template-columns: repeat(auto-fill, minmax(170px, 1fr)); gap: 12px; margin-bottom: 14px; }
 .nf span { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 4px; }
 .nf input, .vt input { width: 100%; font: 14px var(--mono); padding: 7px 9px; border: 1px solid var(--border-2); border-radius: 7px; background: #fff; color: var(--ink); }
-.nf input.bad, .vt input.bad { border-color: #DC2626; background: #FEF2F2; }
+.nf input.bad, .vt input.bad { border-color: #E11D48; background: #FFF1F2; }
 .seg.sm { margin: 0; } .seg.sm button { padding: 5px 10px; font-size: 13px; }
 .vtw { overflow-x: auto; }
 .vt { border-collapse: collapse; width: 100%; max-width: 620px; }
@@ -77,12 +77,12 @@
 .vt td { padding: 3px 8px 3px 0; }
 .vt td:first-child input { font-family: var(--sans); }
 .vt .x { background: none; border: 0; color: var(--muted); font-size: 18px; cursor: pointer; padding: 2px 6px; }
-.vt .x:hover { color: #B91C1C; }
+.vt .x:hover { color: #BE123C; }
 .lnk { background: none; border: 0; color: var(--link); font: 500 13px var(--sans); cursor: pointer; padding: 6px 0; }
 .verdict { font-size: 14px; border-radius: 8px; padding: 10px 14px; margin: 0 0 12px; }
 .verdict:empty { display: none; }
 .verdict.ok { background: var(--money-bg); color: #065F46; }
-.verdict.bad { background: #FEF2F2; color: #991B1B; }
+.verdict.bad { background: #FFF1F2; color: #9F1239; }
 .verdict b { font-weight: 600; }
 #flow .band.held { fill: #B45309; fill-opacity: .25; }
 #flow .node.held { fill: #B45309; }
@@ -92,9 +92,9 @@
 .rcalc { font: 13px var(--mono); background: #F8FAFC; border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; }
 .rcalc div { display: flex; justify-content: space-between; gap: 16px; }
 .rcalc div.t { border-top: 1px solid var(--border-2); margin-top: 4px; padding-top: 4px; font-weight: 500; }
-.rcalc div.t.ok { color: var(--money); } .rcalc div.t.bad { color: #B91C1C; }
+.rcalc div.t.ok { color: var(--money); } .rcalc div.t.bad { color: #BE123C; }
 .pass { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; background: var(--money-bg); color: var(--money); }
-.fail { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; background: #FEE2E2; color: #991B1B; }
+.fail { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; background: #FFE4E6; color: #9F1239; }
 .na { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; background: #F1F5F9; color: var(--muted); }
 </style>
 </head>
@@ -114,7 +114,7 @@
 <a class="back" href="docs/stories.html#checks-before-payment">Stories: SP-6 check 3.6 →</a>
 </div>
 
-<h2 class="section-title" style="margin-top:0">The numbers</h2>
+<h2 id="the-numbers" class="section-title" style="margin-top:0">The numbers</h2>
 <div class="panel nums">
 <div class="nums-head"><span class="tag" id="srcBadge">Doc worked example (4.2)</span><span class="nums-note"><b>MDR</b>: what Geidea deducts from the partner (MID). <b>Commission</b>: what the partner takes from each vendor's leg. Numbers are fictional; what matters is how each component works.</span><button type="button" class="btn-s" id="reset">Reset to the doc example</button></div>
 <div class="ngrid">
@@ -126,10 +126,10 @@
 </div>
 <div class="vtw"><table class="vt"><thead><tr><th>Vendor</th><th id="splitHd">Split (AED)</th><th>Partner commission (%)</th><th></th></tr></thead><tbody id="vRows"></tbody></table></div>
 <button type="button" class="lnk" id="addV">+ Add vendor</button>
-<p class="nums-note" id="numsErr" style="color:#B91C1C"></p>
+<p class="nums-note" id="numsErr" style="color:#BE123C"></p>
 </div>
 
-<h2 class="section-title">One order, end to end</h2>
+<h2 id="one-order-end-to-end" class="section-title">One order, end to end</h2>
 <div class="panel">
 <div class="seg" role="group" aria-label="Scenario">
 <button type="button" data-mode="none" aria-pressed="false">No split</button>
@@ -149,12 +149,12 @@
 
 <div class="grid2">
 <div class="panel calc">
-<h3>How each payout is calculated</h3>
+<h3 id="how-each-payout-is-calculated">How each payout is calculated</h3>
 <p class="sub">Calculated by APEX, not PGW. A percentage split is first converted against the gross order amount. Each amount is rounded to 2 decimals; the partner's residual absorbs the rounding.</p>
 <div id="legs"></div>
 </div>
 <div class="panel residual">
-<h3>What the partner receives</h3>
+<h3 id="what-the-partner-receives">What the partner receives</h3>
 <p class="sub">The residual: everything left of the partner's net after vendor payouts and fees.</p>
 <table class="wf" id="wf"></table>
 </div>
@@ -168,7 +168,7 @@
 </div>
 <p class="src">Source: product doc v1.6, 4.1 How funds move and 4.2 Worked example. The doc example uses MDR 1%, remittance fee AED 1.00 per payout (illustrative), VAT on MDR left out.</p>
 
-<h2 class="section-title">The sequence in APEX</h2>
+<h2 id="the-sequence-in-apex" class="section-title">The sequence in APEX</h2>
 <div class="panel">
 <ol class="steps">
 <li>APEX calculates the partner's settlement and deducts Geidea's MDR and VAT on the MDR. The remainder is the partner's net.</li>
@@ -336,7 +336,7 @@
           <span class="chip"><small>split</small>${f(l.a)}</span><span class="op">−</span>
           <span class="chip${l.comm ? '' : ' off'}"><small>partner commission ${l.pct ? l.pct + '%' : 'none'}</small>${f(l.comm)}</span><span class="op">−</span>
           <span class="chip${l.fee ? '' : ' off'}"><small>remittance fee</small>${f(l.fee)}</span><span class="op">=</span>
-          <span class="res"${l.payout > 0 ? '' : ' style="background:#FEE2E2;color:#991B1B"'}>${f(l.payout)}</span></div></div>`).join('');
+          <span class="res"${l.payout > 0 ? '' : ' style="background:#FFE4E6;color:#9F1239"'}>${f(l.payout)}</span></div></div>`).join('');
     }
     const lessMdr = `Transaction amount less Geidea MDR${c.vat ? ' and VAT' : ''}`;
     const how = `${f(N.txn)} − ${f(c.mdr)}${c.vat ? ' − ' + f(c.vat) : ''}`;
@@ -367,7 +367,7 @@
       ${r1 && c.sa > c.net ? '<p style="font-size:13px;margin:8px 0 0">The splits are above the partner’s net, but commission covers the gap: valid. A plain "split ≤ net" check would wrongly reject this.</p>' : ''}</div>`;
     const r2h = `<div class="rule"><h4><span class="${c.rule2Bad.length ? 'fail' : 'pass'}">${c.rule2Bad.length ? 'FAIL' : 'pass'}</span> Rule 2 – every leg above zero</h4>
       <p class="f">advised amount − commission − remittance fee (only when the vendor bears it) &gt; 0, for every vendor</p>
-      <div class="rcalc">${c.legs.map(l => `<div><span>${esc(l.name)}: ${f(l.a)} − ${f(l.comm)}${m === 'opt2' ? ' − ' + f(l.fee) : ''}</span><span${l.payout > 0 ? '' : ' style="color:#B91C1C"'}>${f(l.payout)}</span></div>`).join('')}</div></div>`;
+      <div class="rcalc">${c.legs.map(l => `<div><span>${esc(l.name)}: ${f(l.a)} − ${f(l.comm)}${m === 'opt2' ? ' − ' + f(l.fee) : ''}</span><span${l.payout > 0 ? '' : ' style="color:#BE123C"'}>${f(l.payout)}</span></div>`).join('')}</div></div>`;
     const r3 = `<div class="rule"><h4><span class="na">rule</span> Single payout</h4><p class="f" style="margin:0">A transaction is never paid out twice.</p></div>`;
     $('rules').innerHTML = r1h + r2h + r3;
   }
@@ -398,5 +398,6 @@
   window.__mf = { compute: (m) => compute(read(), m), set: p => { P = p; renderInputs(); update(); } };
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

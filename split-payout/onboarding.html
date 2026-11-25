@@ -56,7 +56,7 @@ svg.links path.dash { stroke-dasharray: 4 4; }
 .hand h4 { margin: 0 0 8px; font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 14px; }
 .chip { font: 12px var(--mono); padding: 4px 9px; border-radius: 6px; background: #F1F5F9; color: var(--text); border: 1px solid var(--border); }
-.chip.out { background: var(--money-bg); border-color: #A7D7CC; color: #065F46; }
+.chip.out { background: var(--money-bg); border-color: #A7F3D0; color: #065F46; }
 .kind { display: inline-block; font: 500 11px var(--mono); padding: 2px 8px; border-radius: 5px; margin-left: 6px; vertical-align: 2px; }
 .kind.ops { background: #F1F5F9; color: var(--text-2); }
 .kind.sys { background: var(--money-bg); color: var(--money); }
@@ -105,7 +105,7 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 </div>
 <div class="terms"><b>Terms:</b> partner = the Geidea merchant (MID) that asks for split payout; vendor = a payee of the split. APEX gives each vendor a beneficiary ID; PGW uses that ID to check the partner's requests.</div>
 
-<h2 class="section-title">Who does what</h2>
+<h2 id="who-does-what" class="section-title">Who does what</h2>
 <section class="panel" aria-label="Onboarding swimlane">
 <div class="legend">
 <span><i class="sw ops"></i>Operational step (no system build in the MVP)</span>
@@ -127,7 +127,7 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 </div>
 </section>
 
-<h2 class="section-title">Where each set-up item lives</h2>
+<h2 id="where-each-set-up-item-lives" class="section-title">Where each set-up item lives</h2>
 <section class="panel">
 <table class="t">
 <tr><th>Item</th><th>Set by</th><th>Kept in</th><th>Used for</th></tr>
@@ -140,7 +140,7 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 <p class="src">Source: <a href="docs/product.html#setup-steps">product doc 5.2</a>, <a href="docs/product.html#configuration">7.1</a></p>
 </section>
 
-<h2 class="section-title">Rules that apply</h2>
+<h2 id="rules-that-apply" class="section-title">Rules that apply</h2>
 <section class="panel">
 <ul class="rules">
 <li>Offered only to select large partners, case by case. Unlicensed aggregators are excluded.</li>
@@ -154,7 +154,7 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 <p class="src">Source: <a href="docs/product.html#partner-eligibility-and-agreement">product doc 5.1</a>, <a href="docs/product.html#setup-steps">5.2</a>, <a href="docs/product.html#configuration">7.1</a></p>
 </section>
 
-<h2 class="section-title">Still to add</h2>
+<h2 id="still-to-add" class="section-title">Still to add</h2>
 <div class="pending">Detail from the Vendor Payout Service Operations SOP v1.0 (03-Nov-2026): the route and form of each handover, checklists, and how the change and deactivation paths run. This page shows only what the product doc states.</div>
 </main>
 <footer class="lab-footer">Illustrative explanation of the product document. The document is the requirement; where they differ, the document wins.</footer>
@@ -312,5 +312,6 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
   window.__ob = { go, STEPS, cur: () => cur };
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

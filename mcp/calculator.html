@@ -27,7 +27,7 @@
 .f { margin-bottom: 14px; }
 .f label { display: block; font: 500 11px var(--mono); color: var(--muted); margin-bottom: 4px; }
 .f input { width: 100%; font: 14px var(--mono); padding: 7px 9px; border: 1px solid var(--border-2); border-radius: 7px; background: #fff; color: var(--ink); }
-.f input.err { border-color: #B91C1C; background: #FEF2F2; }
+.f input.err { border-color: #BE123C; background: #FFF1F2; }
 .chips { display: flex; flex-wrap: wrap; gap: 6px; }
 .chip { font: 500 13px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--text); border-radius: 8px; padding: 6px 10px; cursor: pointer; }
 .chip:hover { background: #F1F5F9; }
@@ -38,16 +38,16 @@
 .note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
 .note b { color: var(--warn-fg); }
 .info { font-size: 13px; background: #EFF6FF; border-left: 3px solid #1D4ED8; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
-.bad { font-size: 13px; background: #FEF2F2; border-left: 3px solid #B91C1C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.bad { font-size: 13px; background: #FFF1F2; border-left: 3px solid #BE123C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
 .st { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
 .st.ok { background: var(--money-bg); color: var(--money); }
-.st.bad { background: #FEE2E2; color: #991B1B; }
+.st.bad { background: #FFE4E6; color: #9F1239; }
 .st.grey { background: #F1F5F9; color: var(--muted); }
 .st.hold { background: var(--warn-bg); color: var(--warn-fg); }
 .btn { font: 500 14px var(--sans); border-radius: 8px; padding: 7px 12px; cursor: pointer; border: 1px solid var(--border-2); background: var(--card); color: var(--ink); }
 .btn:hover { background: #F1F5F9; }
 .btn.pri { background: var(--money); border-color: var(--money); color: #fff; }
-.btn.pri:hover { background: #0B6553; }
+.btn.pri:hover { background: #065F46; }
 
 /* Quote */
 .quote { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 12px; }
@@ -81,15 +81,15 @@ table.rt td { padding: 9px 8px; border-bottom: 1px solid var(--border); vertical
 table.rt td.m { font-family: var(--mono); white-space: nowrap; }
 table.rt td.m.big { font-weight: 600; color: var(--ink); }
 table.rt tr.purchase td { background: #F8FAFC; }
-table.rt tr.rej td { background: #FEF2F2; color: #7F1D1D; }
-table.rt tr.rej td.m.big { color: #B91C1C; text-decoration: line-through; }
+table.rt tr.rej td { background: #FFF1F2; color: #881337; }
+table.rt tr.rej td.m.big { color: #BE123C; text-decoration: line-through; }
 table.rt tr.final td { background: var(--money-bg); }
 table.rt .calc { font: 12px var(--mono); color: var(--text-2); }
 table.rt .calc b { color: var(--ink); }
 table.rt .x { border: 0; background: none; color: var(--muted); cursor: pointer; font-size: 16px; line-height: 1; padding: 0 4px; }
-table.rt .x:hover { color: #B91C1C; }
+table.rt .x:hover { color: #BE123C; }
 table.rt td.alt { border-left: 2px dashed var(--border-2); }
-table.rt td.alt.neg { color: #B91C1C; font-weight: 600; }
+table.rt td.alt.neg { color: #BE123C; font-weight: 600; }
 table.rt th.alt { border-left: 2px dashed var(--border-2); color: #92400E; }
 .bars { margin-top: 18px; display: grid; gap: 10px; }
 .bar .lbl { display: flex; justify-content: space-between; font: 12px var(--mono); color: var(--text-2); margin-bottom: 4px; }
@@ -138,7 +138,7 @@ table.mt tr.sel td { background: var(--money-bg); color: var(--money); font-weig
 <div class="grid">
 <div class="col">
 <section class="card" id="s-in">
-<header><span class="num">1</span><h2>Order and rate</h2><span class="who">S4 section 2</span></header>
+<header><span class="num">1</span><h2 id="order-and-rate">Order and rate</h2><span class="who">S4 section 2</span></header>
 <div class="in">
 <div class="f"><label for="aed">Order amount (AED)</label>
 <input id="aed" inputmode="decimal" value="100.00" autocomplete="off"></div>
@@ -153,7 +153,7 @@ table.mt tr.sel td { background: var(--money-bg); color: var(--money); font-weig
 </section>
 
 <section class="card" id="s-min">
-<header><span class="num">4</span><h2>Minimum refund (existing rule)</h2><span class="who"><a href="docs/stories.html#checks">S6 check 1.2</a></span></header>
+<header><span class="num">4</span><h2 id="minimum-refund-existing-rule">Minimum refund (existing rule)</h2><span class="who"><a href="docs/stories.html#checks">S6 check 1.2</a></span></header>
 <div class="in">
 <p class="hint" style="margin-top:0">MCP adds no minimum of its own. The existing minimum refund amount (AED 0.10) applies, as for any refund. It is enough for MCP: AED 0.10 converts to at least one minor unit in every MVP currency, because each has a rate of 0.1 or more per AED.</p>
 <div id="minOut"></div>
@@ -165,7 +165,7 @@ table.mt tr.sel td { background: var(--money-bg); color: var(--money); font-weig
 
 <div class="col">
 <section class="card" id="s-q">
-<header><span class="num">2</span><h2>The quote the customer pays</h2><span class="who"><a href="docs/stories.html#quotes-fixed-for-the-session">S4 section 2</a> · <a href="docs/stories.html#fields">S5 section 3</a></span></header>
+<header><span class="num">2</span><h2 id="the-quote-the-customer-pays">The quote the customer pays</h2><span class="who"><a href="docs/stories.html#quotes-fixed-for-the-session">S4 section 2</a> · <a href="docs/stories.html#fields">S5 section 3</a></span></header>
 <div class="in">
 <div class="quote" id="quote"></div>
 <div class="ruler" id="ruler"></div>
@@ -175,7 +175,7 @@ table.mt tr.sel td { background: var(--money-bg); color: var(--money); font-weig
 </section>
 
 <section class="card" id="s-r">
-<header><span class="num">3</span><h2>Refunds in AED, sent in the transaction currency</h2><span class="who"><a href="docs/stories.html#checks">S6 section 1</a> · <a href="docs/stories.html#conversion-original-purchase-ismcp-true">section 2</a></span></header>
+<header><span class="num">3</span><h2 id="refunds-in-aed-sent-in-the-transaction-currency">Refunds in AED, sent in the transaction currency</h2><span class="who"><a href="docs/stories.html#checks">S6 section 1</a> · <a href="docs/stories.html#conversion-original-purchase-ismcp-true">section 2</a></span></header>
 <div class="in">
 <div class="radd">
 <div class="f"><label for="rAmt">Refund amount (AED)</label><input id="rAmt" inputmode="decimal" placeholder="60.00" autocomplete="off"></div>
@@ -211,7 +211,7 @@ const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;',
 const RATES = { GBP: '0.2137000', EUR: '0.2489000', INR: '23.1200000', USD: '0.2759000', SAR: '1.0345000' };
 const NEWER = { GBP: '0.2141000', EUR: '0.2492000', INR: '23.0800000', USD: '0.2759000', SAR: '1.0345000' };
 const CURS = ['GBP', 'EUR', 'INR', 'USD', 'SAR', 'JPY'];
-const SEG = ['#0E7C66', '#14B8A6', '#0F766E', '#2DD4BF', '#115E59', '#5EEAD4'];
+const SEG = ['#047857', '#10B981', '#047857', '#34D399', '#065F46', '#6EE7B7'];
 const E7 = 10000000n;
 const MIN_REFUND = 10n; // existing minimum refund amount, AED 0.10 (in fils)
 
@@ -504,5 +504,6 @@ window.__calc = {
 readHash(); render();
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

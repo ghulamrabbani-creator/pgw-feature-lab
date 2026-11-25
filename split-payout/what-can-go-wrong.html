@@ -31,15 +31,15 @@
 .grp { scroll-margin-top: 150px; }
 .case { background: var(--card); border: 1px solid var(--border); border-left: 4px solid var(--border-2); border-radius: 10px; padding: 14px 16px; scroll-margin-top: 150px; }
 .case:target { box-shadow: 0 0 0 3px rgba(29,78,216,.25); }
-.case.rej { border-left-color: #B91C1C; } .case.hold { border-left-color: #B45309; } .case.rel { border-left-color: #475569; } .case.tbd { border-left-color: #D97706; background: #FFFBEB; } .case.ok { border-left-color: var(--money); }
+.case.rej { border-left-color: #BE123C; } .case.hold { border-left-color: #B45309; } .case.rel { border-left-color: #475569; } .case.tbd { border-left-color: #D97706; background: #FFFBEB; } .case.ok { border-left-color: var(--money); }
 .case h3 { margin: 0 0 6px; font-size: 15px; color: var(--ink); font-weight: 600; display: flex; gap: 8px; align-items: baseline; flex-wrap: wrap; }
 .code { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 5px; background: #F1F5F9; color: var(--text-2); white-space: nowrap; }
 .out { font: 500 11px var(--mono); padding: 2px 7px; border-radius: 5px; white-space: nowrap; }
-.out.rej { background: #FEE2E2; color: #991B1B; } .out.hold { background: #FEF3C7; color: #92400E; } .out.rel { background: #E2E8F0; color: #334155; } .out.tbd { background: var(--warn-bg); color: var(--warn-fg); } .out.ok { background: var(--money-bg); color: var(--money); }
+.out.rej { background: #FFE4E6; color: #9F1239; } .out.hold { background: #FEF3C7; color: #92400E; } .out.rel { background: #E2E8F0; color: #334155; } .out.tbd { background: var(--warn-bg); color: var(--warn-fg); } .out.ok { background: var(--money-bg); color: var(--money); }
 .case dl { margin: 0; display: grid; grid-template-columns: 76px minmax(0, 1fr); gap: 4px 10px; font-size: 14px; }
 .case dt { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; padding-top: 3px; }
 .case dd { margin: 0; }
-.msg { font: 13px var(--mono); color: #991B1B; background: #FEF2F2; padding: 1px 6px; border-radius: 4px; }
+.msg { font: 13px var(--mono); color: #9F1239; background: #FFF1F2; padding: 1px 6px; border-radius: 4px; }
 .links { margin-top: 10px; display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; }
 .links a.try { font-weight: 500; color: #fff; background: var(--ink); padding: 3px 10px; border-radius: 6px; text-decoration: none; }
 .links a.try:hover { background: #1E293B; }
@@ -71,7 +71,7 @@
 <div class="tools">
 <input type="search" id="q" placeholder="Search a message, check or field" aria-label="Search cases">
 <span class="cnt" id="cnt"></span>
-<span class="lg"><span><i class="dot" style="background:#B91C1C"></i>Rejected</span><span><i class="dot" style="background:#B45309"></i>Held at APEX</span><span><i class="dot" style="background:#475569"></i>Released to the partner</span><span><i class="dot" style="background:var(--money)"></i>Handled, no loss</span><span><i class="dot" style="background:#D97706"></i>Not defined yet</span></span>
+<span class="lg"><span><i class="dot" style="background:#BE123C"></i>Rejected</span><span><i class="dot" style="background:#B45309"></i>Held at APEX</span><span><i class="dot" style="background:#475569"></i>Released to the partner</span><span><i class="dot" style="background:var(--money)"></i>Handled, no loss</span><span><i class="dot" style="background:#D97706"></i>Not defined yet</span></span>
 </div>
 <div id="list"></div>
 </main>
@@ -287,5 +287,6 @@
   window.__wg = { C, STAGES, tryable };
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>
