@@ -37,11 +37,11 @@
 .note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
 .note b { color: var(--warn-fg); }
 .info { font-size: 13px; background: #EFF6FF; border-left: 3px solid #1D4ED8; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
-.bad { font-size: 13px; background: #FEF2F2; border-left: 3px solid #B91C1C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
+.bad { font-size: 13px; background: #FFF1F2; border-left: 3px solid #BE123C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 10px; color: var(--text); }
 .src { font: 11px var(--mono); color: var(--muted); margin-top: 10px; }
 .st { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; display: inline-block; }
 .st.ok { background: var(--money-bg); color: var(--money); }
-.st.bad { background: #FEE2E2; color: #991B1B; }
+.st.bad { background: #FFE4E6; color: #9F1239; }
 .st.hold { background: var(--warn-bg); color: var(--warn-fg); }
 .st.grey { background: #F1F5F9; color: var(--muted); }
 .chk { width: 100%; border-collapse: collapse; font-size: 13px; }
@@ -50,7 +50,7 @@
 .chk td.n { font-family: var(--mono); color: var(--muted); white-space: nowrap; width: 1%; }
 .chk td.r { white-space: nowrap; width: 1%; font: 500 12px var(--mono); text-align: right; }
 .chk tr.pass td.r { color: var(--money); }
-.chk tr.fail td { background: #FEF2F2; } .chk tr.fail td.r { color: #B91C1C; }
+.chk tr.fail td { background: #FFF1F2; } .chk tr.fail td.r { color: #BE123C; }
 .chk tr.stop td { background: #FFFBEB; } .chk tr.stop td.r { color: var(--warn-fg); }
 .chk tr.na td { color: var(--muted); }
 .chk .why { display: block; font-size: 12px; color: var(--text-2); margin-top: 2px; }
@@ -190,14 +190,14 @@ pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
 <!-- Column 1: merchant -->
 <div class="col">
 <section class="card" id="s-cfg">
-<header><span class="num">1</span><h2>Merchant set-up</h2><span class="who">PGW Configuration</span></header>
+<header><span class="num">1</span><h2 id="merchant-set-up">Merchant set-up</h2><span class="who">PGW Configuration</span></header>
 <div class="in">
 <div class="gx" id="gx"></div>
 <p class="src">Geidea screen shown in the Geidea Design System. Toggle name is a placeholder until PGW names it (must differ from <code>ENABLE_MULTI_CURRENCY</code> and <code>ENABLE_MULTI_CURRENCY_SETTLEMENT</code>).</p>
 </div>
 </section>
 <section class="card" id="s-order">
-<header><span class="num">2</span><h2>The order</h2><span class="who">merchant → PGW</span></header>
+<header><span class="num">2</span><h2 id="the-order">The order</h2><span class="who">merchant → PGW</span></header>
 <div class="in">
 <div class="f"><label for="oSrc">How the order is paid</label>
 <select id="oSrc">
@@ -219,14 +219,14 @@ pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
 <!-- Column 2: customer and rates -->
 <div class="col">
 <section class="card" id="s-geo">
-<header><span class="num">3</span><h2>Where the customer is</h2><span class="who">customer IP → MaxMind → country</span></header>
+<header><span class="num">3</span><h2 id="where-the-customer-is">Where the customer is</h2><span class="who">customer IP → MaxMind → country</span></header>
 <div class="in">
 <div class="chips" id="geo"></div>
 <div id="geoOut"></div>
 </div>
 </section>
 <section class="card" id="s-rates">
-<header><span class="num">4</span><h2>Planet rate file</h2><span class="who">Planet → PGW, daily over SFTP</span></header>
+<header><span class="num">4</span><h2 id="planet-rate-file">Planet rate file</h2><span class="who">Planet → PGW, daily over SFTP</span></header>
 <div class="in">
 <div class="chips" id="rfs"></div>
 <div id="rfOut"></div>
@@ -246,17 +246,17 @@ pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
 
 <div class="lower">
 <section class="card" id="s-trace">
-<header><span class="num">5</span><h2>Why the HPP looks like this</h2><span class="who">PGW checks, in order</span></header>
+<header><span class="num">5</span><h2 id="why-the-hpp-looks-like-this">Why the HPP looks like this</h2><span class="who">PGW checks, in order</span></header>
 <div class="in" id="trace"></div>
 </section>
 <section class="card" id="s-file">
-<header><span class="num">6</span><h2>The rate PGW used</h2><span class="who">cached file · Visa section</span></header>
+<header><span class="num">6</span><h2 id="the-rate-pgw-used">The rate PGW used</h2><span class="who">cached file · Visa section</span></header>
 <div class="in" id="fileOut"></div>
 </section>
 </div>
 
 <section class="card" id="s-after" style="margin-top:20px">
-<header><span class="num">7</span><h2>After Pay</h2><span class="who">what PGW stores · what the merchant sees</span></header>
+<header><span class="num">7</span><h2 id="after-pay">After Pay</h2><span class="who">what PGW stores · what the merchant sees</span></header>
 <div class="in" id="after"><p class="hint">Press Pay on the HPP to see the result.</p></div>
 </section>
 
@@ -597,5 +597,6 @@ applyHash();
 window.__mcp = { get state() { return S; }, derive, quote, convert, toMinor, fmt, TRY, set(o) { Object.assign(S, o); render(); }, pay, reset() { S = JSON.parse(JSON.stringify(DEF)); render(); } };
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

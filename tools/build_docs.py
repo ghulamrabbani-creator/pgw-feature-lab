@@ -35,6 +35,7 @@ TEMPLATE = """<!DOCTYPE html>
 </main>
 </div>
 <footer class="lab-footer">Published copy of the master Word document. Wording is unchanged; the .docx stays the master.</footer>
+<script src="../../assets/search.js" defer></script>
 </body>
 </html>
 """

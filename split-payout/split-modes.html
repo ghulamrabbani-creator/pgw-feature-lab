@@ -73,10 +73,10 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 </div>
 <div class="terms"><b>Terms:</b> partner = the Geidea merchant (MID) with split payout on; vendor = a payee of the split, identified by an ID from APEX (the stories call it a Partner ID). Field names are from the PGW stories and can be renamed by PGW engineering.</div>
 
-<h2 class="section-title">The three modes side by side</h2>
+<h2 id="the-three-modes-side-by-side" class="section-title">The three modes side by side</h2>
 <div class="cmp">
 <article class="mode">
-<h3>Dynamic</h3>
+<h3 id="dynamic">Dynamic</h3>
 <p class="one">The partner sends the split with each order, or later.</p>
 <dl>
 <dt>Who defines the split</dt><dd><span class="who p">Partner</span> per order</dd>
@@ -88,7 +88,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <a class="try" href="simulator.html#cfg=dynamic">Try it in the simulator →</a>
 </article>
 <article class="mode">
-<h3>Fixed</h3>
+<h3 id="fixed">Fixed</h3>
 <p class="one">One template, set by Geidea, applies to every order.</p>
 <dl>
 <dt>Who defines the split</dt><dd><span class="who g">Geidea</span> once, for all orders</dd>
@@ -100,7 +100,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <a class="try" href="simulator.html#cfg=fixed">Try it in the simulator →</a>
 </article>
 <article class="mode">
-<h3>Profile</h3>
+<h3 id="profile">Profile</h3>
 <p class="one">Geidea sets a catalog of templates; the partner picks one per order.</p>
 <dl>
 <dt>Who defines the split</dt><dd><span class="who g">Geidea</span> defines the catalog, <span class="who p">partner</span> picks per order</dd>
@@ -114,7 +114,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 </div>
 <p class="src">Source: product doc v1.6, <a href="docs/product.html#use-cases">2 Use cases</a> and <a href="docs/product.html#split-modes">3.2 Split modes</a>; stories <a href="docs/stories.html#sp-3-febe-enable-split-partner-ids-and-dynamic-mode">SP-3</a>, <a href="docs/stories.html#sp-4-febe-fixed-mode">SP-4</a>, <a href="docs/stories.html#sp-5-febe-profile-mode">SP-5</a>, <a href="docs/stories.html#what-pgw-does-with-each-request">SP-6 section 2</a>, <a href="docs/stories.html#checks">SP-8 check 2.1</a>.</p>
 
-<h2 class="section-title">One order, three modes</h2>
+<h2 id="one-order-three-modes" class="section-title">One order, three modes</h2>
 <div class="panel">
 <div class="ctl">
 <div class="seg" role="group" aria-label="Mode">
@@ -135,7 +135,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <p class="src">Examples: stories SP-4 section 4 (Fixed template) and SP-5 section 4 (profile catalog); Dynamic legs as in the product doc worked example. Illustrative values.</p>
 </div>
 
-<h2 class="section-title">Rules for every mode</h2>
+<h2 id="rules-for-every-mode" class="section-title">Rules for every mode</h2>
 <div class="panel">
 <ul class="rules">
 <li>A leg names a vendor ID and a value. The value is an amount or a percentage of the gross transaction amount, never both.</li>
@@ -149,7 +149,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <p class="src">Source: product doc v1.6, <a href="docs/product.html#split-modes">3.2 Rules common to all modes</a>; stories SP-2 section 2, SP-4 section 2, SP-6 check 3.6.</p>
 </div>
 
-<h2 class="section-title">Changing the mode or the set-up</h2>
+<h2 id="changing-the-mode-or-the-set-up" class="section-title">Changing the mode or the set-up</h2>
 <div class="panel">
 <div style="overflow-x:auto"><table class="t">
 <tr><th style="width:34%">Change saved in PGW</th><th>Effect</th></tr>
@@ -195,7 +195,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
     const d = DATA[mode];
     const amtOk = /^\d+(\.\d{1,2})?$/.test($('amt').value.trim()) && parseFloat($('amt').value) > 0;
     const amt = amtOk ? parseFloat($('amt').value) : 1000;
-    $('amt').style.borderColor = amtOk ? '' : '#DC2626';
+    $('amt').style.borderColor = amtOk ? '' : '#E11D48';
     document.querySelectorAll('[data-m]').forEach(b => b.setAttribute('aria-pressed', b.dataset.m === mode));
     $('st1').innerHTML = `<h4><span class="who g">Geidea</span> Set up once in PGW</h4><p>${d.s1}</p><pre>${json(d.setup)}</pre>`;
     const req = { amount: amt, currency: 'AED', paymentOperation: 'Pay' };
@@ -210,7 +210,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
       <table class="legs"><tr><th>Vendor ID</th><th>${d.type === 'PERCENTAGE' ? 'Sent' : 'Amount'}</th>${d.type === 'PERCENTAGE' ? '<th style="text-align:right">APEX amount</th>' : ''}</tr>
       ${rows.map(x => `<tr><td style="font-family:var(--mono)">${x.p}</td><td style="font-family:var(--mono)">${d.type === 'PERCENTAGE' ? x.v + '%' : f(x.v)}</td>${d.type === 'PERCENTAGE' ? `<td class="n">${f(x.a)}</td>` : ''}</tr>`).join('')}
       <tr class="rest"><td colspan="${d.type === 'PERCENTAGE' ? 2 : 1}">Partner keeps the rest</td><td class="n">${over ? '—' : f(r2(amt - tot))}</td></tr></table>
-      <p style="margin:10px 0 0;font-size:12px">${over ? '<span style="color:#B91C1C">The amount legs add up to more than this order: PGW rejects it at Create Session (SP-6 check 3.6).</span>' : 'Before MDR, VAT, partner commission and remittance fees. See <a href="money-flow.html">Money flow</a>.'}</p>`;
+      <p style="margin:10px 0 0;font-size:12px">${over ? '<span style="color:#BE123C">The amount legs add up to more than this order: PGW rejects it at Create Session (SP-6 check 3.6).</span>' : 'Before MDR, VAT, partner commission and remittance fees. See <a href="money-flow.html">Money flow</a>.'}</p>`;
     $('foot').textContent = d.foot;
   }
   document.querySelectorAll('[data-m]').forEach(b => b.onclick = () => { mode = b.dataset.m; render(); });
@@ -218,5 +218,6 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
   render();
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

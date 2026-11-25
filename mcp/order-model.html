@@ -37,7 +37,7 @@
 .note { font-size: 13px; background: #FFFBEB; border-left: 3px solid var(--warn-fg); padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
 .note b { color: var(--warn-fg); }
 .info { font-size: 13px; background: #EFF6FF; border-left: 3px solid #1D4ED8; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
-.bad { font-size: 13px; background: #FEF2F2; border-left: 3px solid #B91C1C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
+.bad { font-size: 13px; background: #FFF1F2; border-left: 3px solid #BE123C; padding: 8px 12px; border-radius: 0 8px 8px 0; margin-top: 12px; color: var(--text); }
 .st { font: 500 12px var(--mono); padding: 2px 8px; border-radius: 6px; display: inline-block; white-space: nowrap; }
 .st.ok { background: var(--money-bg); color: var(--money); }
 .st.grey { background: #F1F5F9; color: var(--muted); }
@@ -46,7 +46,7 @@
 .btn:hover:not(:disabled) { background: #F1F5F9; }
 .btn:disabled { opacity: .4; cursor: not-allowed; }
 .btn.pri { background: var(--money); border-color: var(--money); color: #fff; }
-.btn.pri:hover:not(:disabled) { background: #0B6553; }
+.btn.pri:hover:not(:disabled) { background: #065F46; }
 
 /* Stepper */
 ol.steps { list-style: none; margin: 0; padding: 0; counter-reset: s; }
@@ -167,7 +167,7 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 <div class="grid">
 <div class="col"><div class="col sticky">
 <section class="card" id="c-set">
-<header><span class="num">1</span><h2>The order</h2><span class="who">merchant offers GBP, EUR, INR</span></header>
+<header><span class="num">1</span><h2 id="the-order">The order</h2><span class="who">merchant offers GBP, EUR, INR</span></header>
 <div class="in">
 <div class="f"><label>Customer pays in</label><div class="chips" id="payChips"></div>
 <p class="hint" id="payHint"></p></div>
@@ -176,7 +176,7 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 </div>
 </section>
 <section class="card" id="c-steps">
-<header><span class="num">2</span><h2>Steps</h2></header>
+<header><span class="num">2</span><h2 id="steps-2">Steps</h2></header>
 <div class="in">
 <ol class="steps" id="steps"></ol>
 <div class="nav"><button class="btn" id="prev">← Back</button><button class="btn pri" id="next">Next step →</button></div>
@@ -186,14 +186,14 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 
 <div class="col">
 <section class="card now" id="c-now">
-<header><span class="num">3</span><h2>What happened</h2><span class="who" id="nowWho"></span></header>
+<header><span class="num">3</span><h2 id="what-happened">What happened</h2><span class="who" id="nowWho"></span></header>
 <div class="in" id="nowOut"></div>
 </section>
 
 <div class="viewbar" id="viewbar"><span class="lbl">View the order model as</span><span class="seg2"><button data-view="json" aria-pressed="true">JSON</button><button data-view="table" aria-pressed="false">Table</button></span><p class="hint">JSON for developers, table for everyone else. Same data.</p></div>
 
 <section class="card vj" id="c-model">
-<header><span class="num">4</span><h2>PGW order model</h2><span class="who"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · <a href="docs/stories.html#s6-be-mcp-refunds">S6</a></span></header>
+<header><span class="num">4</span><h2 id="pgw-order-model">PGW order model</h2><span class="who"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · <a href="docs/stories.html#s6-be-mcp-refunds">S6</a></span></header>
 <div class="in">
 <div id="jsonOut"></div>
 <div class="lg"><span><i class="mcp">"isMcp"</i> new MCP field</span><span><i class="chg">"amount"</i> existing field, holds the paid currency for an MCP transaction</span><span><i class="fr">+</i> written at this step</span></div>
@@ -202,10 +202,10 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 </section>
 
 <section class="card vt" id="c-order">
-<header><span class="num">4</span><h2>PGW order and HPP session</h2><span class="who"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5 section 3</a></span></header>
+<header><span class="num">4</span><h2 id="pgw-order-and-hpp-session">PGW order and HPP session</h2><span class="who"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5 section 3</a></span></header>
 <div class="in">
 <div class="tw"><table class="rec" id="orderTbl"></table></div>
-<h3 style="font-size:15px;margin:20px 0 10px;color:var(--ink)">Order totals <span class="tg t-ex">existing · computed from <code>mcpBaseAmount</code></span></h3>
+<h3 id="order-totals-existing-computed-from-mcpbaseamount" style="font-size:15px;margin:20px 0 10px;color:var(--ink)">Order totals <span class="tg t-ex">existing · computed from <code>mcpBaseAmount</code></span></h3>
 <div class="tot" id="totOut"></div>
 <p class="src">S5 section 4: compute every order total from <code>mcpBaseAmount</code>. Never add <code>amount</code> values of transactions in different currencies.</p>
 <div id="wrongOut"></div>
@@ -213,7 +213,7 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 </section>
 
 <section class="card vt" id="c-txn">
-<header><span class="num">5</span><h2>Transactions of the order</h2><span class="who"><a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · <a href="docs/stories.html#s6-be-mcp-refunds">S6</a></span></header>
+<header><span class="num">5</span><h2 id="transactions-of-the-order">Transactions of the order</h2><span class="who"><a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · <a href="docs/stories.html#s6-be-mcp-refunds">S6</a></span></header>
 <div class="in">
 <div class="tw"><table class="rec" id="txnTbl"></table></div>
 <div class="legend"><span><span class="sw"></span>written at this step</span><span><span class="tg t-ex">existing</span> as today</span><span><span class="tg t-ch">existing · paid currency</span> same field, holds the transaction view for MCP</span><span><span class="tg t-nw">new</span> MCP field</span></div>
@@ -222,17 +222,17 @@ table.pv td { padding: 7px 6px; border-bottom: 1px solid var(--border); font-fam
 
 <div class="views">
 <section class="card" id="c-merch">
-<header><span class="num">6</span><h2>Merchant sees</h2><span class="who"><a href="docs/stories.html#s7-be-merchant-facing-outputs-in-aed">S7</a></span></header>
+<header><span class="num">6</span><h2 id="merchant-sees">Merchant sees</h2><span class="who"><a href="docs/stories.html#s7-be-merchant-facing-outputs-in-aed">S7</a></span></header>
 <div class="in" id="merchOut"></div>
 </section>
 <section class="card" id="c-proc">
-<header><span class="num">7</span><h2>Processor receives</h2><span class="who">MPGS or CyberSource</span></header>
+<header><span class="num">7</span><h2 id="processor-receives">Processor receives</h2><span class="who">MPGS or CyberSource</span></header>
 <div class="in" id="procOut"></div>
 </section>
 </div>
 
 <section class="card" id="c-chk">
-<header><span class="num">8</span><h2>Checks on the order</h2><span class="who">S5 section 4 · S6 goal 2</span></header>
+<header><span class="num">8</span><h2 id="checks-on-the-order">Checks on the order</h2><span class="who">S5 section 4 · S6 goal 2</span></header>
 <div class="in"><ul class="chk" id="chkOut"></ul>
 <div class="note"><b>Not on this page.</b> The same purchase and refunds as sent to APEX (<a href="docs/stories.html#s8-be-federation-to-apex-parked-waiting-on-p4">S8</a>) and in the enrichment file to Postilion (<a href="docs/stories.html#s9-be-enrichment-file-to-postilion-parked-waiting-on-p5">S9</a>): parked until APEX gives the field names and the enrichment format is agreed. Void and chargebacks: not covered here.</div>
 </div>
@@ -539,5 +539,6 @@ window.addEventListener('hashchange', () => { if (writing) return; readHash(); r
 window.__om = { st, model, TRIES, last: null };
 readHash(); render();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

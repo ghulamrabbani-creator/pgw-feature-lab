@@ -36,10 +36,10 @@
 <h1 class="page">MCP: dynamic multi-currency pricing</h1>
 <p class="lead">A customer on Geidea HPP is offered the price in their own currency, based on where they are, and can pay in it. The merchant prices, sees and is settled in AED as today, and never sees the conversion. Rates come from Planet's daily file, markup included. Launch target Jan-2027.</p>
 
-<h2 class="section-title">One order, three currencies: the main change</h2>
+<h2 id="one-order-three-currencies-the-main-change" class="section-title">One order, three currencies: the main change</h2>
 <div class="keychg"><b>The change to discuss first.</b> Inside PGW, the existing transaction <code>amount</code> and <code>currency</code> now hold what the customer paid (GBP 21.37). Everything the merchant sees, and APEX's main fields, stay in AED. Two new fields, <code>mcpBaseAmount</code> and <code>mcpBaseCurrency</code>, carry the AED value on every purchase and refund, so no system downstream converts anything.</div>
 <div class="cur3">
-<div class="c"><span class="k">order currency</span><h3>What the merchant priced</h3><div class="ex">AED 100.00</div>
+<div class="c"><span class="k">order currency</span><h3 id="what-the-merchant-priced">What the merchant priced</h3><div class="ex">AED 100.00</div>
 <table class="pt"><thead><tr><th>Where</th><th>Parameter</th></tr></thead><tbody>
 <tr><td>Create Session</td><td class="pn"><code>amount</code><code>currency</code><span class="tg t-ex">existing</span></td></tr>
 <tr><td>PGW order</td><td class="pn"><code>amount</code><code>currency</code><span class="tg t-ex">existing</span></td></tr>
@@ -48,7 +48,7 @@
 <tr><td>APEX</td><td class="pn"><code>amount</code><code>transactionCurrency</code><span class="tg t-ch">existing · AED for MCP</span></td></tr>
 </tbody></table>
 <p>Seen by the merchant, the Merchant Portal and APEX main fields. MVP: AED orders only.</p></div>
-<div class="c"><span class="k">transaction currency</span><h3>What the customer pays</h3><div class="ex">GBP 21.37</div>
+<div class="c"><span class="k">transaction currency</span><h3 id="what-the-customer-pays">What the customer pays</h3><div class="ex">GBP 21.37</div>
 <table class="pt"><thead><tr><th>Where</th><th>Parameter</th></tr></thead><tbody>
 <tr><td>PGW transaction</td><td class="pn"><code>amount</code><code>currency</code><span class="tg t-ch">existing · paid currency</span></td></tr>
 <tr><td>PGW transaction</td><td class="pn"><code>isMcp</code><code>mcpRate</code><code>mcpRateId</code><span class="tg t-nw">new</span></td></tr>
@@ -57,7 +57,7 @@
 <tr><td>APEX</td><td class="pn">Cardholder Amount, Cardholder Currency, Cardholder ConvRate, Transaction Identifier<span class="tg t-nw">new · names pending</span></td></tr>
 </tbody></table>
 <p>Chosen on HPP. Authorized and cleared with the scheme in this currency. Never shown to the merchant.</p></div>
-<div class="c"><span class="k">settlement currency</span><h3>What the merchant is paid</h3><div class="ex">SAR</div>
+<div class="c"><span class="k">settlement currency</span><h3 id="what-the-merchant-is-paid">What the merchant is paid</h3><div class="ex">SAR</div>
 <table class="pt"><thead><tr><th>Where</th><th>Parameter</th></tr></thead><tbody>
 <tr><td>APEX</td><td class="pn"><code>settlementAmount</code><code>settlementCurrency</code><span class="tg t-ex">existing</span></td></tr>
 <tr><td>APEX</td><td class="pn"><code>exchangeRate</code><span class="tg t-ex">existing · order → settlement</span></td></tr>
@@ -66,14 +66,14 @@
 </div>
 <p class="src" style="font:11px var(--mono);color:var(--muted);margin-top:10px">Worked example: rate AED → GBP 0.2137, markup included. New PGW field names are the stories' proposals, except <code>mcpBaseAmount</code> and <code>mcpBaseCurrency</code> (agreed). <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">Story S5</a> · <a href="docs/requirements.html#the-three-currencies">Requirement</a></p>
 
-<h2 class="section-title">Documents</h2>
+<h2 id="documents" class="section-title">Documents</h2>
 <div class="rows">
 <a class="row" href="docs/requirements.html"><div class="grow"><div class="t">Solution requirements</div><div class="d">What each Geidea system and team delivers for MCP</div></div><span class="tag">v3.0 · 25-Nov-2026</span></a>
 <a class="row" href="docs/stories.html"><div class="grow"><div class="t">PGW dev stories</div><div class="d">S1 to S7 written; S8 (APEX federation) and S9 (enrichment file) parked</div></div><span class="tag">v0.1 · 25-Nov-2026</span></a>
 <div class="row plan"><div class="grow"><div class="t">Interface notes</div><div class="d">APEX fields, enrichment record, Planet rate file and DTF</div></div><span class="tag grey">in preparation</span></div>
 </div>
 
-<h2 class="section-title">Visual pages</h2>
+<h2 id="visual-pages" class="section-title">Visual pages</h2>
 <div class="rows">
 <a class="row" href="end-to-end.html"><div class="grow"><div class="t">End-to-end view</div><div class="d">One AED order from Planet's rate file to payout and refunds, in one swimlane; switch location, rate file, currency, method and refunds and the flow redraws</div></div><span class="tag">open</span></a>
 <a class="row" href="hpp-simulator.html"><div class="grow"><div class="t">HPP simulator</div><div class="d">Merchant set-up, customer location and rate-file state drive what the HPP offers; pay and see what PGW stores and what the merchant sees</div></div><span class="tag">open</span></a>
@@ -97,5 +97,6 @@
 <div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s9-be-enrichment-file-to-postilion-parked-waiting-on-p5">S9</a> · Enrichment file (parked)</div><div class="d"><a href="end-to-end.html">End-to-end</a></div></div></div>
 </div>
 </main>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

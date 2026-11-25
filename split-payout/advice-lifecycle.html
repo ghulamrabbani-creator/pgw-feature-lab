@@ -22,7 +22,7 @@
 .map svg .node.fin rect { stroke-width: 2; }
 .map svg .node.proc rect { fill: var(--money-bg); stroke: var(--money); }
 .map svg .node.rel rect { fill: #F1F5F9; stroke: #475569; }
-.map svg .node.rej rect { fill: #FEF2F2; stroke: #B91C1C; }
+.map svg .node.rej rect { fill: #FFF1F2; stroke: #BE123C; }
 .map svg .node.start rect { stroke-dasharray: 5 4; }
 .map svg .node.on rect { stroke: var(--ink); stroke-width: 3; }
 .map svg .node:focus { outline: none; }
@@ -40,7 +40,7 @@
 /* chips */
 .chip { display: inline-block; font: 500 11px var(--mono); padding: 2px 8px; border-radius: 5px; white-space: nowrap; }
 .m-held { background: #FEF3C7; color: #92400E; } .m-paid { background: var(--money-bg); color: var(--money); } .m-rel { background: #E2E8F0; color: #334155; } .m-none { background: #F1F5F9; color: var(--muted); }
-.a-CREATED { background: #DBEAFE; color: #1E40AF; } .a-PENDING_MATCH { background: #EDE9FE; color: #5B21B6; } .a-REJECTED { background: #FEE2E2; color: #991B1B; } .a-PROCESSED { background: var(--money-bg); color: var(--money); } .a-RELEASED { background: #E2E8F0; color: #334155; } .a-none { background: #F1F5F9; color: var(--muted); }
+.a-CREATED { background: #DBEAFE; color: #1E40AF; } .a-PENDING_MATCH { background: #EDE9FE; color: #5B21B6; } .a-REJECTED { background: #FFE4E6; color: #9F1239; } .a-PROCESSED { background: var(--money-bg); color: var(--money); } .a-RELEASED { background: #E2E8F0; color: #334155; } .a-none { background: #F1F5F9; color: var(--muted); }
 /* player */
 .seg { display: inline-flex; flex-wrap: wrap; background: #F1F5F9; border: 1px solid var(--border); border-radius: 10px; padding: 4px; gap: 4px; }
 .seg button { font: 500 14px var(--sans); color: var(--text-2); background: transparent; border: 0; border-radius: 7px; padding: 8px 14px; cursor: pointer; }
@@ -66,7 +66,7 @@
 table.t { width: 100%; border-collapse: collapse; font-size: 14px; }
 table.t th { text-align: left; font-weight: 500; color: var(--muted); font-size: 12px; padding: 8px; border-bottom: 1px solid var(--border); }
 table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical-align: top; }
-.yes { color: var(--money); font-weight: 500; } .no { color: #B91C1C; font-weight: 500; }
+.yes { color: var(--money); font-weight: 500; } .no { color: #BE123C; font-weight: 500; }
 .tw { overflow-x: auto; }
 @media (max-width: 960px) {
   .map { grid-template-columns: minmax(0, 1fr); }
@@ -126,7 +126,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <p class="src">Days are illustrative. Day 0 = payment day. P = the transaction's scheduled payout date under the MID's payout schedule. N = days set on the partner MID (can be 0).</p>
 </section>
 
-<h2 class="section-title">What the partner can still do</h2>
+<h2 id="what-the-partner-can-still-do" class="section-title">What the partner can still do</h2>
 <section class="panel"><div class="tw">
 <table class="t">
 <tr><th>APEX status</th><th>Payout Advice API NEW</th><th>Payout Advice API UPDATE</th><th>Update in the day-end file</th><th>Money</th></tr>
@@ -284,5 +284,6 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
   window.__al = { SC, O, setSc, rows: () => rows };
 })();
 </script>
+<script src="../assets/search.js" defer></script>
 </body>
 </html>

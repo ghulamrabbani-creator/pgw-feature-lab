@@ -5,27 +5,123 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>PGW Feature Lab</title>
 <link rel="stylesheet" href="assets/lab.css">
+<style>
+.home-hero{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:48px;align-items:center;padding:24px 0 40px}
+.home-hero h1.page{font-size:44px;line-height:1.1}
+.home-hero .lead{margin-bottom:24px}
+.hsearch{display:flex;align-items:center;gap:10px;width:100%;max-width:600px;background:#fff;border:1px solid var(--border-2);border-radius:14px;padding:13px 16px;font:500 16px var(--sans);color:var(--muted);cursor:text;box-shadow:0 1px 2px rgba(15,23,42,.05);transition:border-color .2s,box-shadow .2s;text-align:left}
+.hsearch:hover,.hsearch:focus-visible{border-color:var(--accent);box-shadow:0 0 0 3px #DBEAFE}
+.hsearch .ic{width:18px;height:18px;flex:none;color:var(--muted)}
+.hsearch span{flex:1}
+.hsearch kbd{font:12px var(--mono);border:1px solid var(--border);border-radius:5px;padding:1px 6px;color:var(--muted)}
+.tries{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin:12px 0 0;font-size:13px;color:var(--muted)}
+.tries button{font:12.5px var(--mono);border:1px solid var(--border);background:#fff;border-radius:999px;padding:3px 10px;color:var(--text-2);cursor:pointer;transition:border-color .2s,color .2s}
+.tries button:hover{border-color:var(--accent);color:var(--accent)}
+.home-hero figure{margin:0}
+.home-hero img{display:block;width:100%;height:auto;border-radius:16px;border:1px solid var(--border);background:#fff}
+.sec{margin-top:40px}
+.sec-head{display:flex;align-items:center;flex-wrap:wrap;gap:8px 14px;margin-bottom:16px}
+.sec-lead{margin:0;color:var(--text-2);font-size:15px}
+.badge{display:inline-flex;align-items:center;gap:8px;font:700 20px var(--head);letter-spacing:-.01em;padding:6px 16px 6px 12px;border-radius:999px;border:1.5px solid}
+.badge .ic{width:18px;height:18px}
+.b-done{color:var(--s-pass);background:var(--s-pass-bg);border-color:var(--s-pass)}
+.b-works{color:var(--s-released);background:var(--s-released-bg);border-color:var(--s-released)}
+.b-next{color:var(--s-undef);border-color:#94A3B8;border-style:dashed;background:repeating-linear-gradient(135deg,#F8FAFC 0 6px,#EEF2F7 6px 9px)}
+.feats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:24px}
+.feats.n1{grid-template-columns:minmax(0,1fr)}
+.feat{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:24px;display:flex;flex-direction:column;box-shadow:0 1px 2px rgba(15,23,42,.04);transition:box-shadow .2s,border-color .2s}
+.feat:hover{box-shadow:0 8px 24px rgba(15,23,42,.08);border-color:#BFDBFE}
+.st-done .feat{border-top:3px solid var(--s-pass)}
+.st-works .feat{border-top:3px solid var(--s-released)}
+.feat.small{max-width:700px}
+.st-next .feat{border-style:dashed;border-color:#CBD5E1}
+.feat-meta{font:12px var(--mono);color:var(--muted);margin:0}
+.feat h3{font:700 24px var(--head);letter-spacing:-.015em;margin:2px 0 0}
+.feat h3 a{color:inherit;text-decoration:none}.feat h3 a:hover{color:var(--accent)}
+.feat-line{margin:10px 0 16px;color:var(--text)}
+.feat-cols,.note{margin-bottom:18px}
+.feat-cols{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:24px;flex:1}
+.feat h4{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 6px}
+.eps{list-style:none;margin:0;padding:0}
+.eps li{display:flex;align-items:center;flex-wrap:wrap;gap:8px;padding:5px 0}
+.eps a{color:var(--ink);font-weight:500;text-decoration:none;display:inline-flex;align-items:center;gap:5px}
+.eps a:hover{color:var(--accent);text-decoration:underline}
+.eps .ext{width:13px;height:13px;color:var(--muted)}
+.ver{font:12px var(--mono);color:var(--muted)}
+.note{font-size:13.5px;color:var(--text-2);margin:12px 0 0;padding:8px 12px;border-radius:10px;background:var(--bg)}
+.feat-foot{display:flex;align-items:center;flex-wrap:wrap;gap:8px 12px;margin-top:auto;padding-top:14px;border-top:1px solid var(--border)}
+.lbl{font:12px var(--mono);color:var(--muted)}
+.sys{list-style:none;margin:0;padding:0;display:flex;flex-wrap:wrap;gap:6px}
+.sys li{font:12px var(--mono);padding:2px 9px;background:#F1F5F9;color:#334155;border-radius:999px}
+.open{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-weight:600;font-size:14px;color:var(--accent);text-decoration:none}
+.open .ic{width:14px;height:14px}
+.ic{display:inline-block;vertical-align:middle}
+@media (max-width:1100px){.feats{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:900px){.home-hero{grid-template-columns:minmax(0,1fr);gap:28px}.home-hero h1.page{font-size:34px}}
+@media (max-width:640px){.feat-cols{grid-template-columns:minmax(0,1fr)}.feat{padding:18px}.badge{font-size:18px}.hsearch kbd{display:none}}
+</style>
 </head>
 <body>
 <header class="lab-header"><div class="inner">
 <a class="lab-brand" href="./"><span>pgw/</span>Feature Lab</a>
 </div></header>
 <main class="wrap">
+<section class="home-hero">
+<div>
 <p class="eyebrow">payment gateway · new features</p>
 <h1 class="page">How new PGW features work, end to end</h1>
-<p class="lead">Each feature has its finalised documents and visual pages that explain the flows, configuration and scenarios. The documents are the reference; the visual pages illustrate them.</p>
-<div class="tiles">
-<a class="tile" href="split-payout/">
-<span class="tag">MVP · in build</span>
-<h2>Split Payout</h2>
-<p>One order, paid out to the partner and its vendors. Product document, PGW dev stories and visual explainers.</p>
-</a>
-<a class="tile" href="mcp/">
-<span class="tag">Jan-2027 · in build</span>
-<h2>MCP</h2>
-<p>The customer pays on HPP in their own currency; the merchant stays in AED. HPP simulator first, more pages to follow.</p>
-</a>
+<p class="lead">Each feature has its documents and visual pages: flows, simulators and scenarios that show the configuration, the calls between systems and what can go wrong. The documents are the reference; the visual pages illustrate them.</p>
+<button type="button" class="hsearch" data-lab-search aria-label="Search the Lab"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="7" cy="7" r="4.5"/><path d="M10.5 10.5L14 14"/></svg><span>Search pages, fields, checks, scenarios</span><kbd>Ctrl K</kbd></button>
+<p class="tries">Try: <button type="button" data-lab-search value="deferredSplit">deferredSplit</button><button type="button" data-lab-search value="rate file">rate file</button><button type="button" data-lab-search value="amount validation">amount validation</button><button type="button" data-lab-search value="refund">refund</button></p>
 </div>
+<figure><img src="assets/img/hero-workbench.webp" width="1344" height="768" alt="Isometric workbench with blue, green and orange pipes running through modular blocks."></figure>
+</section>
+<section class="sec st-done" id="done">
+<div class="sec-head"><span class="badge b-done"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8.5l3 3 7-7"/></svg>Solutioning complete</span><p class="sec-lead">Solution documents written and agreed.</p></div>
+<div class="feats n2"><article class="feat" id="split-payout">
+<p class="feat-meta">MVP</p>
+<h3 id="split-payout-2"><a href="split-payout/">Split Payout</a></h3>
+<p class="feat-line">One partner order, paid out to the partner and its vendors from one transaction.</p>
+<div class="feat-cols"><div><h4 id="documents">Documents</h4><ul class="eps"><li><a href="split-payout/docs/product.html">Product document</a><span class="ver">v1.6</span></li><li><a href="split-payout/docs/stories.html">PGW dev stories</a><span class="ver">v0.5</span></li></ul></div><div><h4 id="visual-pages">Visual pages</h4><ul class="eps"><li><a href="split-payout/end-to-end.html">End-to-end view</a></li><li><a href="split-payout/money-flow.html">Money flow</a></li><li><a href="split-payout/onboarding.html">Onboarding</a></li><li><a href="split-payout/split-modes.html">Split modes</a></li><li><a href="split-payout/simulator.html">Config &amp; Payment Simulator</a></li><li><a href="split-payout/advice-lifecycle.html">Advice lifecycle</a></li><li><a href="split-payout/what-can-go-wrong.html">What can go wrong</a></li></ul></div></div>
+<div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>PGW</li><li>APEX</li><li>MA</li><li>Merchant Portal</li></ul><a class="open" href="split-payout/">Open Split Payout <svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div>
+</article>
+<article class="feat nolab" id="direct-debit">
+<p class="feat-meta">UAE Direct Debit Marketplace (DDS)</p>
+<h3 id="direct-debit-2">Direct Debit</h3>
+<p class="feat-line">Recurring bank-to-bank collections under a signed contract, with frequency-based debits, from the Merchant Portal.</p>
+<div class="feat-cols"><div><h4 id="prototype">Prototype</h4><ul class="eps"><li><a href="https://merchant-portal-replica.vercel.app/direct-debit" target="_blank" rel="noopener">Merchant Portal prototype<svg class="ic ext" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h4v4M13 3L7 9M11 9.5V13H3V5h3.5"/></svg></a></li></ul></div></div><p class="note">Lab pages are being built.</p>
+<div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>DD Backend (new)</li><li>DDS</li><li>Merchant Portal</li><li>APEX</li><li>MA</li><li>PGW config</li></ul></div>
+</article></div>
+</section>
+<section class="sec st-works" id="works">
+<div class="sec-head"><span class="badge b-works"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg>In the works</span><p class="sec-lead">Solution being written; pages follow the documents.</p></div>
+<div class="feats n2"><article class="feat" id="mcp">
+<p class="feat-meta">Multi-currency pricing</p>
+<h3 id="mcp-2"><a href="mcp/">MCP</a></h3>
+<p class="feat-line">The customer pays on HPP in their own currency; the merchant stays in AED.</p>
+<div class="feat-cols"><div><h4 id="documents-2">Documents</h4><ul class="eps"><li><a href="mcp/docs/requirements.html">Solution requirements</a><span class="ver">v3.0</span></li><li><a href="mcp/docs/stories.html">PGW dev stories</a><span class="ver">v0.1</span></li></ul></div><div><h4 id="visual-pages-2">Visual pages</h4><ul class="eps"><li><a href="mcp/end-to-end.html">End-to-end view</a></li><li><a href="mcp/hpp-simulator.html">HPP simulator</a></li><li><a href="mcp/calculator.html">Calculator</a></li><li><a href="mcp/order-model.html">Order model</a></li></ul></div></div><p class="note">Planned: Rate file lifecycle, What can go wrong. Parked: Federation and enrichment.</p>
+<div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>PGW</li><li>HPP</li><li>MA</li><li>APEX</li><li>Planet</li></ul><a class="open" href="mcp/">Open MCP <svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 8h10M9 4l4 4-4 4"/></svg></a></div>
+</article>
+<article class="feat nolab" id="network-tokenization">
+<p class="feat-meta">Visa network token mandate</p>
+<h3 id="network-tokenization-2">Network Tokenization</h3>
+<p class="feat-line">Saved-card (CIT and MIT) payments sent with the scheme token on MPGS and CyberSource.</p>
+<p class="note">Lab pages are being built.</p>
+<div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>PGW</li><li>MA config</li><li>MPGS</li><li>CyberSource</li></ul></div>
+</article></div>
+</section>
+<section class="sec st-next" id="next">
+<div class="sec-head"><span class="badge b-next"><svg class="ic" viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="8" cy="8" r="5.5"/><path d="M8 5v3l2 1.5"/></svg>To work on next</span><p class="sec-lead">Scoping and discovery.</p></div>
+<div class="feats n1"><article class="feat nolab small" id="pay-by-bank">
+<p class="feat-meta">via Lean Technologies</p>
+<h3 id="pay-by-bank-2">Pay by Bank</h3>
+<p class="feat-line">Account-to-account payment through Open Finance; the customer approves in their bank app.</p>
+
+<div class="feat-foot"><span class="lbl">Systems</span><ul class="sys"><li>PGW</li><li>APEX</li><li>MA</li><li>Merchant Portal</li><li>Lean (new)</li></ul></div>
+</article></div>
+</section>
 </main>
+<footer class="lab-footer">Pages marked Illustrative use fictional numbers. The published documents are the reference.</footer>
+<script src="assets/search.js" defer></script>
 </body>
 </html>
