@@ -78,7 +78,7 @@ pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
 .btn { font: 500 14px var(--sans); border-radius: 8px; padding: 7px 12px; cursor: pointer; border: 1px solid var(--border-2); background: var(--card); color: var(--ink); }
 .btn:hover { background: #F1F5F9; }
 
-/* ---------- MA: PGW configuration (Geidea Design System tokens, Montserrat) ---------- */
+/* ---------- PGW Configuration (Geidea Design System tokens, Montserrat) ---------- */
 .gx { --blue:#1554d1; --blue-soft:#eef3ff; --gink:#1c2431; --sub:#6b7280; --gmuted:#9aa1ac; --line:#e6e8ec; --pill:#f3f4f6;
   font-family: Montserrat, Arial, sans-serif; color: var(--gink); font-size: 13px; }
 .gx .tabs { display: flex; gap: 2px; overflow-x: auto; border-bottom: 1px solid #f0f0f0; margin: -4px 0 6px; }
@@ -180,7 +180,8 @@ pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
 <li>The converted amount is <b>rounded up</b> to the currency's minor unit (24-Nov). Refunds keep the PRD rule: round down, with the last-cent rule on the final refund.</li>
 <li>MCP is offered strictly on location. No proposed currency (UAE, no country, currency not offered, Phase 2) means AED only and no currency selector (25-Nov).</li>
 <li>The confirmation and receipt show the amount paid and the AED order amount (25-Nov).</li>
-<li>The MCP toggle is in the PGW configuration inside MA, built by the PGW team. It is switched on after Operations registers the merchant with Planet for MCP (24-Nov).</li>
+<li>The MCP toggle is in PGW Configuration, built by the PGW team. It is switched on after Operations registers the merchant with Planet for MCP (24-Nov).</li>
+<li>The rate file gets basic checks only (header, trailer, record count, not loaded twice). The existing minimum refund amount covers MCP (25-Nov).</li>
 </ul></div>
 
 <div class="tries" id="tries"><span>Try</span></div>
@@ -189,7 +190,7 @@ pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
 <!-- Column 1: merchant -->
 <div class="col">
 <section class="card" id="s-cfg">
-<header><span class="num">1</span><h2>Merchant set-up</h2><span class="who">MA · PGW configuration</span></header>
+<header><span class="num">1</span><h2>Merchant set-up</h2><span class="who">PGW Configuration</span></header>
 <div class="in">
 <div class="gx" id="gx"></div>
 <p class="src">Geidea screen shown in the Geidea Design System. Toggle name is a placeholder until PGW names it (must differ from <code>ENABLE_MULTI_CURRENCY</code> and <code>ENABLE_MULTI_CURRENCY_SETTLEMENT</code>).</p>
@@ -384,7 +385,7 @@ function quote(d) {
   return { cur: d.chosen, minor: c.val, mu, mcp: true, rate, aedMinor, exact: exactStr(c.exact, c.den, mu) };
 }
 
-/* ---------- Render: MA config ---------- */
+/* ---------- Render: PGW Configuration ---------- */
 function renderCfg() {
   let h = '<div class="tabs"><span class="tab">General</span><span class="tab">Payment Methods</span><span class="tab">Gateway Settings</span><span class="tab on">Multi-currency pricing</span><span class="tab">Webhooks</span></div>';
   h += '<div class="trow"><div><div class="h">Dynamic multi-currency pricing</div><div class="d">Offer the customer a price in their own currency on HPP, based on their location. The merchant keeps pricing, reporting and settlement in the order currency.</div></div>';
@@ -414,7 +415,7 @@ function renderControls(d) {
     (c.c === 'AE' ? '<div class="info">A customer in the UAE maps to AED, the order currency. MCP is not offered: AED only, no selector (25-Nov).</div>' : '');
   $('rfs').innerHTML = RFS.map(x => '<button class="chip" data-rf="' + x.k + '" aria-pressed="' + (S.rf === x.k) + '">' + x.t + '</button>').join('');
   $('rfs').querySelectorAll('[data-rf]').forEach(b => b.onclick = () => { S.rf = b.dataset.rf; S.paid = null; render(); });
-  $('rfOut').innerHTML = S.rf === 'today' ? '<p class="hint">File 20261124 v01 loaded and checked (complete, trailer totals match, rates within bounds). PGW caches it; every HPP quote today comes from this copy.</p>'
+  $('rfOut').innerHTML = S.rf === 'today' ? '<p class="hint">File 20261124 v01 fetched, checked (header, trailer, record count) and stored in the PGW rate table. Every HPP quote today comes from this table.</p>'
     : S.rf === 'yday' ? '<p class="hint">Today\'s file has not arrived. Yesterday\'s file (20261123) is valid for 48 hours, to 24-Nov 23:59 UTC, so PGW keeps quoting from it.</p><div class="note"><b>Open with Planet:</b> rate validity and behaviour when the daily file is late (PRD v2 open items). The 48-hour window is taken from Planet\'s sample file.</div>'
     : '<div class="bad">No cached file is inside its validity window. PGW suspends MCP: every HPP shows AED only, and Operations gets an alert.</div>';
 }

@@ -22,13 +22,13 @@
 <li class="l2"><a href="#story-summary">Story summary</a></li>
 <li class="l2"><a href="#requirements">Requirements</a></li>
 <li class="l2"><a href="#acceptance-criteria">Acceptance criteria</a></li>
-<li class="l1"><a href="#s2-be-planet-rate-file-load-and-cache">S2 — BE – Planet rate file load and cache</a></li>
+<li class="l1"><a href="#s2-be-planet-rate-file-fetch-parse-and-store">S2 — BE – Planet rate file: fetch, parse and store</a></li>
 <li class="l2"><a href="#background-1">Background</a></li>
 <li class="l2"><a href="#goal-1">Goal</a></li>
 <li class="l2"><a href="#story-summary-1">Story summary</a></li>
 <li class="l2"><a href="#requirements-1">Requirements</a></li>
 <li class="l2"><a href="#acceptance-criteria-1">Acceptance criteria</a></li>
-<li class="l1"><a href="#s3-be-customer-country-from-ip-maxmind">S3 — BE – Customer country from IP (MaxMind)</a></li>
+<li class="l1"><a href="#s3-be-maxmind-database-fetch-parse-and-store">S3 — BE – MaxMind database: fetch, parse and store</a></li>
 <li class="l2"><a href="#background-2">Background</a></li>
 <li class="l2"><a href="#goal-2">Goal</a></li>
 <li class="l2"><a href="#story-summary-2">Story summary</a></li>
@@ -38,6 +38,7 @@
 <li class="l2"><a href="#background-3">Background</a></li>
 <li class="l2"><a href="#goal-3">Goal</a></li>
 <li class="l2"><a href="#story-summary-3">Story summary</a></li>
+<li class="l2"><a href="#flow">Flow</a></li>
 <li class="l2"><a href="#requirements-3">Requirements</a></li>
 <li class="l2"><a href="#acceptance-criteria-3">Acceptance criteria</a></li>
 <li class="l1"><a href="#s5-be-mcp-payment-and-transaction-record">S5 — BE – MCP payment and transaction record</a></li>
@@ -109,24 +110,26 @@ currencies.</td>
 </tr>
 <tr class="even">
 <td>S2</td>
-<td>BE – Planet rate file load and cache</td>
-<td>PGW receives, checks and caches Planet’s daily rate file. Rate
-lookup for HPP. MCP suspended when no valid file.</td>
+<td>BE – Planet rate file: fetch, parse and store</td>
+<td>PGW fetches Planet’s daily rate file, decrypts it, parses it and
+stores the rates in a table.</td>
 <td>—</td>
 <td>Written. Build on Planet’s sample file until SFTP is live (P3).</td>
 </tr>
 <tr class="odd">
 <td>S3</td>
-<td>BE – Customer country from IP (MaxMind)</td>
-<td>MaxMind GeoIP2 database in PGW. IP address to country.</td>
+<td>BE – MaxMind database: fetch, parse and store</td>
+<td>PGW fetches the MaxMind GeoIP2 database, parses it and stores IP
+networks with their country in a table.</td>
 <td>P2</td>
 <td>Written</td>
 </tr>
 <tr class="even">
 <td>S4</td>
 <td>FE/BE – HPP currency offer and selection</td>
-<td>HPP proposes the customer’s currency, shows both amounts and the
-rate, lets the customer switch. APMs AED only.</td>
+<td>Country and rate lookups. HPP proposes the customer’s currency,
+shows both amounts and the rate, lets the customer switch. APMs AED
+only. MCP suspended when no rate is valid.</td>
 <td>S1, S2, S3</td>
 <td>Written</td>
 </tr>
@@ -141,8 +144,7 @@ transaction. Wallet check. Order totals.</td>
 <tr class="even">
 <td>S6</td>
 <td>BE – MCP refunds</td>
-<td>Refund in AED converted at the stored rate. Last-cent rule. Minimum
-refund.</td>
+<td>Refund in AED converted at the stored rate. Last-cent rule.</td>
 <td>S5</td>
 <td>Written</td>
 </tr>
@@ -206,8 +208,9 @@ database.</td>
 </tr>
 <tr class="odd">
 <td>P3</td>
-<td>Planet rate file delivery: SFTP connection, folder, PGP keys, file
-name, publishing time.</td>
+<td>Planet rate file delivery: SFTP connection, folder, file name,
+publishing time, and whether the file is PGP-encrypted (if so, key
+exchange).</td>
 <td>S2 (live feed)</td>
 <td>Planet (Jose Albarran Sierra), PGW</td>
 </tr>
@@ -261,11 +264,10 @@ flag (S7).</li>
 <h1 id="s1-febe-mcp-configuration">S1 — FE/BE – MCP configuration</h1>
 <div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=mcp-off"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: merchant set-up</a></div>
 <h2 id="background">Background</h2>
-<p>The PGW integration team sets merchant settings in the Backoffice:
-Merchants → Impersonate merchant → Payment Gateway → Configuration. The
-settings are stored on the MID’s PAYMENT_GATEWAY product instance, in
-its <code>data</code> object. The screen saves with the existing product
-instance update
+<p>The PGW integration team sets merchant settings in PGW Configuration.
+The settings are stored on the MID’s PAYMENT_GATEWAY product instance,
+in its <code>data</code> object. The screen saves with the existing
+product instance update
 (<code>PATCH /product/api/v1/productInstance/{productInstanceId}</code>,
 JSON-Patch <code>replace</code> on <code>data/&lt;key&gt;</code>). Live
 and Test instances are separate.</p>
@@ -300,7 +302,7 @@ country-to-currency map and MCP order currencies.</li>
 </tr>
 <tr class="even">
 <td>Users</td>
-<td>PGW integration team (Backoffice)</td>
+<td>PGW integration team (PGW Configuration)</td>
 </tr>
 <tr class="odd">
 <td>Fields written</td>
@@ -406,7 +408,7 @@ Eurozone countries → EUR. JP, KW, BH, OM inactive (Phase 2).</td>
 <h3 id="screen">3. Screen</h3>
 <ol type="1">
 <li>Add the section <em>Dynamic multi-currency pricing</em> in PGW
-configuration (tab position: PGW engineering, next to Gateway
+Configuration (tab position: PGW engineering, next to Gateway
 Settings).</li>
 <li>Toggle with label <em>Dynamic multi-currency pricing</em> and one
 line of text. Use a label that is clearly different from
@@ -490,17 +492,17 @@ disabled.</li>
 <li>Remove INR from the MCP currency list in configuration: INR is not
 shown on the screen and a save with INR is rejected (4.2).</li>
 </ol>
-<h1 id="s2-be-planet-rate-file-load-and-cache">S2 — BE – Planet rate
-file load and cache</h1>
+<h1 id="s2-be-planet-rate-file-fetch-parse-and-store">S2 — BE – Planet
+rate file: fetch, parse and store</h1>
 <div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=rate-yday"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: yesterday's rates</a><a class="visual-link" href="../hpp-simulator.html#try=rate-none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: no valid file</a><a class="visual-link" href="../end-to-end.html#loc=gb&rf=none&pay=aed&m=card&r=none"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>End-to-end: no valid file</a></div>
 <h2 id="background-1">Background</h2>
 <p>Planet publishes one rate file each day. The rates include the
-markup. PGW quotes every MCP amount from this file. No rate is fetched
-from Planet during a payment. Layout: Planet MAS template 194,
-comma-separated, with a Visa section and a Mastercard section. Each rate
-has its own validity window. In Planet’s sample the window is 48 hours,
-so two daily files overlap.</p>
-<p>Sample (from Planet):</p>
+markup. This story only brings the file into PGW: fetch it, decrypt it,
+parse it and store the rates in a table. S4 reads the table when HPP
+loads.</p>
+<p>Layout: Planet MAS template 194, comma-separated, with a Visa section
+and a Mastercard section. Planet’s sample (USD base; Geidea’s file will
+have AED as the base currency):</p>
 <pre><code>PFH,20260214,01
 VILFH,HPLANET VISA,20260214,01
 VID,1023,$,840,2,€,978,2,0.9123456,2026-02-14T00:00:00.000Z,2026-02-15T23:59:59.000Z
@@ -511,13 +513,7 @@ MCD,1025,$,840,2,€,978,2,0.9121000,2026-02-14T00:00:00.000Z,2026-02-15T23:59:5
 MCLFT,TPLANET MASTERCARD,978,0.9121000,1
 PFT,TXN RATES,2782,2.6134579,3</code></pre>
 <h2 id="goal-1">Goal</h2>
-<ol type="1">
-<li>PGW loads each day’s file, checks it and caches it.</li>
-<li>PGW gives HPP the rate for an order currency and a transaction
-currency at a point in time.</li>
-<li>When no valid rate exists, MCP is not offered, and Operations is
-alerted.</li>
-</ol>
+<p>Each day’s rates are in the PGW rate table, one row per rate.</p>
 <h2 id="story-summary-1">Story summary</h2>
 <table>
 <colgroup>
@@ -537,88 +533,41 @@ alerted.</li>
 </tr>
 <tr class="even">
 <td>Source</td>
-<td>Planet, SFTP, PGP-encrypted (as for DCC files). Until P3: Planet’s
-sample file loaded by PGW.</td>
+<td>Planet, SFTP, once a day</td>
 </tr>
 <tr class="odd">
-<td>Depends on</td>
-<td>— . Live feed: P3.</td>
+<td>Table written</td>
+<td><code>mcp_rate</code> (name is a proposal)</td>
 </tr>
 <tr class="even">
+<td>Depends on</td>
+<td>P3 for the live feed. Until then, load Planet’s sample file.</td>
+</tr>
+<tr class="odd">
 <td>Followed by</td>
 <td>S4</td>
+</tr>
+<tr class="even">
+<td>Out of scope</td>
+<td>Rate lookup and MCP suspension (S4). Refunds use the rate stored on
+the transaction, not this table (S6).</td>
 </tr>
 </tbody>
 </table>
 <h2 id="requirements-1">Requirements</h2>
-<h3 id="records-template-194">1. Records (template 194)</h3>
-<table>
-<colgroup>
-<col style="width: 33%" />
-<col style="width: 33%" />
-<col style="width: 33%" />
-</colgroup>
-<thead>
-<tr class="header">
-<th>Record</th>
-<th>Code</th>
-<th>Fields in order</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>Physical file header</td>
-<td><code>PFH</code></td>
-<td><code>date</code> (YYYYMMDD), <code>version</code></td>
-</tr>
-<tr class="even">
-<td>Visa section header</td>
-<td><code>VILFH</code></td>
-<td><code>HRateKey</code> (<code>HPLANET VISA</code>),
-<code>date</code>, <code>version</code></td>
-</tr>
-<tr class="odd">
-<td>Visa detail</td>
-<td><code>VID</code></td>
-<td><code>rateId</code>, <code>baseCurr</code> (symbol),
-<code>baseCurr2</code> (ISO numeric), <code>baseMinorUnit</code>,
-<code>targetCurr</code> (symbol), <code>targetCurr2</code> (ISO
-numeric), <code>targetMinorUnit</code>, <code>rate</code>,
-<code>validFrom</code>, <code>validTo</code> (ISO 8601, UTC)</td>
-</tr>
-<tr class="even">
-<td>Visa section trailer</td>
-<td><code>VILFT</code></td>
-<td><code>TRateKey</code> (<code>TPLANET VISA</code>),
-<code>hashTotalTargetCurrCode</code>, <code>hashTotalExRate</code>,
-<code>recordCount</code></td>
-</tr>
-<tr class="odd">
-<td>Mastercard section</td>
-<td><code>MCLFH</code>, <code>MCD</code>, <code>MCLFT</code></td>
-<td>Same layout as Visa</td>
-</tr>
-<tr class="even">
-<td>Physical file trailer</td>
-<td><code>PFT</code></td>
-<td><code>txnRates</code> (<code>TXN RATES</code>),
-<code>hashTotalTargetCurrCode</code>, <code>hashTotalExRate</code>,
-<code>recordCount</code></td>
-</tr>
-</tbody>
-</table>
+<h3 id="fetch">1. Fetch</h3>
 <ol type="1">
-<li>Identify currencies by the numeric codes (<code>baseCurr2</code>,
-<code>targetCurr2</code>). The symbol fields are for display only.</li>
-<li><code>rate</code> = units of target currency for 1 unit of base
-currency. Converted amount = base amount × <code>rate</code>.</li>
-<li><strong>Quote from the Visa section
-(</strong><code>VID</code><strong>).</strong> Load the Mastercard
-section and keep it, but do not quote from it.</li>
+<li>Collect the file from Planet’s SFTP folder once a day, after
+Planet’s publishing time (P3). Retry until a set time (configuration).
+Alert Operations when no file has arrived by then.</li>
+<li><strong>Encryption.</strong> Planet is to confirm whether the file
+is PGP-encrypted (P3). If it is: Geidea creates a PGP key pair for PGW
+and gives Planet the public key. Planet encrypts with it. PGW decrypts
+with the private key. Keep the private key in PGW’s secrets store, never
+in code or configuration files.</li>
+<li>Keep the received file as it is, for audit.</li>
 </ol>
-<h3 id="checks-on-load">2. Checks on load</h3>
-<p>Any failure: do not use the file, keep the previous cache, alert
-Operations with the file name and the failed check.</p>
+<h3 id="basic-checks">2. Basic checks</h3>
 <table>
 <colgroup>
 <col style="width: 50%" />
@@ -633,104 +582,278 @@ Operations with the file name and the failed check.</p>
 <tbody>
 <tr class="odd">
 <td>2.1</td>
-<td>The file decrypts and has <code>PFH</code> first and
-<code>PFT</code> last.</td>
+<td>The first record is <code>PFH</code> and the last record is
+<code>PFT</code>.</td>
 </tr>
 <tr class="even">
 <td>2.2</td>
-<td>Each section has its header and trailer.</td>
+<td><code>PFT</code> <code>recordCount</code> = the number of detail
+records (<code>VID</code> + <code>MCD</code>).</td>
 </tr>
 <tr class="odd">
 <td>2.3</td>
-<td>Each section trailer <code>recordCount</code> = number of detail
-records in the section. <code>PFT</code> <code>recordCount</code> = all
-detail records.</td>
-</tr>
-<tr class="even">
-<td>2.4</td>
-<td><code>hashTotalTargetCurrCode</code> = sum of
-<code>targetCurr2</code> of the section (<code>PFT</code>: all
-sections).</td>
-</tr>
-<tr class="odd">
-<td>2.5</td>
-<td><code>hashTotalExRate</code> = sum of <code>rate</code> of the
-section (<code>PFT</code>: all sections).</td>
-</tr>
-<tr class="even">
-<td>2.6</td>
-<td>Each <code>rate</code> is above 0. <code>validFrom</code> is before
-<code>validTo</code>.</td>
-</tr>
-<tr class="odd">
-<td>2.7</td>
-<td>A rate changes from the same pair in the previous file by no more
-than the change limit (configuration, e.g. 10%).</td>
-</tr>
-<tr class="even">
-<td>2.8</td>
 <td>The file <code>date</code> and <code>version</code> have not been
 loaded before.</td>
 </tr>
 </tbody>
 </table>
-<p>Worked check on the sample: Visa <code>hashTotalTargetCurrCode</code>
-1804 = 978 + 826. <code>hashTotalExRate</code> 1.7013579 = 0.9123456 +
-0.7890123. <code>PFT</code> 2782 = 978 + 826 + 978, 3 records.</p>
-<h3 id="rate-lookup">3. Rate lookup</h3>
-<p>Input: order currency, transaction currency, time. Output:
-<code>rate</code>, <code>rateId</code>, file <code>date</code> and
-<code>version</code>, or “no rate”. 1. Take Visa detail records with
-<code>baseCurr2</code> = order currency and <code>targetCurr2</code> =
-transaction currency. 2. Keep the records where <code>validFrom</code> ≤
-time ≤ <code>validTo</code>. 3. From these, use the record from the
-latest loaded file (highest <code>date</code>, then
-<code>version</code>). 4. No record: “no rate”. HPP does not offer this
-currency (S4).</p>
-<p>Example: file 20261123 has GBP valid to 24-Nov 23:59:59 UTC. File
-20261124 has GBP valid to 25-Nov 23:59:59 UTC. At 24-Nov 10:00 UTC both
-are valid. PGW uses 20261124.</p>
-<h3 id="mcp-suspended">4. MCP suspended</h3>
+<p>Any failure: do not load the file. Keep the rows already in the
+table. Alert Operations with the file name and the failed check.</p>
+<p><strong>Why only basic checks.</strong> Planet guarantees its rates
+and pays any difference. The checks only make sure the whole file
+arrived and is not loaded twice.</p>
+<h3 id="parse-what-to-keep-and-what-to-drop">3. Parse: what to keep and
+what to drop</h3>
+<p><strong>Records</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Record</th>
+<th>Code</th>
+<th>Action</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Physical file header</td>
+<td><code>PFH</code></td>
+<td>Take <code>date</code> and <code>version</code> onto every row. Do
+not store the record.</td>
+</tr>
+<tr class="even">
+<td>Section header</td>
+<td><code>VILFH</code>, <code>MCLFH</code></td>
+<td>Take the card network (<code>VISA</code> or <code>MASTERCARD</code>)
+onto the rows of the section. Do not store the record.</td>
+</tr>
+<tr class="odd">
+<td>Detail record</td>
+<td><code>VID</code>, <code>MCD</code></td>
+<td>Store one row each (section 4).</td>
+</tr>
+<tr class="even">
+<td>Section trailer</td>
+<td><code>VILFT</code>, <code>MCLFT</code></td>
+<td>Drop.</td>
+</tr>
+<tr class="odd">
+<td>Physical file trailer</td>
+<td><code>PFT</code></td>
+<td>Use for check 2.2. Do not store.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Fields of a detail record (in file order)</strong></p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>#</th>
+<th>Field</th>
+<th>Keep or drop</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>1</td>
+<td><code>rateId</code></td>
+<td>Keep</td>
+<td>Planet’s ID of the rate. Stored on each MCP transaction.</td>
+</tr>
+<tr class="even">
+<td>2</td>
+<td><code>baseCurr</code></td>
+<td>Drop</td>
+<td>Currency symbol (e.g. <code>$</code>). Display only.</td>
+</tr>
+<tr class="odd">
+<td>3</td>
+<td><code>baseCurr2</code></td>
+<td>Keep</td>
+<td>ISO numeric code of the base (order) currency.</td>
+</tr>
+<tr class="even">
+<td>4</td>
+<td><code>baseMinorUnit</code></td>
+<td>Keep</td>
+<td>Decimals of the base currency.</td>
+</tr>
+<tr class="odd">
+<td>5</td>
+<td><code>targetCurr</code></td>
+<td>Drop</td>
+<td>Currency symbol. Display only.</td>
+</tr>
+<tr class="even">
+<td>6</td>
+<td><code>targetCurr2</code></td>
+<td>Keep</td>
+<td>ISO numeric code of the target (transaction) currency.</td>
+</tr>
+<tr class="odd">
+<td>7</td>
+<td><code>targetMinorUnit</code></td>
+<td>Keep</td>
+<td>Decimals of the target currency.</td>
+</tr>
+<tr class="even">
+<td>8</td>
+<td><code>rate</code></td>
+<td>Keep</td>
+<td>The rate, markup included.</td>
+</tr>
+<tr class="odd">
+<td>9</td>
+<td><code>validFrom</code></td>
+<td>Keep</td>
+<td>Start of validity (UTC).</td>
+</tr>
+<tr class="even">
+<td>10</td>
+<td><code>validTo</code></td>
+<td>Keep</td>
+<td>End of validity (UTC).</td>
+</tr>
+</tbody>
+</table>
+<h3 id="table-mcp_rate">4. Table <code>mcp_rate</code></h3>
+<p>One row per detail record. Example: the Geidea file of 24-Nov-2026,
+Visa row for GBP.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Type</th>
+<th>Value</th>
+<th>Example</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>rateFileDate</code></td>
+<td>Date</td>
+<td><code>PFH</code> <code>date</code></td>
+<td>2026-11-24</td>
+</tr>
+<tr class="even">
+<td><code>rateFileVersion</code></td>
+<td>String</td>
+<td><code>PFH</code> <code>version</code></td>
+<td>01</td>
+</tr>
+<tr class="odd">
+<td><code>cardNetwork</code></td>
+<td>String</td>
+<td><code>VISA</code> for <code>VID</code> rows, <code>MASTERCARD</code>
+for <code>MCD</code> rows</td>
+<td>VISA</td>
+</tr>
+<tr class="even">
+<td><code>rateId</code></td>
+<td>String</td>
+<td><code>rateId</code></td>
+<td>2001</td>
+</tr>
+<tr class="odd">
+<td><code>baseCurrency</code></td>
+<td>String (3)</td>
+<td>ISO alpha code of <code>baseCurr2</code></td>
+<td>AED (from 784)</td>
+</tr>
+<tr class="even">
+<td><code>baseMinorUnit</code></td>
+<td>Integer</td>
+<td><code>baseMinorUnit</code></td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><code>targetCurrency</code></td>
+<td>String (3)</td>
+<td>ISO alpha code of <code>targetCurr2</code></td>
+<td>GBP (from 826)</td>
+</tr>
+<tr class="even">
+<td><code>targetMinorUnit</code></td>
+<td>Integer</td>
+<td><code>targetMinorUnit</code></td>
+<td>2</td>
+</tr>
+<tr class="odd">
+<td><code>rate</code></td>
+<td>Decimal (7 decimals)</td>
+<td><code>rate</code>, exactly as in the file. Meaning: 1 unit of
+<code>baseCurrency</code> = <code>rate</code> units of
+<code>targetCurrency</code>, markup included.</td>
+<td>0.2137000 (1 AED = 0.2137 GBP)</td>
+</tr>
+<tr class="even">
+<td><code>validFrom</code></td>
+<td>Timestamp (UTC)</td>
+<td><code>validFrom</code></td>
+<td>2026-11-24 00:00:00</td>
+</tr>
+<tr class="odd">
+<td><code>validTo</code></td>
+<td>Timestamp (UTC)</td>
+<td><code>validTo</code></td>
+<td>2026-11-25 23:59:59</td>
+</tr>
+<tr class="even">
+<td><code>loadedAt</code></td>
+<td>Timestamp</td>
+<td>When PGW loaded the file</td>
+<td>2026-11-24 04:10 UAE</td>
+</tr>
+</tbody>
+</table>
 <ol type="1">
-<li>When no loaded file has any valid rate, MCP is suspended for all
-merchants. HPP shows AED only (S4).</li>
-<li>Alert Operations when MCP becomes suspended and when it
-resumes.</li>
-<li>Alert Operations when no new file has loaded by a set time each day
-(configuration).</li>
-</ol>
-<h3 id="storage">5. Storage</h3>
-<ol type="1">
-<li>Keep every received file and its load result (loaded / failed, with
-the check) for audit.</li>
-<li>The cache is shared by all PGW instances that serve HPP.</li>
+<li>Store both sections. S4 quotes from <code>VISA</code> rows only.
+Keeping the Mastercard rows lets Geidea switch later by
+configuration.</li>
+<li>Do not delete the rows of earlier files. Each daily file overlaps
+the next (48-hour validity in Planet’s sample). Rows older than the
+retention period (configuration) can be removed.</li>
 </ol>
 <h2 id="acceptance-criteria-1">Acceptance criteria</h2>
 <ol type="1">
-<li>Load Planet’s sample file: loaded. Lookup USD → GBP at
-2026-02-14T12:00Z returns 0.7890123, <code>rateId</code> 1024.</li>
-<li>Lookup USD → EUR returns the Visa rate 0.9123456, not the Mastercard
-rate 0.9121000.</li>
-<li>Change <code>VILFT</code> record count to 3: file fails (2.3),
-previous cache kept, Operations alerted.</li>
-<li>Change one rate by 50% against the previous file: file fails
-(2.7).</li>
-<li>Two valid files: the later file’s rate is returned.</li>
-<li>Lookup after <code>validTo</code> of every file: “no rate”. MCP
-suspended, Operations alerted.</li>
-<li>Load the same file twice: second load rejected (2.8).</li>
+<li>Load Planet’s sample file: 3 rows. Row <code>rateId</code> 1024:
+<code>VISA</code>, USD → GBP, 0.7890123, valid 14-Feb 00:00 to 15-Feb
+23:59:59 UTC.</li>
+<li>No currency symbols are stored.</li>
+<li>Change the <code>PFT</code> record count to 4: the file is not
+loaded (2.2). Operations is alerted. Earlier rows stay.</li>
+<li>Load the same file twice: the second load is rejected (2.3).</li>
+<li>When P3 confirms PGP: an encrypted file is decrypted with the
+private key and loaded.</li>
 </ol>
-<h1 id="s3-be-customer-country-from-ip-maxmind">S3 — BE – Customer
-country from IP (MaxMind)</h1>
+<h1 id="s3-be-maxmind-database-fetch-parse-and-store">S3 — BE – MaxMind
+database: fetch, parse and store</h1>
 <div class="visual-links" data-auto><a class="visual-link" href="../hpp-simulator.html#try=geo-miss"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: no country found</a><a class="visual-link" href="../hpp-simulator.html#try=uae"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Simulator: customer in the UAE</a></div>
 <h2 id="background-2">Background</h2>
-<p>MCP proposes a currency from the customer’s location. PGW holds the
-MaxMind GeoIP2 downloadable database (approved 23-Nov-2026) and looks up
-the customer’s IP address in it. No external call is made during the
-payment session.</p>
+<p>MCP proposes a currency from the customer’s country. PGW finds the
+country from the customer’s IP address with the MaxMind GeoIP2 database
+(approved 23-Nov-2026). MaxMind publishes the database as a zip file of
+CSV files. This story only brings it into PGW: fetch it, parse it and
+store it in a table. S4 looks up the IP address when HPP loads.</p>
 <h2 id="goal-2">Goal</h2>
-<p>PGW returns the customer’s country for an IP address, fast enough to
-run before HPP shows the amount.</p>
+<p>The latest MaxMind data is in the PGW geolocation table.</p>
 <h2 id="story-summary-2">Story summary</h2>
 <table>
 <colgroup>
@@ -750,42 +873,229 @@ run before HPP shows the amount.</p>
 </tr>
 <tr class="even">
 <td>Source</td>
-<td>MaxMind GeoIP2 database, hosted by PGW</td>
+<td>MaxMind download permalink from the MaxMind account portal, for
+example
+<code>https://download.maxmind.com/geoip/databases/GeoIP2-Country-CSV/download?suffix=zip</code>.
+Basic authentication with the MaxMind account ID and licence key.</td>
 </tr>
 <tr class="odd">
+<td>Table written</td>
+<td><code>mcp_geoip_network</code> (name is a proposal)</td>
+</tr>
+<tr class="even">
 <td>Depends on</td>
 <td>P2</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Followed by</td>
 <td>S4</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Out of scope</td>
-<td>VPN and proxy detection (accepted risk)</td>
+<td>IP lookup (S4). VPN and proxy detection (accepted risk).</td>
 </tr>
 </tbody>
 </table>
 <h2 id="requirements-2">Requirements</h2>
+<h3 id="fetch-1">1. Fetch</h3>
 <ol type="1">
-<li>Input: the customer’s public IP address (IPv4 or IPv6) as received
-by HPP, after any Geidea load balancer.</li>
-<li>Output: ISO 3166 alpha-2 country code, or “not found”.</li>
-<li>Refresh the database as MaxMind publishes updates. Keep the current
-database in use until the new one loads correctly.</li>
-<li>Lookup error, empty result or a private address: “not found”.</li>
-<li>Alert Operations when the database has not refreshed within the
-expected period (configuration).</li>
-<li>Store the IP address used and the country found on the HPP session,
-for support.</li>
+<li>Each day, check the release date with a HEAD request on the
+permalink (MaxMind’s recommended method). Download only when the release
+is newer than the one loaded.</li>
+<li>Keep the account ID and licence key in PGW’s secrets store.</li>
+<li>Keep the downloaded zip for audit. The zip name carries the release
+date: <code>GeoIP2-Country-CSV_YYYYMMDD.zip</code>.</li>
+<li>Download or load failure: keep the current data. Alert
+Operations.</li>
+</ol>
+<h3 id="files-to-use">2. Files to use</h3>
+<table>
+<colgroup>
+<col style="width: 50%" />
+<col style="width: 50%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>File</th>
+<th>Use</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>GeoIP2-Country-Blocks-IPv4.csv</code></td>
+<td>Load</td>
+</tr>
+<tr class="even">
+<td><code>GeoIP2-Country-Blocks-IPv6.csv</code></td>
+<td>Load</td>
+</tr>
+<tr class="odd">
+<td><code>GeoIP2-Country-Locations-en.csv</code></td>
+<td>Use to find the country code of each network</td>
+</tr>
+<tr class="even">
+<td>Other files (other languages, licence, copyright)</td>
+<td>Do not load</td>
+</tr>
+</tbody>
+</table>
+<p>If the subscription is the City edition, the file names start with
+<code>GeoIP2-City</code>. Use the same columns only.</p>
+<h3 id="parse-what-to-keep-and-what-to-drop-1">3. Parse: what to keep
+and what to drop</h3>
+<p><strong>Blocks files (IPv4 and IPv6)</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Keep or drop</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>network</code></td>
+<td>Keep</td>
+<td>The IP network in CIDR format, e.g. <code>81.2.69.0/24</code>.</td>
+</tr>
+<tr class="even">
+<td><code>geoname_id</code></td>
+<td>Keep (for the join)</td>
+<td>Location of the network. Leads to the country code.</td>
+</tr>
+<tr class="odd">
+<td><code>registered_country_geoname_id</code></td>
+<td>Keep (for the join)</td>
+<td>Country where the ISP registered the network. Used when
+<code>geoname_id</code> is empty.</td>
+</tr>
+<tr class="even">
+<td><code>represented_country_geoname_id</code></td>
+<td>Drop</td>
+<td>Not used for MCP.</td>
+</tr>
+<tr class="odd">
+<td><code>is_anonymous_proxy</code>, <code>is_satellite_provider</code>,
+<code>is_anycast</code></td>
+<td>Drop</td>
+<td>Not used for MCP.</td>
+</tr>
+<tr class="even">
+<td>City edition only: <code>postal_code</code>, <code>latitude</code>,
+<code>longitude</code>, <code>accuracy_radius</code></td>
+<td>Drop</td>
+<td>Not used for MCP.</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Locations file</strong></p>
+<table>
+<colgroup>
+<col style="width: 33%" />
+<col style="width: 33%" />
+<col style="width: 33%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Keep or drop</th>
+<th>Reason</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>geoname_id</code></td>
+<td>Keep (for the join)</td>
+<td>Joins to the blocks files.</td>
+</tr>
+<tr class="even">
+<td><code>country_iso_code</code></td>
+<td>Keep</td>
+<td>ISO 3166 alpha-2 country code.</td>
+</tr>
+<tr class="odd">
+<td><code>locale_code</code>, <code>continent_code</code>,
+<code>continent_name</code>, <code>country_name</code>,
+<code>is_in_european_union</code></td>
+<td>Drop</td>
+<td>Not used for MCP.</td>
+</tr>
+</tbody>
+</table>
+<h3 id="table-mcp_geoip_network">4. Table
+<code>mcp_geoip_network</code></h3>
+<p>One row per network. The join columns are not stored.</p>
+<table>
+<colgroup>
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+<col style="width: 25%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Column</th>
+<th>Type</th>
+<th>Value</th>
+<th>Example (illustrative)</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td><code>ipVersion</code></td>
+<td>Integer</td>
+<td>4 or 6, from the file</td>
+<td>4</td>
+</tr>
+<tr class="even">
+<td><code>networkStart</code></td>
+<td>IP address</td>
+<td>First address of <code>network</code></td>
+<td>81.2.69.0</td>
+</tr>
+<tr class="odd">
+<td><code>networkEnd</code></td>
+<td>IP address</td>
+<td>Last address of <code>network</code></td>
+<td>81.2.69.255</td>
+</tr>
+<tr class="even">
+<td><code>countryIsoCode</code></td>
+<td>String (2)</td>
+<td><code>country_iso_code</code> of <code>geoname_id</code>. If
+<code>geoname_id</code> is empty, of
+<code>registered_country_geoname_id</code>. Empty if neither has a
+country.</td>
+<td>GB</td>
+</tr>
+<tr class="odd">
+<td><code>databaseDate</code></td>
+<td>Date</td>
+<td>Release date from the zip name</td>
+<td>2026-11-24</td>
+</tr>
+</tbody>
+</table>
+<ol type="1">
+<li>Load a new release completely before PGW uses it. Until then, S4
+uses the previous release.</li>
+<li>Keep only the release in use and the one before it.</li>
 </ol>
 <h2 id="acceptance-criteria-2">Acceptance criteria</h2>
 <ol type="1">
-<li>A known UK test address returns <code>GB</code>.</li>
-<li>A private address (e.g. 10.0.0.1) returns “not found”.</li>
-<li>The lookup works for IPv4 and IPv6.</li>
-<li>A failed database refresh keeps the previous database in use and
-raises an alert.</li>
+<li>Load a release: one row per network in the two blocks files. No
+dropped column is stored.</li>
+<li>A network with an empty <code>geoname_id</code> gets the country of
+<code>registered_country_geoname_id</code>.</li>
+<li>The HEAD check finds no newer release: nothing is downloaded.</li>
+<li>A failed download keeps the current data and alerts Operations.</li>
+<li>While a new release loads, lookups still use the previous
+release.</li>
 </ol>
 <h1 id="s4-febe-hpp-currency-offer-and-selection">S4 — FE/BE – HPP
 currency offer and selection</h1>
@@ -825,7 +1135,8 @@ HPP shows the amount in that currency, the AED amount and the rate.</li>
 <tr class="even">
 <td>Reads</td>
 <td><code>isDynamicMcpEnabled</code>, <code>dynamicMcpCurrencies</code>
-(S1), system lists (S1), rate lookup (S2), country (S3)</td>
+(S1), system lists (S1), <code>mcp_rate</code> (S2),
+<code>mcp_geoip_network</code> (S3)</td>
 </tr>
 <tr class="odd">
 <td>Session fields written</td>
@@ -842,6 +1153,11 @@ HPP shows the amount in that currency, the AED amount and the rate.</li>
 </tr>
 </tbody>
 </table>
+<h2 id="flow">Flow</h2>
+<p>The classic MCP path: a UK customer pays an AED 100.00 order in
+GBP.</p>
+<p><img src="media-stories/media/rId57.png" alt="MCP payment on HPP" /></p>
+<p>MCP payment on HPP</p>
 <h2 id="requirements-3">Requirements</h2>
 <h3 id="decide-the-offer-when-hpp-first-loads">1. Decide the offer (when
 HPP first loads)</h3>
@@ -880,12 +1196,12 @@ instance.</td>
 </tr>
 <tr class="even">
 <td>1.4</td>
-<td>MCP is not suspended (a valid rate file exists).</td>
+<td>MCP is not suspended (section 2).</td>
 <td>S2</td>
 </tr>
 <tr class="odd">
 <td>1.5</td>
-<td>The customer’s IP gives a country.</td>
+<td>The country lookup (section 2) returns a country.</td>
 <td>S3</td>
 </tr>
 <tr class="even">
@@ -902,7 +1218,7 @@ MID.</td>
 </tr>
 <tr class="even">
 <td>1.8</td>
-<td>The rate lookup returns a rate for order currency → that
+<td>The rate lookup (section 2) returns a rate for order currency → that
 currency.</td>
 <td>S2</td>
 </tr>
@@ -914,11 +1230,34 @@ currency</strong>. Set <code>isMcpOffered</code> =
 <p><strong>Why 1.6 excludes the order currency.</strong> A customer in
 the UAE maps to AED. Nothing is converted, so MCP is not offered and HPP
 shows no selector.</p>
-<h3 id="quotes-fixed-for-the-session">2. Quotes (fixed for the
+<h3 id="lookups">2. Lookups</h3>
+<p><strong>Country lookup (table from S3)</strong> 1. Take the
+customer’s public IP address as received by HPP, after any Geidea load
+balancer. 2. Find the row of <code>mcp_geoip_network</code> with the
+same <code>ipVersion</code> where <code>networkStart</code> ≤ IP ≤
+<code>networkEnd</code>. Result: <code>countryIsoCode</code>. 3. No row,
+an empty <code>countryIsoCode</code> or a private address
+(e.g. 10.0.0.1): no country. 4. Store the IP address and the country on
+the session, for support.</p>
+<p><strong>Rate lookup (table from S2)</strong> 1. Take the rows of
+<code>mcp_rate</code> with <code>cardNetwork</code> = <code>VISA</code>,
+<code>baseCurrency</code> = order currency, <code>targetCurrency</code>
+= the currency, and <code>validFrom</code> ≤ now ≤ <code>validTo</code>.
+2. Use the row of the latest file (highest <code>rateFileDate</code>,
+then <code>rateFileVersion</code>). 3. No row: no rate. The currency is
+not offered.</p>
+<p>Example: file 20261123 has GBP valid to 24-Nov 23:59:59 UTC. File
+20261124 has GBP valid to 25-Nov 23:59:59 UTC. At 24-Nov 10:00 UTC both
+are valid. PGW uses 20261124.</p>
+<p><strong>MCP suspended</strong> 1. When <code>mcp_rate</code> has no
+<code>VISA</code> row valid now, MCP is suspended for all merchants.
+Every HPP shows AED only. 2. Alert Operations when MCP becomes suspended
+and when it resumes.</p>
+<h3 id="quotes-fixed-for-the-session">3. Quotes (fixed for the
 session)</h3>
 <div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=round-up"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: rounding up</a></div>
 <p>When MCP is offered, build one quote for each currency in
-<code>dynamicMcpCurrencies</code> that has a rate (S2 section 3), at the
+<code>dynamicMcpCurrencies</code> that has a rate (section 2), at the
 time HPP first loads:</p>
 <table>
 <colgroup>
@@ -943,12 +1282,12 @@ currency’s decimals</td>
 </tr>
 <tr class="odd">
 <td><code>rate</code></td>
-<td>From S2 (7 decimals)</td>
+<td>From the rate lookup (7 decimals)</td>
 </tr>
 <tr class="even">
 <td><code>rateId</code>, <code>rateFileDate</code>,
 <code>rateFileVersion</code></td>
-<td>From S2</td>
+<td>From the rate lookup</td>
 </tr>
 </tbody>
 </table>
@@ -992,7 +1331,7 @@ session.</li>
 </tr>
 </tbody>
 </table>
-<h3 id="display">3. Display</h3>
+<h3 id="display">4. Display</h3>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1008,57 +1347,57 @@ session.</li>
 </thead>
 <tbody>
 <tr class="odd">
-<td>3.1</td>
+<td>4.1</td>
 <td>Total</td>
 <td>The quote amount and currency of the selected currency (first: the
 proposed currency), e.g. “GBP 21.37”.</td>
 </tr>
 <tr class="even">
-<td>3.2</td>
+<td>4.2</td>
 <td>Order amount</td>
 <td>“Order amount AED 100.00”. Shown only when the selected currency is
 not AED.</td>
 </tr>
 <tr class="odd">
-<td>3.3</td>
+<td>4.3</td>
 <td>Rate</td>
 <td>“Exchange rate 1 AED = 0.2137 GBP”. The rate as in the file,
 trailing zeros removed. Shown only when the selected currency is not
 AED.</td>
 </tr>
 <tr class="even">
-<td>3.4</td>
+<td>4.4</td>
 <td>Currency selector</td>
 <td><em>Paying in</em>: AED and every currency with a quote. Shown only
 when MCP is offered.</td>
 </tr>
 <tr class="odd">
-<td>3.5</td>
+<td>4.5</td>
 <td>Wallet buttons</td>
 <td>Apple Pay, Google Pay, Samsung Pay built with the selected currency
-and amount. Shown below 3.1 to 3.4.</td>
+and amount. Shown below 4.1 to 4.4.</td>
 </tr>
 <tr class="even">
-<td>3.6</td>
+<td>4.6</td>
 <td>Tabby, Tamara</td>
 <td>Selectable only when the selected currency is AED. Show “Available
 in AED only” under them when MCP is offered.</td>
 </tr>
 <tr class="odd">
-<td>3.7</td>
+<td>4.7</td>
 <td>Pay button</td>
 <td>“Pay GBP 21.37” (selected currency and amount).</td>
 </tr>
 </tbody>
 </table>
 <ol type="1">
-<li>Changing the selector updates 3.1 to 3.7 from the stored quotes. AED
+<li>Changing the selector updates 4.1 to 4.7 from the stored quotes. AED
 shows the order amount.</li>
 <li>When the customer selects a non-AED currency while Tabby or Tamara
 is selected, select card.</li>
 <li>No further disclosure text about the conversion.</li>
 </ol>
-<h3 id="backend-checks-when-hpp-submits-the-payment">4. Backend checks
+<h3 id="backend-checks-when-hpp-submits-the-payment">5. Backend checks
 when HPP submits the payment</h3>
 <table>
 <colgroup>
@@ -1075,19 +1414,19 @@ when HPP submits the payment</h3>
 </thead>
 <tbody>
 <tr class="odd">
-<td>4.1</td>
+<td>5.1</td>
 <td>The submitted currency is AED or a currency in
 <code>mcpQuotes[]</code>.</td>
 <td>Reject. Message: “Currency not available. Reload the page.”</td>
 </tr>
 <tr class="even">
-<td>4.2</td>
+<td>5.2</td>
 <td>The submitted amount equals the stored quote (or the order amount
 for AED).</td>
 <td>Reject. Same message.</td>
 </tr>
 <tr class="odd">
-<td>4.3</td>
+<td>5.3</td>
 <td>Tabby or Tamara only with AED.</td>
 <td>Reject. Message: “This payment method is available in AED
 only.”</td>
@@ -1114,7 +1453,11 @@ selector.</li>
 <li>Order AED 99.99, customer in the UK: GBP 21.37.</li>
 <li>A new rate file loads while the page is open, then the customer
 reloads: the amount does not change.</li>
-<li>A tampered submit with GBP 20.00: rejected (4.2).</li>
+<li>Two valid rate files: the quote uses the later file.</li>
+<li>No <code>VISA</code> rate valid now: MCP suspended, AED only,
+Operations alerted.</li>
+<li>A customer IP with no matching network: no country, AED only.</li>
+<li>A tampered submit with GBP 20.00: rejected (5.2).</li>
 <li>Pay-by-Link opened from the UK: same behaviour as 1.</li>
 </ol>
 <h1 id="s5-be-mcp-payment-and-transaction-record">S5 — BE – MCP payment
@@ -1267,8 +1610,6 @@ gap at PGW.</p>
 at the stored rate.</li>
 <li>The refunds of a transaction never total more or less than the
 amount paid, in both currencies.</li>
-<li>A refund too small to convert is rejected, except the final
-one.</li>
 </ol>
 <h2 id="story-summary-5">Story summary</h2>
 <table>
@@ -1312,7 +1653,7 @@ No new request fields.</td>
 </table>
 <h2 id="requirements-5">Requirements</h2>
 <h3 id="checks">1. Checks</h3>
-<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=min-nonfinal"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: minimum refund</a><a class="visual-link" href="../calculator.html#try=over"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: refund too much</a></div>
+<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=over"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: refund too much</a></div>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1335,13 +1676,15 @@ No new request fields.</td>
 </tr>
 <tr class="even">
 <td>1.2</td>
-<td>The refund converts to at least one minor unit of the transaction
-currency (section 2), unless it is the final refund.</td>
-<td>Refund amount is below the minimum refundable amount.</td>
+<td>Existing minimum refund amount (0.10).</td>
+<td>Existing message</td>
 </tr>
 </tbody>
 </table>
-<p>The message for 1.2 does not show the transaction currency.</p>
+<p><strong>Why no MCP-specific minimum.</strong> The existing minimum of
+AED 0.10 always converts to at least one minor unit in every MVP
+currency, because each of them has a rate of 0.1 or more per AED.
+Example: AED 0.10 × 0.2137000 = GBP 0.021370 → GBP 0.02.</p>
 <h3 id="conversion-original-purchase-ismcp-true">2. Conversion (original
 purchase <code>isMcp</code> = <code>true</code>)</h3>
 <div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=nearest-fails"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: why round down</a></div>
@@ -1368,7 +1711,7 @@ today.</p>
 below its exact value, so the final refund is never negative.</p>
 <h3 id="examples-purchase-aed-100.00-gbp-21.37-rate-0.2137000">3.
 Examples (purchase AED 100.00 = GBP 21.37, rate 0.2137000)</h3>
-<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=refund-60-40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: 60 + 40</a><a class="visual-link" href="../calculator.html#try=thirds"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: thirds</a><a class="visual-link" href="../calculator.html#try=min-final"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: AED 0.04 as final</a></div>
+<div class="visual-links" data-auto><a class="visual-link" href="../calculator.html#try=refund-60-40"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: 60 + 40</a><a class="visual-link" href="../calculator.html#try=thirds"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg>Calculator: thirds</a></div>
 <table>
 <colgroup>
 <col style="width: 33%" />
@@ -1436,18 +1779,12 @@ Examples (purchase AED 100.00 = GBP 21.37, rate 0.2137000)</h3>
 </tr>
 </tbody>
 </table>
-<p>Minimum refund: AED 0.04 × 0.2137000 = GBP 0.008548 → 0.00. Rejected
-(1.2), unless AED 0.04 is the final refund.</p>
 <h2 id="acceptance-criteria-5">Acceptance criteria</h2>
 <ol type="1">
 <li>Refund AED 60.00 then AED 40.00 on the example: processor receives
 GBP 12.82 then GBP 8.55. Order refunded total AED 100.00.</li>
 <li>Refund AED 33.33, 33.33, 33.34: GBP 7.12, 7.12, 7.13.</li>
 <li>Full refund AED 100.00 in one call: GBP 21.37.</li>
-<li>Refund AED 0.04 as a non-final refund: rejected (1.2). Message does
-not name GBP.</li>
-<li>Refund AED 0.04 as the final refund: accepted, GBP = remaining
-amount.</li>
 <li>A new rate file has loaded since the purchase: refund still uses
 0.2137000.</li>
 <li>Refund AED 100.01: rejected (1.1).</li>
@@ -1686,8 +2023,8 @@ for each amount.</li>
 </tr>
 <tr class="even">
 <td>2</td>
-<td>Rate change limit for check 2.7 and the daily file deadline for the
-alert.</td>
+<td>Daily deadline for the rate file before Operations is alerted, and
+row retention period.</td>
 <td>S2</td>
 <td>Rabbani with Operations</td>
 </tr>

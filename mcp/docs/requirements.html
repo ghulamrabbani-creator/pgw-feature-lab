@@ -28,14 +28,13 @@
 <li class="l1"><a href="#scheme-position-and-known-risks">7. Scheme position and known risks</a></li>
 <li class="l1"><a href="#requirements">8. Requirements</a></li>
 <li class="l2"><a href="#pgw-pgw-engineering-team">8.1 PGW: PGW engineering team</a></li>
-<li class="l2"><a href="#ma-merchant-portal-backoffice-derya-gungor-emir-ipekci">8.2 MA (Merchant Portal Backoffice): Derya Gungor, Emir Ipekci</a></li>
-<li class="l2"><a href="#mpgs-and-cybersource-technical-integration-team">8.3 MPGS and CyberSource: technical integration team</a></li>
-<li class="l2"><a href="#apex-arulraj-panchamoorthy-spoc-talha-ahmed-parked">8.4 APEX: Arulraj Panchamoorthy (SPOC), Talha Ahmed — parked</a></li>
-<li class="l2"><a href="#postilion-musaad-haider-parked">8.5 Postilion: Musaad Haider — parked</a></li>
-<li class="l2"><a href="#planet-payment-jose-albarran-sierra">8.6 Planet Payment: Jose Albarran Sierra</a></li>
-<li class="l2"><a href="#operations-owner-to-confirm">8.7 Operations: owner to confirm</a></li>
-<li class="l2"><a href="#merchant-portal-badr-elhosseiny">8.8 Merchant Portal: Badr Elhosseiny</a></li>
-<li class="l2"><a href="#reporting-operations-finance-to-provide">8.9 Reporting: Operations &amp; Finance to provide</a></li>
+<li class="l2"><a href="#mpgs-and-cybersource-technical-integration-team">8.2 MPGS and CyberSource: technical integration team</a></li>
+<li class="l2"><a href="#apex-arulraj-panchamoorthy-spoc-talha-ahmed-parked">8.3 APEX: Arulraj Panchamoorthy (SPOC), Talha Ahmed — parked</a></li>
+<li class="l2"><a href="#postilion-musaad-haider-parked">8.4 Postilion: Musaad Haider — parked</a></li>
+<li class="l2"><a href="#planet-payment-jose-albarran-sierra">8.5 Planet Payment: Jose Albarran Sierra</a></li>
+<li class="l2"><a href="#operations-owner-to-confirm">8.6 Operations: owner to confirm</a></li>
+<li class="l2"><a href="#merchant-portal-badr-elhosseiny">8.7 Merchant Portal: Badr Elhosseiny</a></li>
+<li class="l2"><a href="#reporting-operations-finance-to-provide">8.8 Reporting: Operations &amp; Finance to provide</a></li>
 <li class="l1"><a href="#end-to-end-flow">9. End-to-end flow</a></li>
 <li class="l1"><a href="#open-items">10. Open items</a></li>
 </ol></aside>
@@ -176,16 +175,16 @@ and stores the rate on the transaction.</li>
 <li><strong>PGW</strong> federates the transaction to
 <strong>APEX</strong> with the AED order amount in the main fields and
 the transaction amount, currency and rate in the new cardholder fields
-(section 8.4).</li>
+(section 8.3).</li>
 <li>The scheme file reaches <strong>Postilion</strong> in the
 transaction currency. Postilion clears in that currency. PGW’s
 enrichment file gives Postilion the AED view, so the PTLF to APEX
-matches the federation (section 8.5).</li>
+matches the federation (section 8.4).</li>
 <li><strong>APEX</strong> prices and pays out the merchant from the AED
 amount, as today.</li>
 <li><strong>APEX</strong> includes the MCP transactions in the Daily
 Transaction File (DTF) to <strong>Planet</strong>, as for DCC. Planet
-accounts for the markup (section 8.6).</li>
+accounts for the markup (section 8.5).</li>
 <li>A refund is made in AED by the merchant. <strong>PGW</strong>
 converts it at the rate stored on the original transaction.</li>
 </ol>
@@ -211,45 +210,39 @@ refunds, merchant outputs, federation to APEX, enrichment file</td>
 <td>Main build</td>
 </tr>
 <tr class="even">
-<td>MA (Merchant Portal Backoffice)</td>
-<td>Hosts the PGW configuration screen with the new MCP settings. Built
-by the PGW team.</td>
-<td>Screen in PGW configuration</td>
-</tr>
-<tr class="odd">
 <td>APEX</td>
 <td>Holds AED in the main fields and the transaction currency in new
 cardholder fields; flags MCP; produces the DTF to Planet</td>
-<td>New fields (parked, section 8.4); MCP rows in the DTF</td>
+<td>New fields (parked, section 8.3); MCP rows in the DTF</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Postilion</td>
 <td>Clears in the transaction currency as today; builds the PTLF with
 the AED view from the enrichment file</td>
-<td>Enrichment processing (parked, section 8.5)</td>
+<td>Enrichment processing (parked, section 8.4)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MPGS, CyberSource</td>
 <td>Authorize and clear in the transaction currency</td>
 <td>No change. Already set up for the full ISO currency list.</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>Merchant Portal</td>
 <td>Shows what APEX returns: order and settlement currency</td>
 <td>No change</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>Planet Payment (external)</td>
 <td>Daily rate file with markup; MCP merchant registration; DTF
 processing, reports and markup share</td>
 <td>Existing DCC rails, MCP product type</td>
 </tr>
-<tr class="even">
+<tr class="odd">
 <td>MaxMind (external)</td>
 <td>GeoIP2 database: IP address to country</td>
 <td>New subscription (approved)</td>
 </tr>
-<tr class="odd">
+<tr class="even">
 <td>MW, TMS, Direct Debit Backend, DDS, GSDK, Noon, Lean</td>
 <td>Not involved</td>
 <td>No change</td>
@@ -314,7 +307,7 @@ DCC obligations; the HPP display (section 8.1, HPP).</p>
 </thead>
 <tbody>
 <tr class="odd">
-<td>MCP toggle (name to be set by PGW, for example
+<td>MCP toggle in PGW Configuration (name to be set by PGW, for example
 <code>ENABLE_DYNAMIC_MCP</code>)</td>
 <td>Per MID, Live and Test</td>
 <td>Turns MCP on for the merchant</td>
@@ -359,27 +352,29 @@ it. The list is configuration, so later changes need no code
 change.</li>
 <li>The PGW integration team switches MCP on only after Operations
 confirms the merchant is registered with Planet for MCP (section
-8.7).</li>
+8.6).</li>
 </ul>
-<p><strong>Rate file (S2)</strong> - Receive Planet’s daily rate file
-over SFTP, PGP-encrypted as for DCC files. Layout: Planet MAS template
-194 (Visa and Mastercard sections). Until the SFTP feed is live, load
-Planet’s sample file. - Check each file on load: header and trailer
-records, record counts, hash totals, base and target currencies, rates
-above zero and within a configurable change limit from the previous
-file. A file that fails is not used, and Operations is alerted. - Quote
-from the <strong>Visa section</strong>. Rate direction: units of
-transaction currency for 1 unit of order currency (AED → GBP 0.2137000).
-Converted amount = order amount × rate. - Each rate has a validity
-window (48 hours in Planet’s sample, so daily files overlap). Use the
-rate from the latest loaded file that is valid at the time of the quote.
-- If no valid rate exists for a currency, that currency is not offered.
-If no valid file exists, MCP is suspended for all merchants and
-Operations is alerted. - Keep every loaded file for audit.</p>
-<p><strong>Geolocation (S3)</strong> - Look up the customer’s IP address
-in the MaxMind GeoIP2 database held by PGW, before HPP shows the amount.
-No external call during the session. - Refresh the database as MaxMind
-publishes updates. - No country found: no MCP for the session. The
+<p><strong>Rate file (S2)</strong> - Fetch Planet’s daily rate file over
+SFTP, decrypt it (if Planet confirms PGP encryption, with Geidea’s
+private key; Planet holds the public key), parse it and store the rates
+in a PGW table. Layout: Planet MAS template 194 (Visa and Mastercard
+sections). Until the SFTP feed is live, load Planet’s sample file. -
+Basic checks only: header and trailer present, record count matches,
+file not loaded before. Planet guarantees its rates. A file that fails
+is not loaded, and Operations is alerted. - Quote from the <strong>Visa
+section</strong>. Rate direction: units of transaction currency for 1
+unit of order currency (AED → GBP 0.2137000). Converted amount = order
+amount × rate. - Each rate has a validity window (48 hours in Planet’s
+sample, so daily files overlap). Use the rate from the latest loaded
+file that is valid at the time of the quote (S4). - If no valid rate
+exists for a currency, that currency is not offered. If no rate is valid
+at all, MCP is suspended for all merchants and Operations is alerted
+(S4).</p>
+<p><strong>Geolocation (S3)</strong> - Fetch the MaxMind GeoIP2 database
+(CSV) when MaxMind publishes a new release, parse it and store IP
+networks with their country in a PGW table. - Look up the customer’s IP
+address in this table before HPP shows the amount (S4). No external call
+during the session. - No country found: no MCP for the session. The
 payment is a regular AED payment.</p>
 <p><strong>HPP (S4)</strong> - MCP is offered only when all of these are
 true: the order currency is an MCP order currency (AED),
@@ -422,11 +417,9 @@ original transaction and refunds in the transaction currency. - A
 non-final refund is converted and <strong>rounded down</strong> to the
 minor unit. The refund that brings the AED refunds to the full amount is
 set to: original transaction amount minus all earlier refunds in the
-transaction currency (last-cent rule). - A refund that converts to less
-than one minor unit is rejected with a generic message (“Refund amount
-is below the minimum refundable amount”), which does not show the
-transaction currency. The final refund is never rejected for this
-reason.</p>
+transaction currency (last-cent rule). - The existing minimum refund
+amount (0.10) applies. No MCP-specific minimum is needed: AED 0.10
+converts to at least one minor unit in every MVP currency.</p>
 <table>
 <colgroup>
 <col style="width: 25%" />
@@ -472,22 +465,16 @@ inquiry, <code>transaction.amount</code> and
 <code>transaction.currency</code> of an MCP transaction carry the AED
 values. The rate, the MCP flag and the MCP offered flag are not
 returned. There is no setting to return them.</p>
-<p><strong>Federation and enrichment (S8, S9):</strong> see sections 8.4
-and 8.5.</p>
-<h2 id="ma-merchant-portal-backoffice-derya-gungor-emir-ipekci">8.2 MA
-(Merchant Portal Backoffice): Derya Gungor, Emir Ipekci</h2>
-<ul>
-<li>The MCP settings sit in the PGW configuration screen in MA. The PGW
-team builds them, as for other PGW settings. No MA team build.</li>
-</ul>
-<h2 id="mpgs-and-cybersource-technical-integration-team">8.3 MPGS and
+<p><strong>Federation and enrichment (S8, S9):</strong> see sections 8.3
+and 8.4.</p>
+<h2 id="mpgs-and-cybersource-technical-integration-team">8.2 MPGS and
 CyberSource: technical integration team</h2>
 <ul>
 <li>No change. PGW sends the transaction currency and amount as for any
 non-AED payment. MPGS and CyberSource are already set up for the full
 list of ISO currencies.</li>
 </ul>
-<h2 id="apex-arulraj-panchamoorthy-spoc-talha-ahmed-parked">8.4 APEX:
+<h2 id="apex-arulraj-panchamoorthy-spoc-talha-ahmed-parked">8.3 APEX:
 Arulraj Panchamoorthy (SPOC), Talha Ahmed — parked</h2>
 <p>Agreed approach (Arul, 23-Nov-2026). The exact field names and
 formats are awaited from APEX. The PGW federation story (S8) waits on
@@ -558,14 +545,14 @@ merchant APIs and the Merchant Portal continue on the AED fields with no
 change. - <strong>DTF to Planet.</strong> APEX produces the DTF, as for
 DCC. MCP transactions (purchases and refunds) are included with field 22
 Product Indicator = <code>2</code> and field 20 = the applied rate as a
-decimal, subject to Planet’s confirmation (section 8.6).</p>
+decimal, subject to Planet’s confirmation (section 8.5).</p>
 <p><strong>Required to be confirmed</strong> - Field keys for the API
 and the PTLF; currency format (alpha <code>GBP</code> or numeric
 <code>826</code>); amount format and decimals; rate decimals (Planet
 uses 7); value of the identifier for non-MCP transactions. - Rounding
 for partial chargebacks (AED = transaction amount ÷ rate). - Exception
 handling for MCP mismatches.</p>
-<h2 id="postilion-musaad-haider-parked">8.5 Postilion: Musaad Haider —
+<h2 id="postilion-musaad-haider-parked">8.4 Postilion: Musaad Haider —
 parked</h2>
 <p>The enrichment file format and its data set are being finalized. The
 PGW enrichment story (S9) waits on this.</p>
@@ -587,7 +574,7 @@ unchanged.</p>
 before the matching DCF/TC33. - Matching on PGW order ID + RRN +
 authorization code for MPGS-routed transactions as well as
 CyberSource.</p>
-<h2 id="planet-payment-jose-albarran-sierra">8.6 Planet Payment: Jose
+<h2 id="planet-payment-jose-albarran-sierra">8.5 Planet Payment: Jose
 Albarran Sierra</h2>
 <table>
 <colgroup>
@@ -605,8 +592,9 @@ Albarran Sierra</h2>
 <tbody>
 <tr class="odd">
 <td>1</td>
-<td>Daily rate file (template 194) over SFTP: connection, folder, PGP
-keys, file naming, publishing time</td>
+<td>Daily rate file (template 194) over SFTP: connection, folder,
+whether the file is PGP-encrypted (if so, Geidea shares its public key),
+file naming, publishing time</td>
 <td>Asked 13-Nov</td>
 </tr>
 <tr class="even">
@@ -641,9 +629,9 @@ rate</td>
 </tbody>
 </table>
 <ul>
-<li>APEX produces the DTF and includes the MCP rows (section 8.4).</li>
+<li>APEX produces the DTF and includes the MCP rows (section 8.3).</li>
 </ul>
-<h2 id="operations-owner-to-confirm">8.7 Operations: owner to
+<h2 id="operations-owner-to-confirm">8.6 Operations: owner to
 confirm</h2>
 <ul>
 <li><strong>Merchant enablement with Planet.</strong> For each merchant
@@ -658,13 +646,13 @@ currencies.</li>
 <li>Markup changes for a merchant go through Planet and take effect from
 the rate file.</li>
 </ul>
-<h2 id="merchant-portal-badr-elhosseiny">8.8 Merchant Portal: Badr
+<h2 id="merchant-portal-badr-elhosseiny">8.7 Merchant Portal: Badr
 Elhosseiny</h2>
 <ul>
 <li>No change. The portal shows what APEX returns: order currency and
 settlement currency. To validate in UAT with an MCP transaction.</li>
 </ul>
-<h2 id="reporting-operations-finance-to-provide">8.9 Reporting:
+<h2 id="reporting-operations-finance-to-provide">8.8 Reporting:
 Operations &amp; Finance to provide</h2>
 <p>Merchant reports need no change. Internal reporting is defined by
 Operations &amp; Finance (FinOps: Sherly Sadanandan), then built by
@@ -720,7 +708,7 @@ Refund: merchant refunds AED 60.00, then AED 40.00
 <td>APEX field keys and formats for the four cardholder fields;
 partial-chargeback rounding; MCP mismatch exception; MCP rows in the
 DTF</td>
-<td>8.4</td>
+<td>8.3</td>
 <td>APEX</td>
 <td>Arulraj Panchamoorthy</td>
 </tr>
@@ -728,15 +716,15 @@ DTF</td>
 <td>2</td>
 <td>Enrichment file layout and data set; processing before the DCF/TC33;
 MPGS matching</td>
-<td>8.5</td>
+<td>8.4</td>
 <td>Postilion, PGW</td>
 <td>Musaad Haider, Ghulam Rabbani</td>
 </tr>
 <tr class="odd">
 <td>3</td>
-<td>Rate file SFTP delivery, validity, currency coverage; DTF fields for
-MCP</td>
-<td>8.6</td>
+<td>Rate file SFTP delivery, PGP encryption and key exchange, validity,
+currency coverage; DTF fields for MCP</td>
+<td>8.5</td>
 <td>Planet</td>
 <td>Jose Albarran Sierra</td>
 </tr>
@@ -744,7 +732,7 @@ MCP</td>
 <td>4</td>
 <td>Department that runs merchant enablement with Planet for DCC, and
 its agreement to do it for MCP</td>
-<td>8.7</td>
+<td>8.6</td>
 <td>Operations</td>
 <td>To identify</td>
 </tr>
@@ -758,7 +746,7 @@ its agreement to do it for MCP</td>
 <tr class="even">
 <td>6</td>
 <td>Internal MCP reporting requirements</td>
-<td>8.9</td>
+<td>8.8</td>
 <td>Operations &amp; Finance</td>
 <td>Sherly Sadanandan</td>
 </tr>

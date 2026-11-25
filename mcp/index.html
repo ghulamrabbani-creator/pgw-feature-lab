@@ -6,14 +6,24 @@
 <title>MCP · PGW Feature Lab</title>
 <link rel="stylesheet" href="../assets/lab.css">
 <style>
-.cur3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; }
+.cur3 { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; align-items: start; }
 .cur3 .c { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 18px 20px; }
 .cur3 .c .k { font: 500 12px var(--mono); color: var(--money); }
 .cur3 .c h3 { margin: 6px 0 4px; font-size: 17px; color: var(--ink); font-weight: 600; }
 .cur3 .c .ex { font: 500 22px var(--mono); color: var(--ink); margin: 6px 0; }
 .cur3 .c p { margin: 0; font-size: 14px; color: var(--text-2); }
 .row.plan { opacity: .7; }
-@media (max-width: 820px) { .cur3 { grid-template-columns: minmax(0, 1fr); } }
+.keychg { background: var(--money-bg); border-left: 3px solid var(--money); border-radius: 0 10px 10px 0; padding: 12px 16px; margin: 0 0 16px; font-size: 15px; max-width: 1100px; }
+.keychg b { color: var(--ink); }
+.pt { width: 100%; border-collapse: collapse; font-size: 12.5px; margin: 10px 0 12px; }
+.pt th { text-align: left; font: 500 11px var(--mono); color: var(--muted); padding: 4px 6px; border-bottom: 1px solid var(--border); }
+.pt td { padding: 6px; border-bottom: 1px solid var(--border); vertical-align: top; }
+.pt td:first-child { color: var(--text-2); white-space: nowrap; }
+.pt code { font-size: 11.5px; display: block; }
+.pt td.pn { width: 100%; }
+.tg { display: inline-block; font: 500 10.5px var(--mono); padding: 2px 6px; border-radius: 5px; margin-top: 3px; }
+.t-ex { background: #F1F5F9; color: var(--muted); } .t-nw { background: var(--money-bg); color: var(--money); } .t-ch { background: var(--warn-bg); color: var(--warn-fg); }
+@media (max-width: 1100px) { .cur3 { grid-template-columns: minmax(0, 1fr); } .pt td:first-child { white-space: normal; } }
 </style>
 </head>
 <body>
@@ -26,13 +36,35 @@
 <h1 class="page">MCP: dynamic multi-currency pricing</h1>
 <p class="lead">A customer on Geidea HPP is offered the price in their own currency, based on where they are, and can pay in it. The merchant prices, sees and is settled in AED as today, and never sees the conversion. Rates come from Planet's daily file, markup included. Launch target Jan-2027.</p>
 
-<h2 class="section-title">One order, three currencies</h2>
+<h2 class="section-title">One order, three currencies: the main change</h2>
+<div class="keychg"><b>The change to discuss first.</b> Inside PGW, the existing transaction <code>amount</code> and <code>currency</code> now hold what the customer paid (GBP 21.37). Everything the merchant sees, and APEX's main fields, stay in AED. Two new fields, <code>mcpBaseAmount</code> and <code>mcpBaseCurrency</code>, carry the AED value on every purchase and refund, so no system downstream converts anything.</div>
 <div class="cur3">
-<div class="c"><span class="k">order currency</span><h3>What the merchant priced</h3><div class="ex">AED 100.00</div><p>Seen by the merchant, the Merchant Portal and APEX main fields. MVP: AED orders only.</p></div>
-<div class="c"><span class="k">transaction currency</span><h3>What the customer pays</h3><div class="ex">GBP 21.37</div><p>Chosen on HPP. Authorised and cleared with the scheme in this currency. APEX holds it as the cardholder currency. Never shown to the merchant.</p></div>
-<div class="c"><span class="k">settlement currency</span><h3>What the merchant is paid</h3><div class="ex">SAR</div><p>Unchanged by MCP. The order amount (AED) is converted to it for payout, as today.</p></div>
+<div class="c"><span class="k">order currency</span><h3>What the merchant priced</h3><div class="ex">AED 100.00</div>
+<table class="pt"><thead><tr><th>Where</th><th>Parameter</th></tr></thead><tbody>
+<tr><td>Create Session</td><td class="pn"><code>amount</code><code>currency</code><span class="tg t-ex">existing</span></td></tr>
+<tr><td>PGW order</td><td class="pn"><code>amount</code><code>currency</code><span class="tg t-ex">existing</span></td></tr>
+<tr><td>PGW transaction</td><td class="pn"><code>mcpBaseAmount</code><code>mcpBaseCurrency</code><span class="tg t-nw">new</span></td></tr>
+<tr><td>Callback, order inquiry</td><td class="pn"><code>transaction.amount</code><code>transaction.currency</code><span class="tg t-ch">existing · AED for MCP</span></td></tr>
+<tr><td>APEX</td><td class="pn"><code>amount</code><code>transactionCurrency</code><span class="tg t-ch">existing · AED for MCP</span></td></tr>
+</tbody></table>
+<p>Seen by the merchant, the Merchant Portal and APEX main fields. MVP: AED orders only.</p></div>
+<div class="c"><span class="k">transaction currency</span><h3>What the customer pays</h3><div class="ex">GBP 21.37</div>
+<table class="pt"><thead><tr><th>Where</th><th>Parameter</th></tr></thead><tbody>
+<tr><td>PGW transaction</td><td class="pn"><code>amount</code><code>currency</code><span class="tg t-ch">existing · paid currency</span></td></tr>
+<tr><td>PGW transaction</td><td class="pn"><code>isMcp</code><code>mcpRate</code><code>mcpRateId</code><span class="tg t-nw">new</span></td></tr>
+<tr><td>PGW order</td><td class="pn"><code>isMcpOffered</code><span class="tg t-nw">new · internal</span></td></tr>
+<tr><td>MPGS / CYBS</td><td class="pn">amount, currency<span class="tg t-ex">existing</span></td></tr>
+<tr><td>APEX</td><td class="pn">Cardholder Amount, Cardholder Currency, Cardholder ConvRate, Transaction Identifier<span class="tg t-nw">new · names pending</span></td></tr>
+</tbody></table>
+<p>Chosen on HPP. Authorized and cleared with the scheme in this currency. Never shown to the merchant.</p></div>
+<div class="c"><span class="k">settlement currency</span><h3>What the merchant is paid</h3><div class="ex">SAR</div>
+<table class="pt"><thead><tr><th>Where</th><th>Parameter</th></tr></thead><tbody>
+<tr><td>APEX</td><td class="pn"><code>settlementAmount</code><code>settlementCurrency</code><span class="tg t-ex">existing</span></td></tr>
+<tr><td>APEX</td><td class="pn"><code>exchangeRate</code><span class="tg t-ex">existing · order → settlement</span></td></tr>
+</tbody></table>
+<p>Unchanged by MCP. The AED order amount is converted to it for payout, as today. <code>exchangeRate</code> is not the MCP rate.</p></div>
 </div>
-<p class="src" style="font:11px var(--mono);color:var(--muted);margin-top:10px">Worked example from PRD v2: rate AED → GBP 0.2137, markup included.</p>
+<p class="src" style="font:11px var(--mono);color:var(--muted);margin-top:10px">Worked example: rate AED → GBP 0.2137, markup included. New PGW field names are the stories' proposals, except <code>mcpBaseAmount</code> and <code>mcpBaseCurrency</code> (agreed). <a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">Story S5</a> · <a href="docs/requirements.html#the-three-currencies">Requirement</a></p>
 
 <h2 class="section-title">Documents</h2>
 <div class="rows">
@@ -45,18 +77,18 @@
 <div class="rows">
 <a class="row" href="end-to-end.html"><div class="grow"><div class="t">End-to-end view</div><div class="d">One AED order from Planet's rate file to payout and refunds, in one swimlane; switch location, rate file, currency, method and refunds and the flow redraws</div></div><span class="tag">open</span></a>
 <a class="row" href="hpp-simulator.html"><div class="grow"><div class="t">HPP simulator</div><div class="d">Merchant set-up, customer location and rate-file state drive what the HPP offers; pay and see what PGW stores and what the merchant sees</div></div><span class="tag">open</span></a>
-<a class="row" href="calculator.html"><div class="grow"><div class="t">Calculator</div><div class="d">Quote, rounding up, partial refunds with the last-cent rule, minimum refund; compare with rounding to nearest</div></div><span class="tag">open</span></a>
+<a class="row" href="calculator.html"><div class="grow"><div class="t">Calculator</div><div class="d">Quote, rounding up, partial refunds with the last-cent rule; compare with rounding to nearest</div></div><span class="tag">open</span></a>
 <div class="row plan"><div class="grow"><div class="t">Order model</div><div class="d">One MCP order in the PGW order model, MCP fields highlighted: a purchase and two partial refunds that close it</div></div><span class="tag grey">planned</span></div>
 <div class="row plan"><div class="grow"><div class="t">Rate file lifecycle</div><div class="d">Daily load, checks, validity overlap, MCP suspended</div></div><span class="tag grey">planned</span></div>
-<div class="row plan"><div class="grow"><div class="t">What can go wrong</div><div class="d">Geolocation miss, missing rate file, wallet mismatch, record mismatches, refunds below minimum</div></div><span class="tag grey">planned</span></div>
+<div class="row plan"><div class="grow"><div class="t">What can go wrong</div><div class="d">Geolocation miss, missing rate file, wallet mismatch, record mismatches</div></div><span class="tag grey">planned</span></div>
 <div class="row plan"><div class="grow"><div class="t">Federation and enrichment</div><div class="d">The same purchase and refunds as sent to APEX in real time and to Postilion in the enrichment file</div></div><span class="tag warn">parked: APEX field names, enrichment format</span></div>
 </div>
 
 <h2 class="section-title" id="stories">Stories and where to see them</h2>
 <div class="rows">
 <div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s1-febe-mcp-configuration">S1</a> · Configuration</div><div class="d"><a href="hpp-simulator.html#try=mcp-off">Simulator 1</a></div></div></div>
-<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s2-be-planet-rate-file-load-and-cache">S2</a> · Planet rate file</div><div class="d"><a href="hpp-simulator.html#try=rate-yday">Simulator 4</a> · <a href="end-to-end.html#loc=gb&rf=none&pay=aed&m=card&r=none">End-to-end</a></div></div></div>
-<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s3-be-customer-country-from-ip-maxmind">S3</a> · Country from IP</div><div class="d"><a href="hpp-simulator.html#try=geo-miss">Simulator 3</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s2-be-planet-rate-file-fetch-parse-and-store">S2</a> · Planet rate file: fetch and store</div><div class="d"><a href="hpp-simulator.html#try=rate-yday">Simulator 4</a> · <a href="end-to-end.html#loc=gb&rf=none&pay=aed&m=card&r=none">End-to-end</a></div></div></div>
+<div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s3-be-maxmind-database-fetch-parse-and-store">S3</a> · MaxMind database: fetch and store</div><div class="d"><a href="hpp-simulator.html#try=geo-miss">Simulator 3</a></div></div></div>
 <div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s4-febe-hpp-currency-offer-and-selection">S4</a> · HPP offer and selection</div><div class="d"><a href="hpp-simulator.html#try=gb-card">Simulator</a> · <a href="calculator.html#try=round-up">Calculator</a> · <a href="end-to-end.html">End-to-end</a></div></div></div>
 <div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s5-be-mcp-payment-and-transaction-record">S5</a> · Payment and record</div><div class="d"><a href="hpp-simulator.html#try=wallet">Simulator 7</a> · <a href="end-to-end.html">End-to-end</a></div></div></div>
 <div class="row"><div class="grow"><div class="t"><a href="docs/stories.html#s6-be-mcp-refunds">S6</a> · Refunds</div><div class="d"><a href="calculator.html#try=refund-60-40">Calculator</a> · <a href="end-to-end.html#loc=gb&rf=ok&pay=gbp&m=card&r=partial">End-to-end</a></div></div></div>

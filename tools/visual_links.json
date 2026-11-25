@@ -246,7 +246,7 @@
         "../simulator.html#s2"
       ],
       [
-        "What can go wrong: checks 3.1–3.9",
+        "What can go wrong: checks 3.1\u20133.9",
         "../what-can-go-wrong.html#stage-cs"
       ]
     ],
@@ -312,7 +312,7 @@
     ],
     "checks": [
       [
-        "What can go wrong: checks 2.1–2.6",
+        "What can go wrong: checks 2.1\u20132.6",
         "../what-can-go-wrong.html#stage-api"
       ]
     ],
@@ -384,30 +384,6 @@
         "../hpp-simulator.html#try=mcp-off"
       ]
     ],
-    "s2-be-planet-rate-file-load-and-cache": [
-      [
-        "Simulator: yesterday's rates",
-        "../hpp-simulator.html#try=rate-yday"
-      ],
-      [
-        "Simulator: no valid file",
-        "../hpp-simulator.html#try=rate-none"
-      ],
-      [
-        "End-to-end: no valid file",
-        "../end-to-end.html#loc=gb&rf=none&pay=aed&m=card&r=none"
-      ]
-    ],
-    "s3-be-customer-country-from-ip-maxmind": [
-      [
-        "Simulator: no country found",
-        "../hpp-simulator.html#try=geo-miss"
-      ],
-      [
-        "Simulator: customer in the UAE",
-        "../hpp-simulator.html#try=uae"
-      ]
-    ],
     "s4-febe-hpp-currency-offer-and-selection": [
       [
         "Simulator: GBP offered",
@@ -474,10 +450,6 @@
     ],
     "checks": [
       [
-        "Calculator: minimum refund",
-        "../calculator.html#try=min-nonfinal"
-      ],
-      [
         "Calculator: refund too much",
         "../calculator.html#try=over"
       ]
@@ -496,10 +468,30 @@
       [
         "Calculator: thirds",
         "../calculator.html#try=thirds"
+      ]
+    ],
+    "s2-be-planet-rate-file-fetch-parse-and-store": [
+      [
+        "Simulator: yesterday's rates",
+        "../hpp-simulator.html#try=rate-yday"
       ],
       [
-        "Calculator: AED 0.04 as final",
-        "../calculator.html#try=min-final"
+        "Simulator: no valid file",
+        "../hpp-simulator.html#try=rate-none"
+      ],
+      [
+        "End-to-end: no valid file",
+        "../end-to-end.html#loc=gb&rf=none&pay=aed&m=card&r=none"
+      ]
+    ],
+    "s3-be-maxmind-database-fetch-parse-and-store": [
+      [
+        "Simulator: no country found",
+        "../hpp-simulator.html#try=geo-miss"
+      ],
+      [
+        "Simulator: customer in the UAE",
+        "../hpp-simulator.html#try=uae"
       ]
     ]
   }

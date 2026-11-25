@@ -58,6 +58,8 @@ def main():
         ["pandoc", a.docx, "-t", "html5", f"--extract-media={media}"],
         cwd=out_dir, check=True, capture_output=True, text=True,
     ).stdout
+    # Word stores a fixed image size; drop it so images fill the text column (CSS caps at 100%).
+    body = re.sub(r'(<img\b[^>]*?)\s*style="width:[^"]*"', r'\1', body)
 
     toc = []
     for level, hid, inner in re.findall(r'<h([1-3])\s+id="([^"]+)"[^>]*>(.*?)</h\1>', body, re.S):

@@ -153,12 +153,12 @@ table.mt tr.sel td { background: var(--money-bg); color: var(--money); font-weig
 </section>
 
 <section class="card" id="s-min">
-<header><span class="num">4</span><h2>Minimum refund</h2><span class="who"><a href="docs/stories.html#checks">S6 check 1.2</a></span></header>
+<header><span class="num">4</span><h2>Minimum refund (existing rule)</h2><span class="who"><a href="docs/stories.html#checks">S6 check 1.2</a></span></header>
 <div class="in">
-<p class="hint" style="margin-top:0">A refund that is not the final one must convert to at least one minor unit. The smallest AED refund that passes depends on the rate.</p>
+<p class="hint" style="margin-top:0">MCP adds no minimum of its own. The existing minimum refund amount (AED 0.10) applies, as for any refund. It is enough for MCP: AED 0.10 converts to at least one minor unit in every MVP currency, because each has a rate of 0.1 or more per AED.</p>
 <div id="minOut"></div>
 <div id="minTable" style="margin-top:12px"></div>
-<p class="src">The rejection message does not show the transaction currency: “Refund amount is below the minimum refundable amount.”</p>
+<p class="src">Decided 25-Nov-2026. A refund below AED 0.10 gets the existing refund message.</p>
 </div>
 </section>
 </div>
@@ -213,6 +213,7 @@ const NEWER = { GBP: '0.2141000', EUR: '0.2492000', INR: '23.0800000', USD: '0.2
 const CURS = ['GBP', 'EUR', 'INR', 'USD', 'SAR', 'JPY'];
 const SEG = ['#0E7C66', '#14B8A6', '#0F766E', '#2DD4BF', '#115E59', '#5EEAD4'];
 const E7 = 10000000n;
+const MIN_REFUND = 10n; // existing minimum refund amount, AED 0.10 (in fils)
 
 /* ---------- exact arithmetic (BigInt) ---------- */
 // Amounts in minor units (2 decimals). Rate as integer × 1e7.
@@ -260,6 +261,7 @@ function model() {
     if (req == null) { row.status = 'invalid'; rows.push(row); return; }
     const remAed = aed - rAed;
     if (req > remAed) { row.status = 'rej11'; row.remAed = remAed; rows.push(row); return; }
+    if (req < MIN_REFUND) { row.status = 'rej12'; rows.push(row); return; }
     const final = rAed + req === aed;
     const n = req * r7;
     row.exact = n; row.final = final;
@@ -269,14 +271,13 @@ function model() {
     } else {
       row.txn = floorDiv(n, E7);
       row.alt = nearDiv(n, E7);
-      if (row.txn < 1n) { row.status = 'rej12'; rows.push(row); return; }
     }
     row.status = 'ok';
     rAed += req; rTxn += row.txn; altTxn += row.alt;
     row.afterAed = rAed; row.afterTxn = rTxn; row.afterAlt = altTxn;
     rows.push(row);
   });
-  const minAed = ceilDiv(E7, r7); // smallest AED minor that converts to ≥ 1 minor unit
+  const minAed = MIN_REFUND; // existing minimum refund amount (AED 0.10)
   return { ok: true, aed, r7, exact, q, qDown, qNear, rows, rAed, rTxn, altTxn, minAed,
     altNeg: rows.some(r => r.status === 'ok' && r.alt < 0n), altOver: rows.some(r => r.status === 'ok' && r.afterAlt > q) };
 }
@@ -351,14 +352,14 @@ function renderRefunds(m) {
       return;
     }
     if (r.status === 'rej12') {
-      h += '<tr class="rej"><td class="m">–</td><td class="m big">' + fmtMinor(r.req) + '</td><td><span class="st ok">1.1 pass</span> <span class="st bad">1.2 rejected</span></td><td class="calc">' + fmtMinor(r.req) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(r.exact) + ' → down = <b>0.00</b>. Below one minor unit and not the final refund.</td><td class="m">—</td><td class="m">—</td>' + (cmp ? '<td class="alt"></td>' : '') + '<td>' + del + '</td></tr>';
+      h += '<tr class="rej"><td class="m">–</td><td class="m big">' + fmtMinor(r.req) + '</td><td><span class="st ok">1.1 pass</span> <span class="st bad">1.2 rejected</span></td><td class="calc">Below the existing minimum refund amount (AED 0.10). Existing refund message.</td><td class="m">—</td><td class="m">—</td>' + (cmp ? '<td class="alt"></td>' : '') + '<td>' + del + '</td></tr>';
       return;
     }
     n++;
     const calc = r.final
       ? 'Final: ' + fmtMinor(m.q) + ' − ' + fmtMinor(r.afterTxn - r.txn) + ' earlier = <b>' + fmtMinor(r.txn) + '</b><br>(exact would be ' + fmtExact(r.exact) + ')'
       : fmtMinor(r.req) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(r.exact) + ' → down = <b>' + fmtMinor(r.txn) + '</b>';
-    h += '<tr' + (r.final ? ' class="final"' : '') + '><td class="m">R' + n + '</td><td class="m big">' + fmtMinor(r.req) + '</td><td><span class="st ok">1.1 pass</span> <span class="st ' + (r.final ? 'grey' : 'ok') + '">' + (r.final ? '1.2 n/a: final' : '1.2 pass') + '</span></td><td class="calc">' + calc + '</td><td class="m big">' + fmtMinor(r.txn) + '</td><td class="m">AED ' + fmtMinor(r.afterAed) + '<br>' + esc(c) + ' ' + fmtMinor(r.afterTxn) + '</td>' +
+    h += '<tr' + (r.final ? ' class="final"' : '') + '><td class="m">R' + n + '</td><td class="m big">' + fmtMinor(r.req) + '</td><td><span class="st ok">1.1 pass</span> <span class="st ' + 'ok">1.2 pass</span></td><td class="calc">' + calc + '</td><td class="m big">' + fmtMinor(r.txn) + '</td><td class="m">AED ' + fmtMinor(r.afterAed) + '<br>' + esc(c) + ' ' + fmtMinor(r.afterTxn) + '</td>' +
       (cmp ? '<td class="m alt' + (r.alt < 0n ? ' neg' : '') + '">' + fmtMinor(r.alt) + (r.alt < 0n ? '<br>negative' : (r.afterAlt > m.q ? '<br>over paid' : '')) + '</td>' : '') + '<td>' + del + '</td></tr>';
   });
   if (!m.rows.length) h += '<tr><td colspan="' + (cmp ? 8 : 7) + '" class="calc" style="color:var(--muted)">No refunds yet. Enter an AED amount, or use a Try preset.</td></tr>';
@@ -399,16 +400,15 @@ function renderRefunds(m) {
 
 function renderMin(m) {
   const c = st.cur;
-  const below = m.minAed - 1n;
-  let h = '<div class="mrow">Smallest non-final refund: <b style="color:var(--money)">AED ' + fmtMinor(m.minAed) + '</b><br>' +
-    'AED ' + fmtMinor(m.minAed) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(m.minAed * m.r7) + ' → ' + fmtMinor(floorDiv(m.minAed * m.r7, E7)) + ' ' + esc(c) + ' <span class="st ok">pass</span>';
-  if (below > 0n) h += '<br>AED ' + fmtMinor(below) + ' × ' + fmtRate(m.r7) + ' = ' + fmtExact(below * m.r7) + ' → 0.00 <span class="st bad">rejected</span><br><span style="color:var(--text-2)">AED ' + fmtMinor(below) + ' is accepted only as the final refund.</span>';
-  else h += '<br><span style="color:var(--text-2)">At this rate every AED amount converts to at least one minor unit. Check 1.2 never rejects.</span>';
-  $('minOut').innerHTML = h + '</div>';
-  let t = '<table class="mt"><thead><tr><th>Currency</th><th>Dummy rate</th><th>Min. AED</th></tr></thead><tbody>';
+  const t10 = floorDiv(MIN_REFUND * m.r7, E7);
+  let h = '<div class="mrow">Existing minimum refund: <b style="color:var(--money)">AED 0.10</b><br>' +
+    'AED 0.10 × ' + fmtRate(m.r7) + ' = ' + fmtExact(MIN_REFUND * m.r7) + ' → down = ' + fmtMinor(t10) + ' ' + esc(c) + ' ' +
+    (t10 >= 1n ? '<span class="st ok">at least one minor unit</span>' : '<span class="st bad">below one minor unit</span>') + '</div>';
+  $('minOut').innerHTML = h;
+  let t = '<table class="mt"><thead><tr><th>Currency</th><th>Dummy rate</th><th>AED 0.10 converts to</th></tr></thead><tbody>';
   Object.keys(RATES).forEach(k => {
     const r7 = parseFixed(RATES[k], 7);
-    t += '<tr' + (k === c ? ' class="sel"' : '') + '><td>' + k + '</td><td>' + RATES[k] + '</td><td>' + fmtMinor(ceilDiv(E7, r7)) + '</td></tr>';
+    t += '<tr' + (k === c ? ' class="sel"' : '') + '><td>' + k + '</td><td>' + RATES[k] + '</td><td>' + fmtMinor(floorDiv(MIN_REFUND * r7, E7)) + '</td></tr>';
   });
   $('minTable').innerHTML = t + '</tbody></table>';
 }
@@ -438,8 +438,7 @@ const TRY = {
   'refund-60-40':  { t: 'Refund 60 + 40', aed: '100.00', cur: 'GBP', refunds: ['60.00', '40.00'] },
   'thirds':        { t: 'Refund in thirds', aed: '100.00', cur: 'GBP', refunds: ['33.33', '33.33', '33.34'] },
   'full':          { t: 'Full refund', aed: '100.00', cur: 'GBP', refunds: ['100.00'] },
-  'min-nonfinal':  { t: 'AED 0.04, not final', aed: '100.00', cur: 'GBP', refunds: ['0.04'] },
-  'min-final':     { t: 'AED 0.04 as final', aed: '100.00', cur: 'GBP', refunds: ['60.00', '39.96', '0.04'] },
+  'min':           { t: 'Refund below AED 0.10', aed: '100.00', cur: 'GBP', refunds: ['0.05'] },
   'over':          { t: 'Refund too much', aed: '100.00', cur: 'GBP', refunds: ['100.01'] },
   'newer-rate':    { t: 'Newer rate file', aed: '100.00', cur: 'GBP', refunds: ['60.00'], newer: true },
   'nearest-fails': { t: 'Why round down', aed: '100.00', cur: 'GBP', refunds: Array(42).fill('2.37').concat(['0.46']), cmp: true }
