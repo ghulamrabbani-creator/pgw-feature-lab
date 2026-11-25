@@ -163,19 +163,22 @@ pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
 <p class="lead">Set up the merchant, place the customer somewhere in the world and choose the rate-file state. The HPP on the right reacts as PGW would. Pay to see what PGW stores and what the merchant sees.</p>
 <div class="vp-meta">
 <span class="tag warn">Illustrative</span>
-<span class="tag grey">Reflects PRD v2 (09-Nov-2026) + decisions to 24-Nov-2026</span>
-<span class="tag grey">Stories: S1, S2, S3, S4, S5, S7 (draft list)</span>
+<span class="tag grey">Reflects solution requirements v3.0 and PGW stories v0.1 (25-Nov-2026, drafts)</span>
+<span class="tag grey">Stories: S1 to S5, S7</span>
+<a href="end-to-end.html">End-to-end view</a>
 <a href="./">Back to MCP</a>
 </div>
 
 <div class="terms"><b>Terms.</b> <b>Order currency</b>: what the merchant priced in (AED). <b>Transaction currency</b>: what the customer pays in, and what the scheme clears in (APEX calls it <i>cardholder currency</i>). <b>Settlement currency</b>: what the merchant is paid out in; MCP does not change it. <b>Rate</b>: Planet's rate from AED to the transaction currency, markup included.</div>
 
-<div class="newer"><b>Newer than PRD v2 (shown on this page)</b>
+<div class="newer"><b>Decided after PRD v2 (09-Nov), now in v3.0</b>
 <ul>
 <li>Geolocation is MaxMind GeoIP2 (a database held by PGW), not Planet. Planet offers no geolocation (13-Nov).</li>
 <li>Rates come from Planet's daily rate file (template 194). PGW quotes from the <b>Visa section</b>, the higher of the two rates (24-Nov).</li>
 <li>The converted amount is <b>rounded up</b> to the currency's minor unit (24-Nov). Refunds keep the PRD rule: round down, with the last-cent rule on the final refund.</li>
-<li>MCP is a PGW feature toggle in the PGW configuration inside MA, built by the PGW team. There is no operational process (24-Nov).</li>
+<li>MCP is offered strictly on location. No proposed currency (UAE, no country, currency not offered, Phase 2) means AED only and no currency selector (25-Nov).</li>
+<li>The confirmation and receipt show the amount paid and the AED order amount (25-Nov).</li>
+<li>The MCP toggle is in the PGW configuration inside MA, built by the PGW team. It is switched on after Operations registers the merchant with Planet for MCP (24-Nov).</li>
 </ul></div>
 
 <div class="tries" id="tries"><span>Try</span></div>
@@ -254,7 +257,7 @@ pre.code .k { color: #93C5FD; } pre.code .s { color: var(--code-fg); }
 <div class="in" id="after"><p class="hint">Press Pay on the HPP to see the result.</p></div>
 </section>
 
-<p class="src" style="margin-top:24px">Sources: PRD v2 (09-Nov-2026) sections 4, 5, 6, 8 (PGW); Planet rate file template 194 and sample (Project_Feed/MCP/Planet Files); MCP project note, decisions 13-Nov to 24-Nov-2026. All rates, IP addresses and file values on this page are dummy values.</p>
+<p class="src" style="margin-top:24px">Sources: MCP solution requirements v3.0 section 8.1 and PGW stories S1 to S5, S7 (25-Nov-2026, drafts); Planet rate file template 194 and sample (Project_Feed/MCP/Planet Files); MCP project note, decisions 13-Nov to 24-Nov-2026. All rates, IP addresses and file values on this page are dummy values.</p>
 </main>
 <footer class="lab-footer">PGW Feature Lab · MCP · HPP simulator</footer>
 
@@ -349,7 +352,7 @@ function derive() {
   else push(5, 'MaxMind returns a country for the customer IP', 'pass', ctry.ip + ' → ' + ctry.c);
   // 6
   if (stop) push(6, 'Country maps to an active MCP currency', 'na');
-  else if (ctry.cur === 'AED') { push(6, 'Country maps to an active MCP currency', 'stop', 'AE maps to AED, the order currency. Nothing to propose; the customer can still pick a currency.'); stop = 'home'; }
+  else if (ctry.cur === 'AED') { push(6, 'Country maps to an active MCP currency', 'stop', 'AE maps to AED, the order currency. Nothing to convert, so MCP is not offered.'); stop = 'home'; }
   else if (PHASE2.includes(ctry.cur)) { push(6, 'Country maps to an active MCP currency', 'stop', ctry.c + ' → ' + ctry.cur + ' is inactive: 0 and 3-decimal currencies are Phase 2 (PRD v2 5.3).'); stop = 'p2'; }
   else push(6, 'Country maps to an active MCP currency', 'pass', ctry.c + ' → ' + ctry.cur);
   // 7
@@ -361,8 +364,8 @@ function derive() {
   else if (!file.visa[ctry.cur]) { push(8, 'Rate AED → currency is in the file (Visa section)', 'stop', 'No rate for this pair.'); stop = 'norate'; }
   else { push(8, 'Rate AED → currency is in the file (Visa section)', 'pass', '1 AED = ' + file.visa[ctry.cur] + ' ' + ctry.cur); proposed = ctry.cur; }
 
-  // selector available? only when HPP + AED order + MCP on + file valid + geo found (any outcome after that)
-  const selectorOn = !['src', 'ocur', 'mcp', 'rf', 'geo'].includes(stop);
+  // MCP is offered strictly on location: selector only when a currency is proposed
+  const selectorOn = !!proposed;
   const options = selectorOn ? MCP_LIST.filter(c => S.cur[c] && file.visa[c]) : [];
   const offered = !!proposed;
   let chosen = S.sel;
@@ -406,7 +409,7 @@ function renderControls(d) {
   const c = d.ctry;
   $('geoOut').innerHTML = '<dl class="kv" style="margin-top:14px"><dt>Customer IP</dt><dd>' + c.ip + ' <span class="st grey">dummy</span></dd><dt>MaxMind result</dt><dd>' + (c.cur ? c.c : 'no country') + '</dd><dt>Mapped currency</dt><dd>' + (c.cur ? c.cur + (PHASE2.includes(c.cur) ? ' (inactive, Phase 2)' : '') : '—') + '</dd></dl>' +
     '<p class="hint">PGW looks up the IP in the MaxMind GeoIP2 database it holds (no call out during the session), then maps the country to a currency using its own country-to-currency table.</p>' +
-    (c.c === 'AE' ? '<div class="note"><b>Not defined:</b> for a customer in the UAE, PRD v2 does not say whether MCP_offered is set when the customer opens the selector and picks another currency (e.g. an Indian tourist in Dubai paying in INR). Shown here as N, because no converted currency was proposed.</div>' : '');
+    (c.c === 'AE' ? '<div class="info">A customer in the UAE maps to AED, the order currency. MCP is not offered: AED only, no selector (25-Nov).</div>' : '');
   $('rfs').innerHTML = RFS.map(x => '<button class="chip" data-rf="' + x.k + '" aria-pressed="' + (S.rf === x.k) + '">' + x.t + '</button>').join('');
   $('rfs').querySelectorAll('[data-rf]').forEach(b => b.onclick = () => { S.rf = b.dataset.rf; S.paid = null; render(); });
   $('rfOut').innerHTML = S.rf === 'today' ? '<p class="hint">File 20261124 v01 loaded and checked (complete, trailer totals match, rates within bounds). PGW caches it; every HPP quote today comes from this copy.</p>'
@@ -424,9 +427,9 @@ function renderHpp(d, q) {
     const p = S.paid;
     H.innerHTML = '<div class="env">Test Merchant</div><div class="done"><div class="tick ' + (p.ok ? 'ok' : 'no') + '">' + (p.ok ? TICK : CROSS) + '</div>' +
       '<h4>' + (p.ok ? 'Payment successful' : 'Payment failed') + '</h4>' +
-      (p.ok ? '<p><b>' + p.cur + ' ' + fmt(p.minor, p.mu) + '</b></p>' + (p.mcp ? '<p>Order amount AED ' + fmt(p.aedMinor, 2) + '</p>' : '') : '<p>' + esc(p.msg) + '</p>') +
+      (p.ok ? '<p><b>' + p.cur + ' ' + fmt(p.minor, p.mu) + (p.mcp ? ' (AED ' + fmt(p.aedMinor, 2) + ')' : '') + '</b></p>' : '<p>' + esc(p.msg) + '</p>') +
       '<p style="margin-top:18px"><button class="btn" id="again">Start again</button></p></div>' +
-      (p.ok && p.mcp ? '<div class="fine" style="color:#b45309">Not defined: which currency the confirmation and receipt show. Shown here in the currency paid, with the order amount.</div>' : '');
+      (p.ok && p.mcp ? '<div class="fine">Confirmation and receipt: amount paid with the AED order amount.</div>' : '');
     $('again').onclick = () => { S.paid = null; render(); };
     return;
   }
@@ -483,10 +486,8 @@ function renderTrace(d, q) {
   });
   h += '</tbody></table>';
   if (d.proposed) h += '<div class="outcome ok">HPP proposes <b>' + d.proposed + '</b>. MCP_offered = Y. The customer can switch to any offered currency or back to AED.</div>';
-  else if (d.selectorOn) h += '<div class="outcome off">No currency proposed. HPP opens in AED with the currency selector. MCP_offered = N.</div>';
   else h += '<div class="outcome off">HPP shows ' + esc(S.ocur) + ' only, with no selector. MCP_offered = N.</div>';
   if (d.selectorOn && d.chosen !== (d.proposed || 'AED')) h += '<div class="info">The customer switched to <b>' + d.chosen + '</b>. The selector re-prices from the same cached file; nothing is fetched from Planet during the session.</div>';
-  if (d.stop === 'curoff' || d.stop === 'home' || d.stop === 'p2') h += '<div class="note"><b>Not defined:</b> PRD v2 says MCP applies only when the proposed currency is on for the merchant. It does not say whether the selector is still shown when nothing is proposed. Shown here with the selector, so the customer can still pick an offered currency.</div>';
   $('trace').innerHTML = h;
 }
 function fileText(f, hitCur) {
@@ -551,7 +552,7 @@ const TRY = {
   'gb-aed': { t: 'Switches back to AED', s: { sel: 'AED' } },
   'eu': { t: 'Germany: EUR', s: { geo: 'DE' } },
   'us': { t: 'US: USD', s: { geo: 'US' } },
-  'uae-inr': { t: 'In the UAE, picks INR', s: { geo: 'AE', sel: 'INR' } },
+  'uae': { t: 'Customer in the UAE', s: { geo: 'AE' } },
   'geo-miss': { t: 'No country found', s: { geo: '--' } },
   'cur-off': { t: 'INR off for merchant', s: { geo: 'IN', cur: { GBP: true, EUR: true, INR: false, USD: true, SAR: true } } },
   'jp': { t: 'Japan (Phase 2)', s: { geo: 'JP' } },

@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MCP end-to-end view · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.vp-meta { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin: 0 0 20px; }
+.vp-meta a { font-size: 14px; margin-left: 4px; }
+.terms { font-size: 14px; color: var(--text-2); background: var(--card); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 8px; }
+.terms b { color: var(--ink); font-weight: 600; }
+.panel { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 22px; }
+/* control bar */
+.ctrl { position: sticky; top: 52px; z-index: 6; background: rgba(248,250,252,.96); backdrop-filter: blur(4px); border: 1px solid var(--border); border-radius: 12px; padding: 10px 16px; margin: 8px 0 22px; display: flex; flex-wrap: wrap; gap: 12px 22px; align-items: flex-end; }
+.ctrl .g { display: flex; flex-direction: column; gap: 5px; min-width: 0; }
+.ctrl .g > span { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; letter-spacing: .03em; }
+.seg { display: inline-flex; flex-wrap: wrap; background: #F1F5F9; border: 1px solid var(--border); border-radius: 9px; padding: 3px; gap: 3px; }
+.seg button { font: 500 13px var(--sans); color: var(--text-2); background: transparent; border: 0; border-radius: 6px; padding: 6px 11px; cursor: pointer; white-space: nowrap; }
+.seg button[aria-pressed="true"] { background: #fff; color: var(--ink); box-shadow: 0 1px 2px rgba(15,23,42,.14); }
+.seg button:disabled { opacity: .35; cursor: not-allowed; }
+.ctrl .note { order: 9; flex-basis: 100%; font-size: 12px; color: var(--warn-fg); min-height: 0; }
+.ctrl .note:empty { display: none; }
+.ctrl .reset { margin-left: auto; align-self: center; font: 500 12px var(--sans); background: none; border: 0; color: var(--link); cursor: pointer; text-decoration: underline; padding: 0; justify-self: start; }
+/* flows */
+.fh { display: flex; flex-wrap: wrap; gap: 10px 18px; align-items: center; margin: 0 0 6px; }
+.fh h2 { margin: 0; font-size: 20px; color: var(--ink); font-weight: 600; }
+.fh .start { font-size: 13px; color: var(--text-2); background: #F1F5F9; border: 1px solid var(--border); border-radius: 7px; padding: 4px 10px; }
+.fdesc { font-size: 14px; color: var(--text-2); margin: 0 0 14px; }
+.legend { display: flex; flex-wrap: wrap; gap: 16px; font-size: 13px; color: var(--text-2); margin: 0 0 12px; }
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.sw { width: 20px; height: 13px; border-radius: 4px; display: inline-block; border: 1.5px solid var(--border-2); background: #fff; }
+.sw.act { border-style: dashed; } .sw.money { border-color: var(--money); background: var(--money-bg); } .sw.held { border-color: #B45309; background: #FFF7ED; }
+.sw.fail { border-color: #B91C1C; background: #FEF2F2; } .sw.wait { border: 1.5px dashed #D97706; background: var(--warn-bg); } .sw.rel { border-color: #475569; background: #F1F5F9; }
+.lane-wrap { position: relative; overflow-x: auto; padding-bottom: 4px; }
+.lanes { position: relative; display: grid; }
+.lane-label { grid-column: 1; display: flex; align-items: center; font: 500 12px var(--mono); color: var(--muted); padding: 0 10px 0 0; border-top: 1px solid var(--border); text-transform: uppercase; letter-spacing: .03em; }
+.lane-bg { grid-column: 2 / -1; border-top: 1px solid var(--border); }
+.lane-bg.alt, .lane-label.alt { background: #F8FAFC; }
+.phase { grid-row: 1; font: 500 11px var(--mono); color: var(--ink); text-align: center; padding: 6px 4px; border-bottom: 2px solid var(--ink); margin: 0 4px 6px; text-transform: uppercase; letter-spacing: .04em; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card { position: relative; z-index: 2; margin: 8px 5px; padding: 8px 9px; border-radius: 9px; background: #fff; border: 1.5px solid var(--border-2); font: 12.5px/1.35 var(--sans); color: var(--text); text-align: left; cursor: pointer; transition: box-shadow .2s, border-color .2s, opacity .2s; min-width: 0; }
+.card .n { display: block; font: 500 10.5px var(--mono); color: var(--muted); margin-bottom: 2px; }
+.card .sub { display: block; font-size: 11.5px; color: var(--text-2); margin-top: 3px; }
+.card.act { border-style: dashed; }
+.card.money { border-color: var(--money); background: var(--money-bg); } .card.money .n { color: var(--money); }
+.card.held { border-color: #B45309; background: #FFF7ED; } .card.held .n { color: #B45309; }
+.card.fail { border-color: #B91C1C; background: #FEF2F2; } .card.fail .n { color: #B91C1C; }
+.card.wait { border: 1.5px dashed #D97706; background: var(--warn-bg); } .card.wait .n { color: var(--warn-fg); }
+.card.rel { border-color: #475569; background: #F1F5F9; }
+.card.link { border: 1.5px dashed var(--link); background: #EFF6FF; color: #1E3A8A; }
+.card:hover { box-shadow: 0 2px 8px rgba(15,23,42,.10); }
+.card[aria-current="step"] { box-shadow: 0 0 0 3px rgba(15,23,42,.18); border-color: var(--ink); }
+.card.chg { animation: chg 1.4s ease-out; }
+@keyframes chg { 0% { box-shadow: 0 0 0 4px rgba(29,78,216,.55); } 100% { box-shadow: 0 0 0 0 rgba(29,78,216,0); } }
+@media (prefers-reduced-motion: reduce) { .card.chg { animation: none; outline: 2px solid var(--link); } }
+svg.links { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: visible; }
+svg.links path { fill: none; stroke: #94A3B8; stroke-width: 1.5; }
+svg.links path.on { stroke: var(--ink); stroke-width: 2; }
+.scrollhint { font: 12px var(--mono); color: var(--muted); margin: 6px 0 0; display: none; }
+/* detail */
+.nav { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin: 16px 0 12px; }
+.btn { font: 500 14px var(--sans); border: 1px solid var(--border-2); background: #fff; color: var(--ink); border-radius: 8px; padding: 7px 13px; cursor: pointer; }
+.btn:disabled { opacity: .4; cursor: default; }
+.btn.primary { background: var(--ink); color: #fff; border-color: var(--ink); }
+.pos { font: 12px var(--mono); color: var(--muted); }
+.detail { border: 1px solid var(--border); border-radius: 10px; padding: 18px; display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 22px; }
+.detail h3 { margin: 0 0 4px; font-size: 18px; color: var(--ink); font-weight: 600; }
+.detail .by { font: 500 12px var(--mono); color: var(--muted); margin: 0 0 10px; }
+.detail p { margin: 0 0 10px; font-size: 15px; }
+.detail ul { margin: 0 0 10px; padding-left: 20px; font-size: 14px; display: grid; gap: 3px; }
+.detail pre { margin: 0 0 8px; background: var(--code-bg); color: #E2E8F0; border-radius: 8px; padding: 12px 14px; font-size: 12px; line-height: 1.55; overflow-x: auto; }
+.detail pre .k { color: #93C5FD; } .detail pre .s { color: var(--code-fg); font-weight: 500; } .detail pre .c { color: #64748B; }
+.detail .cap { font: 500 11px var(--mono); color: var(--muted); text-transform: uppercase; margin: 0 0 6px; }
+.detail .lk { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 13px; margin-top: 8px; }
+.detail .lk a.try { font-weight: 500; color: #fff; background: var(--ink); padding: 3px 10px; border-radius: 6px; text-decoration: none; }
+.detail .flag { font-size: 13px; color: var(--warn-fg); background: var(--warn-bg); padding: 6px 10px; border-radius: 6px; margin: 0 0 10px; }
+.empty { color: var(--muted); font-size: 14px; }
+/* mobile list */
+.vlist { display: none; }
+/* flow canvases break out to the browser width; text stays on the page grid */
+.bleed { width: min(calc(100vw - 72px), 1880px); margin-left: calc((100% - min(calc(100vw - 72px), 1880px)) / 2); }
+@media (max-width: 860px) {
+  .ctrl { position: static; }
+  .bleed { width: auto; margin-left: 0; }
+  .lane-wrap { display: none; }
+  .vlist { display: grid; gap: 8px; }
+  .vlist .card { margin: 0; }
+  .vlist .card .lane { font: 500 10.5px var(--mono); color: var(--muted); text-transform: uppercase; margin-left: 6px; }
+  .vlist .ph { font: 500 11px var(--mono); color: var(--ink); text-transform: uppercase; letter-spacing: .04em; border-bottom: 2px solid var(--ink); padding: 10px 0 4px; }
+  .detail { grid-template-columns: minmax(0, 1fr); }
+}
+
+.lane-label { font-size: 11px; }
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="./">MCP</a> / End-to-end view</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">visual · mcp</p>
+<h1 class="page">End-to-end view</h1>
+<p class="lead">One AED order from the daily rate file to the merchant's payout and refunds, across the customer, the merchant, PGW, Planet, the processor and scheme, Postilion and APEX. Change the settings and the flow redraws.</p>
+<div class="vp-meta">
+<span class="tag warn">Illustrative</span>
+<span class="tag grey">Reflects solution requirements v3.0 and PGW stories v0.1 (25-Nov-2026, drafts)</span>
+<a href="hpp-simulator.html">HPP simulator →</a>
+</div>
+<div class="terms"><b>Terms:</b> order currency = AED, what the merchant priced in; transaction currency = what the customer pays in (APEX: cardholder currency). Rates are dummy values. Field names are the stories' proposals. Steps marked <b>parked</b> wait on APEX field names (S8) and the Postilion enrichment format (S9).</div>
+
+<div class="ctrl bleed" id="ctrl" role="group" aria-label="Simulation settings"></div>
+
+<section class="panel bleed" id="flowA" aria-label="MCP flow">
+<div class="fh"><h2>From the rate file to payout</h2><span class="start" id="aStart"></span></div>
+<p class="fdesc" id="aDesc"></p>
+<div class="legend">
+<span><i class="sw act"></i>Action by the customer or merchant</span><span><i class="sw"></i>Processing</span><span><i class="sw money"></i>Money moves or is converted</span>
+<span><i class="sw wait"></i>Parked or open</span><span><i class="sw fail"></i>Failed</span><span><i class="sw rel"></i>MCP not applied</span>
+</div>
+<div class="lane-wrap" id="aWrap"><div class="lanes" id="aLanes"></div></div>
+<p class="scrollhint" id="aHint">Scroll sideways to see the whole flow →</p>
+<div class="vlist" id="aList"></div>
+<div class="nav"><button class="btn" data-f="A" data-go="-1">← Previous</button><button class="btn primary" data-f="A" data-go="1">Next step →</button><span class="pos" id="aPos"></span></div>
+<div class="detail" id="aDetail" aria-live="polite"></div>
+</section>
+</main>
+<footer class="lab-footer">Illustrative explanation of the MCP solution requirements and PGW stories. The documents are the requirement; where they differ, the documents win.</footer>
+<script>
+(() => {
+  const $ = id => document.getElementById(id);
+  const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const json = o => esc(JSON.stringify(o, null, 2))
+    .replace(/&quot;([A-Za-z_ ]+)&quot;:/g, (m, k) => `<span class="${/^(mcp|isMcp|Cardholder|Transaction Identifier|transactionCurrency|amount|currency|rate|quote)/.test(k) ? 's' : 'k'}">"${k}"</span>:`)
+    .replace(/&quot;(\.\.\.[^&]*)&quot;/g, '<span class="c">$1</span>');
+  const LANES = ['Customer', 'Merchant', 'PGW / HPP', 'Planet', 'MPGS / CYBS · scheme', 'Postilion', 'APEX'];
+  const L = { cust: 0, mer: 1, pgw: 2, pla: 3, proc: 4, pos: 5, apx: 6 };
+  const CTRL = [
+    ['loc', 'Customer location', [['gb', 'UK (GBP offered)'], ['none', 'UAE / not found / not offered']]],
+    ['rf', 'Rate file', [['ok', 'Valid'], ['none', 'No valid file']]],
+    ['pay', 'Customer pays in', [['gbp', 'GBP (proposed)'], ['aed', 'Switches to AED']]],
+    ['m', 'Method', [['card', 'Card'], ['wallet', 'Apple Pay'], ['tabby', 'Tabby']]],
+    ['r', 'Refund', [['none', 'None'], ['partial', 'AED 60 + AED 40']]]
+  ];
+  const DEF = { loc: 'gb', rf: 'ok', pay: 'gbp', m: 'card', r: 'none' };
+  const O = Object.assign({}, DEF);
+  const offered = () => O.loc === 'gb' && O.rf === 'ok';
+  const mcp = () => offered() && O.pay === 'gbp';
+  let note = '';
+  function norm() {
+    note = '';
+    if (!offered() && O.pay === 'gbp') { O.pay = 'aed'; }
+    if (O.m === 'tabby' && O.pay === 'gbp') { O.pay = 'aed'; note = 'Tabby is available in AED only, so the customer pays in AED.'; }
+    if (!offered()) note = 'MCP is not offered, so HPP shows AED only with no currency selector.' + (note ? ' ' + note : '');
+  }
+  function ctrlHtml() {
+    $('ctrl').innerHTML = CTRL.map(([k, t, opts]) => `<div class="g"><span>${t}</span><div class="seg">${opts.map(([v, l]) => {
+      const dis = k === 'pay' && v === 'gbp' && (!offered() || O.m === 'tabby');
+      return `<button type="button" data-k="${k}" data-v="${v}" aria-pressed="${O[k] === v}"${dis ? ' disabled' : ''}>${l}</button>`; }).join('')}</div></div>`).join('') +
+      `<button class="reset" type="button" id="reset">Reset</button><div class="note">${esc(note)}</div>`;
+    $('ctrl').querySelectorAll('[data-k]').forEach(b => b.onclick = () => { O[b.dataset.k] = b.dataset.v; if (b.dataset.k === 'm' && b.dataset.v !== 'tabby' && offered() && O.pay === 'aed' && note.startsWith('Tabby')) O.pay = 'gbp'; norm(); update(); });
+    $('reset').onclick = () => { Object.assign(O, DEF); norm(); update(); };
+  }
+  const S = 'Stories ', SIM = 'hpp-simulator.html#try=';
+  const method = () => ({ card: 'card', wallet: 'Apple Pay', tabby: 'Tabby' }[O.m]);
+
+  function flowA() {
+    const st = []; const add = (id, lane, kind, ph, title, sub, d, par) => st.push({ id, lane, kind, phx: ph, title, sub, d, par });
+    const M = mcp(), OF = offered();
+    // Daily
+    add('d1', L.pla, 'sys', 'Daily rates', 'Publishes the rate file', 'Template 194, markup included',
+      { by: 'Planet → PGW · SFTP, PGP', p: 'Planet publishes one rate file each day over SFTP. Each rate is from AED to one currency, with the markup already in it, and is valid for 48 hours in Planet\'s sample, so two daily files overlap.', list: ['Visa section (VID) and Mastercard section (MCD)', 'Delivery details (folder, keys, file name, time) are still with Planet'], src: [['Simulator: the rate file', SIM + 'gb-card']],
+        pre: { file: 'PFH,20261124,01', visaRow: 'VID,2001,AED,784,2,GBP,826,2,0.2137000,2026-11-24T00:00:00.000Z,2026-11-25T23:59:59.000Z' }, preCap: 'Dummy row in Planet\'s layout' });
+    add('d2', L.pgw, O.rf === 'ok' ? 'sys' : 'fail', 'Daily rates', O.rf === 'ok' ? 'Checks and caches it' : 'No valid file: MCP suspended', O.rf === 'ok' ? 'S2' : 'Operations alerted',
+      O.rf === 'ok' ? { by: 'PGW · story S2', p: 'PGW checks the file (record counts, hash totals, rates above zero and within the change limit) and caches it. Every HPP quote comes from this cache. No rate is fetched from Planet during a payment.', list: ['Quotes use the Visa section', 'Where two files are valid, the latest one is used'], pre: { lookup: { orderCurrency: 'AED', transactionCurrency: 'GBP' }, result: { rate: '0.2137000', rateId: '2001', file: '20261124 v01' } }, preCap: 'Rate lookup' }
+      : { by: 'PGW · story S2', p: 'No loaded file has a valid rate. PGW suspends MCP for every merchant and alerts Operations. Every HPP shows AED only until a valid file loads.', tryH: SIM + 'rate-none', tryT: 'Try it in the simulator' });
+    // Order and offer
+    add('o1', L.mer, 'act', 'HPP offer', 'Creates the order', 'AED 100.00',
+      { by: 'Merchant → PGW · Create Session', p: 'The merchant creates the order in AED as today. Nothing in the request is new for MCP.', pre: { amount: 100.00, currency: 'AED', paymentOperation: 'Pay', merchantReferenceId: 'ORD-DEMO-100', '...': '...' }, preCap: 'POST /payment-intent/api/v2/direct/session' });
+    add('o2', L.cust, 'act', 'HPP offer', 'Opens the payment page', 'From the site, SDK or Pay-by-Link',
+      { by: 'Customer', p: 'MCP is decided when HPP first loads. Flows with no HPP (Direct API with the merchant\'s card form, recurring, merchant-initiated) never get MCP.', src: [['Simulator: Direct API', SIM + 'direct-api']] });
+    add('o3', L.pgw, 'sys', 'HPP offer', O.loc === 'gb' ? 'IP → GB → GBP' : 'IP → no currency to propose', 'MaxMind database in PGW · S3',
+      { by: 'PGW · story S3', p: O.loc === 'gb' ? 'PGW looks up the customer\'s IP in the MaxMind GeoIP2 database it holds and gets GB. The country map turns GB into GBP.' : 'The IP gives the UAE (AED, the order currency), no country, or a currency the merchant does not offer. There is nothing to propose.', pre: { ip: '81.2.69.142 (dummy)', country: O.loc === 'gb' ? 'GB' : 'AE', mappedCurrency: O.loc === 'gb' ? 'GBP' : 'AED' }, preCap: 'Lookup (illustrative)' });
+    add('o4', L.pgw, OF ? 'sys' : 'rel', 'HPP offer', OF ? 'Offers GBP 21.37' : 'MCP not offered', OF ? 'Rounded up · quote fixed · S4' : 'AED only, no selector',
+      OF ? { by: 'PGW · story S4', p: 'All eight checks pass: AED order, Pay, MCP on, valid rate file, country found, active currency, offered by the merchant, rate in the file. PGW builds a quote for each offered currency and keeps them for the session. MCP_offered = Y.', list: ['AED 100.00 × 0.2137000 = 21.37 (rounded up to 2 decimals)', 'A newer rate file does not change the quote during the session'], pre: { mcpProposedCurrency: 'GBP', isMcpOffered: true, mcpQuotes: [{ currency: 'GBP', amount: 21.37, rate: '0.2137000', rateId: '2001' }, { currency: 'EUR', amount: 24.89, rate: '0.2489000', rateId: '2002' }] }, preCap: 'Session fields (proposed names)', tryH: SIM + 'gb-card', tryT: 'Try it in the simulator' }
+      : { by: 'PGW · story S4', p: 'A check failed, so MCP is not offered. HPP is the same as today: AED only, with no currency selector. MCP_offered = N.', tryH: SIM + (O.rf === 'none' ? 'rate-none' : 'geo-miss'), tryT: 'Try it in the simulator' });
+    add('o5', L.cust, 'act', 'HPP offer', OF ? 'Sees GBP 21.37 and AED 100.00' : 'Sees AED 100.00', OF ? '1 AED = 0.2137 GBP · selector' : 'As today',
+      OF ? { by: 'Customer on HPP', p: 'HPP shows the total in GBP, the order amount in AED and the rate, with a currency selector above the wallet buttons. The selector lists AED and the currencies the merchant offers. Tabby and Tamara show "Available in AED only".', tryH: SIM + 'gb-card', tryT: 'See the HPP' } : { by: 'Customer on HPP', p: 'AED only, as today.' });
+    // Payment
+    const payTitle = M ? `Pays GBP 21.37 by ${method()}` : `Pays AED 100.00 by ${method()}`;
+    add('p1', L.cust, 'act', 'Payment', payTitle, O.pay === 'aed' && OF ? 'Switched to AED' : '',
+      { by: 'Customer', p: M ? 'The customer keeps GBP and pays. ' + (O.m === 'wallet' ? 'The Apple Pay sheet is built with GBP 21.37, the amount on screen.' : '') : (OF ? 'The customer switches back to AED. Nothing is converted.' : 'A regular AED payment.'), tryH: SIM + (M ? (O.m === 'wallet' ? 'wallet' : 'gb-card') : (OF ? (O.m === 'tabby' ? 'apm' : 'gb-aed') : 'geo-miss')), tryT: 'Try it in the simulator' });
+    add('p2', L.pgw, 'sys', 'Payment', M ? (O.m === 'wallet' ? 'Checks token = quote' : 'Checks amount = quote') : 'Normal checks', 'S4, S5',
+      { by: 'PGW · stories S4, S5', p: M ? 'PGW checks that the submitted currency and amount equal the stored quote. For a wallet, the amount and currency in the wallet token must equal the quote; otherwise PGW rejects the payment before the processor.' : 'No MCP checks. Tabby and Tamara are accepted only in AED.', tryH: M && O.m === 'wallet' ? SIM + 'wallet-mismatch' : '', tryT: 'Try a mismatch' });
+    add('p3', L.proc, 'money', 'Payment', M ? 'Authorizes GBP 21.37' : (O.m === 'tabby' ? 'Tabby: AED 100.00' : 'Authorizes AED 100.00'), M ? 'Approved' : 'Approved',
+      { by: O.m === 'tabby' ? 'PGW → Tabby' : 'PGW → MPGS or CyberSource', p: M ? 'PGW sends the payment in GBP, as for any non-AED payment. No new processor fields. The merchant\'s MPGS and CyberSource set-up must accept GBP (open point with Rohit).' : 'As today.', pre: M ? { amount: 21.37, currency: 'GBP' } : { amount: 100.00, currency: 'AED' }, preCap: 'Amount sent' });
+    add('p4', L.pgw, M ? 'money' : 'sys', 'Payment', 'Stores both views', M ? 'Order view, paid view, rate · S5' : 'isMcp = false',
+      { by: 'PGW · story S5', p: M ? 'PGW keeps the order view (AED) and the transaction view (GBP) on the transaction, with the rate and its source. Order totals are computed from mcpBaseAmount.' : 'Not converted: isMcp = false, mcpBaseAmount = amount.', pre: M ? { amount: 21.37, currency: 'GBP', isMcp: true, mcpBaseAmount: 100.00, mcpBaseCurrency: 'AED', mcpRate: '0.2137000', mcpRateId: '2001', mcpRateFileDate: '20261124' } : { amount: 100.00, currency: 'AED', isMcp: false, mcpBaseAmount: 100.00, mcpBaseCurrency: 'AED' }, preCap: 'Transaction (proposed names)' });
+    add('p5', L.cust, 'sys', 'Payment', 'Confirmation', M ? 'GBP 21.37 (AED 100.00)' : 'AED 100.00',
+      { by: 'HPP · story S5', p: M ? 'The confirmation and the customer receipt show the amount paid and the AED order amount.' : 'As today.' });
+    add('p6', L.mer, 'sys', 'Payment', 'Callback: AED 100.00', 'No rate, no flag · S7',
+      { by: 'PGW → merchant · story S7', p: M ? 'transaction.amount and transaction.currency carry the AED values. The rate and the MCP fields are not sent. The merchant never learns the customer paid in GBP.' : 'As today.', pre: { order: { amount: 100.00, currency: 'AED' }, transaction: { amount: 100.00, currency: 'AED', status: 'Success' } }, preCap: 'Callback (amount fields only)' }, true);
+    // Federation and clearing
+    add('f1', L.apx, M ? 'wait' : 'sys', 'Federation and clearing', M ? 'Federation: AED + cardholder fields' : 'Federation as today', M ? 'Parked: field names from APEX · S8' : 'AED 100.00',
+      M ? { by: 'PGW → APEX · story S8 (parked)', flag: 'Parked: exact field names and formats awaited from APEX (Arul).', p: 'APEX keeps AED in its main fields, so pricing, payout and the Merchant Portal work as today. The GBP amount, GBP and the rate go in four new cardholder fields.', pre: { amount: 100.00, transactionCurrency: 'AED', settlementCurrency: 'SAR', 'Cardholder Amount': 21.37, 'Cardholder Currency': 'GBP', 'Transaction Identifier': 'Y', 'Cardholder ConvRate': '0.2137000' }, preCap: 'Agreed content (names pending)' } : { by: 'PGW → APEX', p: 'As today: AED 100.00.' });
+    if (M) add('f2', L.pos, 'wait', 'Federation and clearing', 'Enrichment record', 'Parked: file format · S9',
+      { by: 'PGW → Postilion · story S9 (parked)', flag: 'Parked: format and data set being finalized with Postilion (Musaad).', p: 'At day end PGW sends Postilion the AED view of the transaction, so the PTLF to APEX matches the federation. Matching key: PGW order ID, RRN and authorization code.', pre: { orderId: '...', rrn: '...', authCode: '...', orderView: { amount: 100.00, currency: 'AED' }, transactionView: { amount: 21.37, currency: 'GBP' }, rate: '0.2137000', mcp: 'Y' }, preCap: 'Data to supply (format pending)' });
+    add('f3', L.pos, 'money', 'Federation and clearing', M ? 'Clears GBP 21.37' : 'Clears AED 100.00', 'Scheme file in the paid currency',
+      { by: 'Scheme → Postilion', p: 'The DCF/TC33 arrives in the currency the customer paid, and Postilion clears in it, as today.' }, M);
+    add('f4', L.apx, M ? 'wait' : 'sys', 'Federation and clearing', 'PTLF to APEX', M ? 'Same convention as the federation (parked)' : 'As today',
+      { by: 'Postilion → APEX', flag: M ? 'Parked with the enrichment file.' : '', p: M ? 'Postilion builds the PTLF row with AED in the main fields and the GBP view in the cardholder fields, copied from the enrichment record. APEX matches it to the PGW federation. A mismatch goes to an exception.' : 'As today.' });
+    if (M) add('f5', L.pla, 'wait', 'Federation and clearing', 'DTF with the MCP row', 'Product Indicator 2 · producer open',
+      { by: 'Geidea → Planet', flag: 'Open: which system produces the MCP rows (Postilion or PGW).', p: 'Planet receives MCP transactions in the Daily Transaction File, as for DCC, with Product Indicator 2 (Shop in Your Currency), and accounts for the markup share.' });
+    add('s1', L.apx, 'money', 'Settlement', 'Pays the merchant', 'From AED 100.00, in SAR',
+      { by: 'APEX', p: 'APEX prices and pays out from the AED order amount, converted to the merchant\'s settlement currency as today. MCP does not change the payout.' });
+    // Refund
+    if (O.r === 'partial') {
+      add('r1', L.mer, 'act', 'Refund', 'Refunds AED 60.00', 'Existing refund API',
+        { by: 'Merchant → PGW · refund v2', p: 'The merchant refunds in AED, as today.', pre: { orderId: '...', refundAmount: 60.00 }, preCap: 'Refund request' });
+      add('r2', L.proc, 'money', 'Refund', M ? 'Refund GBP 12.82' : 'Refund AED 60.00', M ? '60.00 × 0.2137 = 12.822 → round down · S6' : 'As today',
+        { by: 'PGW → processor · story S6', p: M ? 'PGW converts at the rate stored on the purchase, never a newer rate, and rounds a non-final refund down.' : 'Not an MCP transaction: as today.', pre: M ? { amount: 12.82, currency: 'GBP', isMcp: true, mcpBaseAmount: 60.00, mcpBaseCurrency: 'AED', mcpRate: '0.2137000' } : { amount: 60.00, currency: 'AED' }, preCap: 'Refund transaction' });
+      add('r3', L.mer, 'act', 'Refund', 'Refunds AED 40.00', 'Final refund',
+        { by: 'Merchant → PGW', p: 'This refund brings the AED refunds to the full AED 100.00.' });
+      add('r4', L.proc, 'money', 'Refund', M ? 'Refund GBP 8.55' : 'Refund AED 40.00', M ? '21.37 − 12.82 (last-cent rule)' : 'As today',
+        { by: 'PGW → processor · story S6', p: M ? 'The final refund is not converted. It is the purchase amount minus the earlier refunds, so the customer gets back exactly GBP 21.37. Converting it would give 8.548 → 8.54, one penny short.' : 'As today.', pre: M ? { amount: 8.55, currency: 'GBP', mcpBaseAmount: 40.00, mcpBaseCurrency: 'AED' } : null, preCap: 'Refund transaction' });
+      add('r5', L.mer, 'sys', 'Refund', 'Sees AED 60.00 and AED 40.00', 'S7', { by: 'PGW → merchant', p: 'Refund responses, callbacks and order inquiry show AED only.' });
+      add('r6', L.apx, M ? 'wait' : 'sys', 'Refund', M ? 'Refunds federated in AED' : 'As today', M ? 'With GBP leg and original rate (parked)' : '',
+        { by: 'PGW → APEX', flag: M ? 'Parked with S8.' : '', p: M ? 'Each refund reaches APEX in AED in the main fields, with its own GBP amount and the original rate in the cardholder fields.' : 'As today.' }, true);
+    }
+    return st;
+  }
+
+  // ---------------- render ----------------
+  const FL = { A: { wrap: 'aWrap', lanes: 'aLanes', list: 'aList', det: 'aDetail', pos: 'aPos', hint: 'aHint', cur: 0, steps: [], prev: {}, build: flowA } };
+  function layout(steps) { let c = 0; steps.forEach((s, i) => { if (!(s.par && i > 0)) c++; s.col = c; }); return c; }
+  function cardHtml(s, i, list) {
+    const cls = ['card', s.kind === 'sys' ? '' : s.kind].join(' ');
+    return `<button type="button" class="${cls}" data-i="${i}" data-id="${s.id}"><span class="n">${String(i + 1).padStart(2, '0')}${list ? `<span class="lane">${LANES[s.lane]}</span>` : ''}</span>${s.title}${s.sub ? `<span class="sub">${s.sub}</span>` : ''}</button>`;
+  }
+  const PH = () => '';
+  function render(k) {
+    const F = FL[k], steps = F.build(); F.steps = steps;
+    if (!steps.length) { $(F.lanes).innerHTML = ''; $(F.list).innerHTML = ''; F.prev = {}; F.cur = 0; return; }
+    steps.forEach(st => st.ph = st.phx || PH(st.id));
+    const cols = layout(steps);
+    const lanesUsed = LANES.map((_, i) => i);
+    const g = $(F.lanes);
+    g.style.gridTemplateColumns = `120px repeat(${cols}, minmax(104px, 1fr))`;
+    g.style.minWidth = (120 + cols * 104) + 'px';
+    g.style.gridTemplateRows = `auto repeat(${lanesUsed.length}, minmax(72px, auto))`;
+    let h = '<svg class="links" aria-hidden="true"></svg><div style="grid-row:1;grid-column:1"></div>';
+    // phase headers: consecutive runs of the same phase
+    const runs = []; steps.forEach(st => { const last = runs[runs.length - 1]; if (last && last[0] === st.ph) last[2] = st.col; else runs.push([st.ph, st.col, st.col]); });
+    runs.forEach(([t, a, b]) => { h += `<div class="phase" style="grid-column:${a + 1} / ${b + 2}" title="${t}">${t}</div>`; });
+    lanesUsed.forEach((l, r) => { const alt = r % 2 ? ' alt' : ''; h += `<div class="lane-label${alt}" style="grid-row:${r + 2}">${LANES[l]}</div><div class="lane-bg${alt}" style="grid-row:${r + 2}"></div>`; });
+    g.innerHTML = h;
+    steps.forEach((s, i) => { const w = document.createElement('div'); w.innerHTML = cardHtml(s, i, false); const c = w.firstChild; c.style.gridRow = lanesUsed.indexOf(s.lane) + 2; c.style.gridColumn = s.col + 1; g.appendChild(c); });
+    // mobile list
+    $(F.list).innerHTML = steps.map((s, i) => cardHtml(s, i, true)).join('');
+    // change flash
+    const now = {}; steps.forEach(s => now[s.id] = s.title + '|' + s.sub + '|' + s.kind);
+    const first = !Object.keys(F.prev).length;
+    if (!first) document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => { if (F.prev[c.dataset.id] !== now[c.dataset.id]) c.classList.add('chg'); });
+    F.prev = now;
+    document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => c.onclick = () => { const s = F.steps[+c.dataset.i]; if (s.go) { $('flowB').scrollIntoView({ block: 'start' }); } go(k, +c.dataset.i); });
+    F.cur = Math.min(F.cur, steps.length - 1);
+    requestAnimationFrame(() => { draw(k); go(k, F.cur); });
+  }
+
+  // Connector rule: same lane -> straight across. Other lane -> leave from the bottom/top centre, one turn into the left side.
+  // If that vertical would cross another card, go across first, then drop into the top/bottom of the target.
+  function route(A, B, G, others) {
+    const r = x => ({ l: x.left - G.left, r: x.right - G.left, t: x.top - G.top, b: x.bottom - G.top, cx: x.left + x.width / 2 - G.left, cy: x.top + x.height / 2 - G.top });
+    const a = r(A), b = r(B), os = others.map(r);
+    const hitV = (x, y1, y2) => os.some(o => x > o.l - 2 && x < o.r + 2 && Math.max(y1, y2) > o.t && Math.min(y1, y2) < o.b);
+    const hitH = (y, x1, x2) => os.some(o => y > o.t - 2 && y < o.b + 2 && Math.max(x1, x2) > o.l && Math.min(x1, x2) < o.r);
+    if (Math.abs(a.cy - b.cy) < 4) return `M${a.r},${a.cy} L${b.l - 2},${b.cy}`;
+    const down = b.cy > a.cy, sy = down ? a.b : a.t;
+    if (!hitV(a.cx, sy, b.cy) && !hitH(b.cy, a.cx, b.l)) return `M${a.cx},${sy} L${a.cx},${b.cy} L${b.l - 2},${b.cy}`;
+    const ey = down ? b.t : b.b;
+    if (!hitH(a.cy, a.r, b.cx) && !hitV(b.cx, a.cy, ey)) return `M${a.r},${a.cy} L${b.cx},${a.cy} L${b.cx},${ey + (down ? -2 : 2)}`;
+    const mx = (a.r + b.l) / 2;
+    return `M${a.r},${a.cy} L${mx},${a.cy} L${mx},${b.cy} L${b.l - 2},${b.cy}`;
+  }
+  function draw(k) {
+    const F = FL[k], g = $(F.lanes); if (!g.offsetParent || !F.steps.length) return;
+    const svg = g.querySelector('svg'), G = g.getBoundingClientRect();
+    svg.setAttribute('width', G.width); svg.setAttribute('height', G.height);
+    const cards = [...g.querySelectorAll('.card')];
+    const byCol = {}; F.steps.forEach((s, i) => (byCol[s.col] = byCol[s.col] || []).push(i));
+    const edges = [];
+    Object.keys(byCol).map(Number).sort((a, b) => a - b).forEach(c => { if (byCol[c - 1]) { const from = byCol[c - 1].filter(i => !F.steps[i].par || byCol[c - 1].length === 1).slice(0, 1); byCol[c].forEach(t => from.forEach(f => edges.push([f, t]))); } });
+    svg.innerHTML = '<defs><marker id="ah' + k + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#94A3B8"/></marker><marker id="ahk' + k + '" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="7" markerHeight="7" orient="auto"><path d="M0,0 L8,4 L0,8 z" fill="#0F172A"/></marker></defs>' +
+      edges.map(([a, b]) => {
+        const A = cards[a].getBoundingClientRect(), B = cards[b].getBoundingClientRect();
+        const p = route(A, B, G, cards.filter((_, i) => i !== a && i !== b).map(c => c.getBoundingClientRect()));
+        return `<path data-t="${b}" d="${p}" marker-end="url(#ah${k})"/>`;
+      }).join('');
+    const wrap = $(F.wrap); $(F.hint).style.display = wrap.scrollWidth > wrap.clientWidth + 2 ? 'block' : 'none';
+    mark(k);
+  }
+  function mark(k) {
+    const F = FL[k];
+    document.querySelectorAll(`#${F.lanes} .card, #${F.list} .card`).forEach(c => { if (+c.dataset.i === F.cur) c.setAttribute('aria-current', 'step'); else c.removeAttribute('aria-current'); });
+    $(F.lanes).querySelectorAll('svg path[data-t]').forEach(p => { const on = +p.dataset.t === F.cur; p.classList.toggle('on', on); p.setAttribute('marker-end', `url(#${on ? 'ahk' : 'ah'}${k})`); });
+  }
+  function go(k, i) {
+    const F = FL[k]; F.cur = Math.max(0, Math.min(F.steps.length - 1, i));
+    const s = F.steps[F.cur], d = s.d;
+    const links = [];
+    if (d.tryH) links.push(`<a class="try" href="${d.tryH}">${d.tryT}</a>`);
+    (d.src || []).forEach(([t, h]) => links.push(`<a href="${h}">${t}</a>`));
+    (d.also || []).forEach(([t, h]) => links.push(`<a href="${h}" ${h === '#flowB' ? `data-tob="${s.go || ''}"` : ''}>${t}</a>`));
+    $(F.det).innerHTML = `<div><h3>${F.cur + 1}. ${s.title}</h3><p class="by">${d.by}</p>${d.flag ? `<div class="flag">${d.flag}</div>` : ''}<p>${d.p}</p>${d.list ? `<ul>${d.list.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}<div class="lk">${links.join('')}</div></div>
+      <div>${d.pre ? `<p class="cap">${d.preCap || ''}</p><pre>${json(d.pre)}</pre>` : '<p class="empty">No payload at this step.</p>'}</div>`;
+    $(F.det).querySelectorAll('[data-tob]').forEach(a => a.onclick = e => { e.preventDefault(); $('flowB').scrollIntoView({ block: 'start' }); });
+    $(F.pos).textContent = `Step ${F.cur + 1} of ${F.steps.length}`;
+    document.querySelectorAll(`[data-f="${k}"]`).forEach(b => b.disabled = (+b.dataset.go < 0 && F.cur === 0) || (+b.dataset.go > 0 && F.cur === F.steps.length - 1));
+    mark(k);
+  }
+  document.querySelectorAll('[data-f]').forEach(b => b.onclick = () => go(b.dataset.f, FL[b.dataset.f].cur + +b.dataset.go));
+
+
+
+  function update() {
+    ctrlHtml(); render('A');
+    $('aDesc').textContent = mcp() ? 'The customer in the UK pays GBP 21.37 for an AED 100.00 order. The merchant sees AED throughout and is paid out in SAR.' : (offered() ? 'MCP was offered, but the customer pays in AED. Nothing is converted.' : 'MCP is not offered. The payment is a regular AED payment, as today.');
+    $('aStart').textContent = 'Order AED 100.00 · rate AED → GBP 0.2137000 (dummy) · merchant settled in SAR';
+    history.replaceState(null, '', '#' + Object.entries(O).map(([k, v]) => k + '=' + v).join('&'));
+  }
+  function readHash() {
+    Object.assign(O, DEF);
+    location.hash.slice(1).split('&').forEach(kv => { const [k, v] = kv.split('='); const c = CTRL.find(x => x[0] === k); if (c && c[2].some(o => o[0] === v)) O[k] = v; });
+    norm();
+  }
+  readHash();
+  addEventListener('hashchange', () => { readHash(); update(); });
+  addEventListener('resize', () => draw('A'));
+  document.fonts && document.fonts.ready.then(() => draw('A'));
+  update();
+  window.__mcpE2e = { O, FL, update, flowA, set(o) { Object.assign(O, o); norm(); update(); } };
+})();
+
+</script>
+</body>
+</html>

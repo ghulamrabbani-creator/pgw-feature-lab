@@ -36,20 +36,20 @@
 
 <h2 class="section-title">Documents</h2>
 <div class="rows">
-<div class="row plan"><div class="grow"><div class="t">Solution requirements</div><div class="d">v3 in preparation. Current reference: PRD v2 (Planet), 09-Nov-2026, not published here</div></div><span class="tag grey">in preparation</span></div>
-<div class="row plan"><div class="grow"><div class="t">PGW dev stories</div><div class="d">S1 to S9: configuration, rate file, geolocation, HPP offer, payment, refunds, merchant outputs, APEX federation, enrichment file</div></div><span class="tag grey">in preparation</span></div>
+<div class="row plan"><div class="grow"><div class="t">Solution requirements</div><div class="d">v3.0 draft, 25-Nov-2026, under review. Published here once final.</div></div><span class="tag grey">draft · under review</span></div>
+<div class="row plan"><div class="grow"><div class="t">PGW dev stories</div><div class="d">v0.1 draft, 25-Nov-2026: S1 to S7 written; S8 (APEX federation) and S9 (enrichment file) parked</div></div><span class="tag grey">draft · under review</span></div>
 <div class="row plan"><div class="grow"><div class="t">Interface notes</div><div class="d">APEX fields, enrichment record, Planet rate file and DTF</div></div><span class="tag grey">in preparation</span></div>
 </div>
 
 <h2 class="section-title">Visual pages</h2>
 <div class="rows">
+<a class="row" href="end-to-end.html"><div class="grow"><div class="t">End-to-end view</div><div class="d">One AED order from Planet's rate file to payout and refunds, in one swimlane; switch location, rate file, currency, method and refunds and the flow redraws</div></div><span class="tag">open</span></a>
 <a class="row" href="hpp-simulator.html"><div class="grow"><div class="t">HPP simulator</div><div class="d">Merchant set-up, customer location and rate-file state drive what the HPP offers; pay and see what PGW stores and what the merchant sees</div></div><span class="tag">open</span></a>
+<div class="row plan"><div class="grow"><div class="t">Calculator</div><div class="d">Quote, rounding up, partial refunds with the last-cent rule, minimum refund</div></div><span class="tag grey">planned</span></div>
 <div class="row plan"><div class="grow"><div class="t">Order model</div><div class="d">One MCP order in the PGW order model, MCP fields highlighted: a purchase and two partial refunds that close it</div></div><span class="tag grey">planned</span></div>
-<div class="row plan"><div class="grow"><div class="t">Calculator</div><div class="d">Quote, rounding, partial refunds with the last-cent rule, minimum refund</div></div><span class="tag grey">planned</span></div>
-<div class="row plan"><div class="grow"><div class="t">End-to-end view</div><div class="d">Customer, HPP/PGW, MaxMind, Planet, MPGS/CYBS, Postilion, APEX and scheme in one swimlane</div></div><span class="tag grey">planned</span></div>
 <div class="row plan"><div class="grow"><div class="t">Rate file lifecycle</div><div class="d">Daily load, checks, validity overlap, MCP suspended</div></div><span class="tag grey">planned</span></div>
 <div class="row plan"><div class="grow"><div class="t">What can go wrong</div><div class="d">Geolocation miss, missing rate file, wallet mismatch, record mismatches, refunds below minimum</div></div><span class="tag grey">planned</span></div>
-<div class="row plan"><div class="grow"><div class="t">Federation and enrichment</div><div class="d">The same purchase and refunds as sent to APEX in real time and to Postilion in the enrichment file</div></div><span class="tag warn">on hold: field names and file format</span></div>
+<div class="row plan"><div class="grow"><div class="t">Federation and enrichment</div><div class="d">The same purchase and refunds as sent to APEX in real time and to Postilion in the enrichment file</div></div><span class="tag warn">parked: APEX field names, enrichment format</span></div>
 </div>
 </main>
 </body>
