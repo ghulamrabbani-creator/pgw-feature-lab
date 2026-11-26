@@ -76,7 +76,7 @@ def ensure_script_and_ids(rel):
 
 EXTRACT = r"""
 () => {
-  const SKIP = 'script,style,noscript,header.lab-header,.toc,footer,.lab-footer,#lab-search,template';
+  const SKIP = 'script,style,noscript,header.lab-header,.toc,footer,.lab-footer,#lab-search,template,details.refby,#xref-back';
   const root = document.querySelector('main') || document.body;
   const h1 = document.querySelector('h1');
   const pageTitle = (h1 ? h1.innerText : document.title).trim();

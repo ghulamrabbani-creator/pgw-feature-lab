@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Direct Debit · PGW Feature Lab</title>
+<link rel="stylesheet" href="../assets/lab.css">
+<style>
+.jump{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:20px}
+.jump .col{background:var(--card);border:1px solid var(--border);border-radius:16px;padding:18px 20px;box-shadow:0 1px 2px rgba(15,23,42,.04)}
+.jump h3{font:700 16px var(--head);margin:0 0 2px;color:var(--ink)}
+.jump p{margin:0 0 10px;font-size:13px;color:var(--muted)}
+.jump ol{list-style:none;margin:0;padding:0;font-size:14px}
+.jump li{padding:3px 0}
+.jump a{color:var(--text);text-decoration:none}.jump a:hover{color:var(--accent);text-decoration:underline}
+.how{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:16px;margin:0;padding:0;list-style:none}
+.how li{background:var(--card);border:1px solid var(--border);border-radius:14px;padding:14px 16px;font-size:14px;color:var(--text-2)}
+.how b{display:block;color:var(--ink);font-family:var(--head);margin-bottom:4px}
+.how .demo{color:var(--accent);border-bottom:1px dotted currentColor;font-weight:500}
+.how .chg{color:#1D4ED8}.how del{color:#BE123C}
+@media (max-width:1100px){.jump{grid-template-columns:repeat(2,minmax(0,1fr))}.how{grid-template-columns:minmax(0,1fr)}}
+@media (max-width:640px){.jump{grid-template-columns:minmax(0,1fr)}}
+</style>
+</head>
+<body>
+<header class="lab-header"><div class="inner">
+<a class="lab-brand" href="../"><span>pgw/</span>Feature Lab</a>
+<nav class="lab-crumbs"><a href="../">Home</a> / Direct Debit</nav>
+</div></header>
+<main class="wrap">
+<p class="eyebrow">direct debit · solutioning complete</p>
+<h1 class="page">Direct Debit</h1>
+<p class="lead">Recurring bank-to-bank collections through the UAE Direct Debit Marketplace (DDS). The merchant creates a contract in the Merchant Portal, the customer signs it with UAE PASS, and Geidea collects each payment on its due date and pays the merchant out through APEX.</p>
+
+<h2 id="documents" class="section-title">Documents</h2>
+<div class="rows">
+<a class="row" href="docs/product.html"><div class="grow"><div class="t">Product Document</div><div class="d">Part A: Direct Debit at Geidea · Part B: functional requirements · Part C: technical requirements with the Backend stories S1 to S14</div></div><span class="tag">v2.7 · 18-Nov-2026</span></a>
+</div>
+
+<h2 class="section-title" id="how-to-follow">Following a trail of requirements</h2>
+<ul class="how">
+<li><b>Every reference is a link</b>Section and story references such as <span class="demo">B8</span>, <span class="demo">S5</span> or <span class="demo">S1 section 5.4</span> jump to that place. Hover to see where it goes.</li>
+<li><b>See who points here</b>Under each referenced heading, <span class="demo">Referenced from</span> lists every place that refers to it, so you can follow a requirement both ways.</li>
+<li><b>Go back along your trail</b>After a jump, the <b style="display:inline">Back</b> button at the bottom returns you to where you were, one step at a time (or press Alt + ←). <span class="chg">Blue</span> text changed in recent versions; <del>struck-through</del> text is superseded.</li>
+</ul>
+
+<h2 class="section-title" id="jump">Jump into the document</h2>
+<div class="jump">
+<div class="col"><h3 id="part-a">Part A</h3><p>Direct Debit at Geidea</p><ol><li><a href="docs/product.html#a1.-what-direct-debit-is">A1. What Direct Debit is</a></li><li><a href="docs/product.html#a2.-market-use-case-and-target-segments">A2. Market use case and target segments</a></li><li><a href="docs/product.html#a3.-payment-instruments">A3. Payment instruments</a></li><li><a href="docs/product.html#a4.-key-scheme-rules-and-timings">A4. Key scheme rules and timings</a></li><li><a href="docs/product.html#a5.-commercial-and-funds-model">A5. Commercial and funds model</a></li><li><a href="docs/product.html#a6.-who-does-what">A6. Who does what</a></li><li><a href="docs/product.html#a7.-end-to-end-flows">A7. End-to-end flows</a></li><li><a href="docs/product.html#a8.-settlement-and-merchant-payout-timing">A8. Settlement and merchant payout timing</a></li><li><a href="docs/product.html#a9.-merchant-enablement-and-configuration">A9. Merchant enablement and configuration</a></li><li><a href="docs/product.html#a10.-user-journeys">A10. User journeys</a></li><li><a href="docs/product.html#a11.-scope-and-phasing">A11. Scope and phasing</a></li><li><a href="docs/product.html#a12.-operations-and-support">A12. Operations and support</a></li><li><a href="docs/product.html#a13.-risks-and-open-items">A13. Risks and open items</a></li><li><a href="docs/product.html#a14.-dds-go-live-checklist">A14. DDS go-live checklist</a></li></ol></div>
+<div class="col"><h3 id="part-b">Part B</h3><p>Functional requirements</p><ol><li><a href="docs/product.html#b1.-scope-actors">B1. Scope &amp; Actors</a></li><li><a href="docs/product.html#b2.-merchant-enablement">B2. Merchant Enablement</a></li><li><a href="docs/product.html#b3.-mandate-creation">B3. Mandate Creation</a></li><li><a href="docs/product.html#b4.-mandate-status-lifecycle">B4. Mandate Status Lifecycle</a></li><li><a href="docs/product.html#b5.-contract-signing-via-uae-pass">B5. Contract Signing via UAE Pass</a></li><li><a href="docs/product.html#b6.-subscription-collection-schedule">B6. Subscription &amp; Collection Schedule</a></li><li><a href="docs/product.html#b7.-payment-execution---daily-processing-chain">B7. Payment Execution - Daily Processing Chain</a></li><li><a href="docs/product.html#b8.-failure-handling-retry-rollover">B8. Failure Handling, Retry &amp; Rollover</a></li><li><a href="docs/product.html#b9.-cancellation">B9. Cancellation</a></li><li><a href="docs/product.html#b10.-reconciliation-settlement---to-be-finalized-with-talha">B10. Reconciliation &amp; Settlement - To be Finalized with the APEX team</a></li><li><a href="docs/product.html#b11.-notifications">B11. Notifications</a></li><li><a href="docs/product.html#b12.-security-data-handling">B12. Security &amp; Data Handling</a></li><li><a href="docs/product.html#b13.-api-support">B13. API Support</a></li><li><a href="docs/product.html#b14.-bulk-contract-upload">B14. Bulk Contract Upload</a></li><li><a href="docs/product.html#b15.-direct-debit-user-permissions">B15. Direct Debit User Permissions</a></li><li><a href="docs/product.html#b16.-store-selection">B16. Store Selection</a></li><li><a href="docs/product.html#b17.-geidea-support-view">B17. Geidea Support View</a></li><li><a href="docs/product.html#b18.-open-items">B18. Open Items</a></li></ol></div>
+<div class="col"><h3 id="part-c">Part C</h3><p>Technical requirements</p><ol><li><a href="docs/product.html#c1.-story-map">C1. Story map</a></li><li><a href="docs/product.html#c2.-delivery-slices">C2. Delivery slices</a></li><li><a href="docs/product.html#c3.-frontend-story-alignment">C3. Frontend story alignment</a></li><li><a href="docs/product.html#c4.-rules-for-every-story">C4. Rules for every story</a></li><li><a href="docs/product.html#c5.-provisions-for-the-phase-2-partner-model">C5. Provisions for the Phase 2 partner model</a></li><li><a href="docs/product.html#c6.-backend-stories">C6. Backend stories</a></li></ol></div>
+<div class="col"><h3 id="backend-stories">Backend stories</h3><p>S1 to S14</p><ol><li><a href="docs/product.html#s1-dd-merchant-enablement-configuration">S1 — DD Merchant Enablement &amp; Configuration</a></li><li><a href="docs/product.html#s2-create-dds-contract">S2 — Create DDS Contract</a></li><li><a href="docs/product.html#s3-contract-sending-signing">S3 — Contract Sending &amp; Signing</a></li><li><a href="docs/product.html#s4-mandate-approval-activation">S4 — Mandate Approval &amp; Activation</a></li><li><a href="docs/product.html#s5-daily-collection-cycle">S5 — Daily Collection Cycle</a></li><li><a href="docs/product.html#s6-failed-collection-handling">S6 — Failed Collection Handling</a></li><li><a href="docs/product.html#s7-contract-subscription-management">S7 — Contract &amp; Subscription Management</a></li><li><a href="docs/product.html#s8-contract-cancellation">S8 — Contract Cancellation</a></li><li><a href="docs/product.html#s9-bulk-contract-upload">S9 — Bulk Contract Upload</a></li><li><a href="docs/product.html#s10-merchant-portal-views-reporting">S10 — Merchant Portal Views &amp; Reporting</a></li><li><a href="docs/product.html#s11-merchant-notifications-webhooks">S11 — Merchant Notifications &amp; Webhooks</a></li><li><a href="docs/product.html#s12-apex-federation">S12 — APEX Federation</a></li><li><a href="docs/product.html#s13-direct-debit-user-permissions">S13 — Direct Debit User Permissions</a></li><li><a href="docs/product.html#s14-operations-console-job-control">S14 — Operations Console &amp; Job Control</a></li></ol></div>
+</div>
+
+<h2 id="prototype" class="section-title">Prototype</h2>
+<div class="rows">
+<a class="row" href="https://merchant-portal-replica.vercel.app/direct-debit" target="_blank" rel="noopener"><div class="grow"><div class="t">Merchant Portal prototype</div><div class="d">Contracts, signing and collections as the merchant and the customer see them; the PGW configuration settings open from the top bar (PGW Config in MA)</div></div><span class="tag warn">Illustrative</span></a>
+</div>
+
+<h2 id="visual-pages" class="section-title">Visual pages</h2>
+<div class="rows">
+<div class="row plan"><div class="grow"><div class="t">Being built</div><div class="d">Visual pages for the contract lifecycle, the daily collection cycle, failed collections and settlement will follow.</div></div><span class="tag grey">planned</span></div>
+</div>
+</main>
+<footer class="lab-footer">The Product Document is the reference. Identifiers in the published copy are dummy values; people are shown as their teams.</footer>
+<script src="../assets/search.js" defer></script>
+</body>
+</html>

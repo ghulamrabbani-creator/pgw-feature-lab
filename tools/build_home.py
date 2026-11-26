@@ -28,11 +28,12 @@ SECTIONS = [
             "note": "",
         },
         {
-            "name": "Direct Debit", "href": "", "meta": "UAE Direct Debit Marketplace (DDS)",
+            "name": "Direct Debit", "href": "direct-debit/", "meta": "UAE Direct Debit Marketplace (DDS)",
             "line": "Recurring bank-to-bank collections under a signed contract, with frequency-based debits, from the Merchant Portal.",
             "systems": ["DD Backend (new)", "DDS", "Merchant Portal", "APEX", "MA", "PGW config"],
-            "docs": [], "pages": [("Merchant Portal prototype", "https://merchant-portal-replica.vercel.app/direct-debit")],
-            "note": "Lab pages are being built.",
+            "docs": [("Product Document", "v2.7", "direct-debit/docs/product.html")],
+            "pages": [("Merchant Portal prototype", "https://merchant-portal-replica.vercel.app/direct-debit")],
+            "note": "Visual pages are being built.",
         },
     ]),
     ("works", "In the works", "Solution being written; pages follow the documents.", [
@@ -107,7 +108,7 @@ def card(f, status):
         if docs:
             cols += f'<div><h4>Documents</h4><ul class="eps">{docs}</ul></div>'
         if pages:
-            ttl = "Visual pages" if has_lab else "Prototype"
+            ttl = "Prototype" if all(h.startswith("http") for _, h in f["pages"]) else "Visual pages"
             cols += f'<div><h4>{ttl}</h4><ul class="eps">{pages}</ul></div>'
         cols += "</div>"
     note = f'<p class="note">{e(f["note"])}</p>' if f["note"] else ""

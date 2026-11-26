@@ -50,13 +50,14 @@ def main():
     ap.add_argument("--date", required=True)
     ap.add_argument("--feature", required=True)
     ap.add_argument("--toc-depth", type=int, default=2)
+    ap.add_argument("--styles", action="store_true", help="keep Word character styles (e.g. Changed) as data-custom-style spans")
     a = ap.parse_args()
 
     out_dir = os.path.dirname(os.path.abspath(a.out))
     stem = os.path.splitext(os.path.basename(a.out))[0]
     media = f"media-{stem}"
     body = subprocess.run(
-        ["pandoc", a.docx, "-t", "html5", f"--extract-media={media}"],
+        ["pandoc", "-f", "docx+styles" if a.styles else "docx", a.docx, "-t", "html5", "--wrap=none", f"--extract-media={media}"],
         cwd=out_dir, check=True, capture_output=True, text=True,
     ).stdout
     # Word stores a fixed image size; drop it so images fill the text column (CSS caps at 100%).

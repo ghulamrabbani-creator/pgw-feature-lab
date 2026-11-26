@@ -8,7 +8,7 @@ Prints any known first name still present so the map can be extended.
 import json, re, sys
 from pathlib import Path
 ROOT = Path(__file__).resolve().parent.parent
-NAMES = r"\b(Arul|Arulraj|Talha|Sidra|Rohit|Asad|Manjunath|Badr|Emir|Nancy|Derya|Hussam|Dheeraj|Sherly|Marina|Musaad|Farida|Konchada|Mithun|Pankaj|Yassmin|Nehal|Lamia|Elgendy|Qurany|Osama|Pramod|ElTabbakh|Rahmatullah|Mahmoud)\b"
+NAMES = r"\b(George|Vivek|Haggag|Alsomali|Wankhade|Eldegheidy|Arul|Arulraj|Talha|Sidra|Rohit|Asad|Manjunath|Badr|Emir|Nancy|Derya|Hussam|Dheeraj|Sherly|Marina|Musaad|Farida|Konchada|Mithun|Pankaj|Yassmin|Nehal|Lamia|Elgendy|Qurany|Osama|Pramod|ElTabbakh|Rahmatullah|Mahmoud)\b"
 
 def apply(path):
     s = path.read_text(encoding="utf-8")
