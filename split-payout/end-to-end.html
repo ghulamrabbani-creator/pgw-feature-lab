@@ -102,7 +102,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
 <p class="lead">One order from start to payout, across the customer, the partner, PGW, APEX and the vendors. Change the settings below and both flows redraw: the split mode, when the split is sent, who bears the transfer fees, and what goes wrong on the way.</p>
 <div class="vp-meta">
 <span class="tag warn">Illustrative</span>
-<span class="tag grey">Reflects product doc v1.6 and PGW stories v0.5</span>
+<span class="tag grey">Reflects product doc v1.6 and PGW stories v0.6</span>
 <a href="docs/product.html#transaction-flow">Read the requirement →</a>
 <a href="docs/stories.html#sp-6-be-create-session-with-split-payout">Stories: SP-6 →</a>
 <a href="docs/stories.html#sp-8-be-pgw-split-payout-api">SP-8 →</a>
@@ -239,7 +239,7 @@ svg.links path.on { stroke: var(--ink); stroke-width: 2; }
       S({ id: prefix + 'rv', lane: L.V, kind: 'rel', par: true, title: 'Vendors not paid through Geidea', sub: 'partner settles them', d: { by: 'Vendors', p: 'No payout is made to the vendors for this transaction. Settling with them is between the partner and its vendors.', src: [['Product doc 4.3', PD + 'outcomes']] } })
     ];
   }
-  const AGREED = 'Agreed with APEX on 23-Nov: the APEX advice API only creates advices. An UPDATE is not sent in real time; it goes in the day-end file, where it overwrites the earlier advice. Stories v0.5 and doc v1.6 still describe a real-time U.';
+  const AGREED = 'Agreed with APEX on 23-Nov: the APEX advice API only creates advices. An UPDATE is not sent in real time; it goes in the day-end file, where it overwrites the earlier advice. Stories v0.6 and doc v1.6 still describe a real-time U.';
   const RULE = 'Rule (Rabbani, 24-Nov): an UPDATE is accepted on the transaction date only. An UPDATE after that day’s day-end file is rejected.';
   function validationSteps(prefix) {
     const pct = split().type === 'PERCENTAGE';

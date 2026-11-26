@@ -89,14 +89,14 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <p class="lead">A split advice tells APEX how to pay one flagged transaction. This page follows an advice from the moment it is sent to the moment the money moves: its statuses at APEX, what PGW records, and what happens to the money each day.</p>
 <div class="vp-meta">
 <span class="tag warn">Illustrative</span>
-<span class="tag grey">Reflects product doc v1.6 (6.3–6.5, 7.3, 7.5) and PGW stories v0.5 (SP-7 to SP-9)</span>
+<span class="tag grey">Reflects product doc v1.6 (6.3–6.5, 7.3, 7.5) and PGW stories v0.6 (SP-7 to SP-9)</span>
 <a href="docs/product.html#advice-statuses">Read the requirement →</a>
 <a href="end-to-end.html">End-to-end view →</a>
 <a href="docs/stories.html#sp-7-be-apex-payout-advice-api-integration-waiting-on-emcrey-p3">Stories: SP-7 →</a>
 <a href="docs/stories.html#sp-8-be-pgw-split-payout-api">SP-8 →</a>
 <a href="docs/stories.html#sp-9-be-day-end-split-advice-file-waiting-on-emcrey-p3">SP-9 →</a>
 </div>
-<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Action <b>A</b> creates an advice at APEX, <b>U</b> replaces it. PGW sends A in real time for a split sent with the order or a Payout Advice API NEW. An UPDATE is not sent in real time: the day-end file carries it and APEX overwrites the earlier advice (agreed with APEX on 23-Nov; stories v0.5 and doc v1.6 still describe a real-time U). APEX advice fields and statuses are drafts until the Emcrey spec (P3).</div>
+<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Action <b>A</b> creates an advice at APEX, <b>U</b> replaces it. PGW sends A in real time for a split sent with the order or a Payout Advice API NEW. An UPDATE is not sent in real time: the day-end file carries it and APEX overwrites the earlier advice (agreed with APEX on 23-Nov; stories v0.6 and doc v1.6 still describe a real-time U). APEX advice fields and statuses are drafts until the Emcrey spec (P3).</div>
 
 <h2 class="section-title" id="statuses">The statuses at APEX</h2>
 <section class="panel">
@@ -137,7 +137,7 @@ table.t td { padding: 10px 8px; border-bottom: 1px solid var(--border); vertical
 <tr><td><span class="chip a-PROCESSED">PROCESSED</span></td><td><span class="no">No</span></td><td>PGW stores it; APEX refuses it</td><td><span class="no">Refused</span>: final</td><td><span class="chip m-paid">paid out</span></td></tr>
 <tr><td><span class="chip a-RELEASED">RELEASED</span></td><td><span class="no">No</span></td><td>PGW stores it; APEX refuses it</td><td><span class="no">Refused</span>: final</td><td><span class="chip m-rel">released to the partner</span></td></tr>
 </table></div>
-<p class="src">Source: <a href="docs/product.html#payout-advice-api">product doc 7.3</a> · <a href="docs/product.html#real-time-split-advice-api">6.4</a> · <a href="docs/stories.html#checks">SP-8 section 2</a>. Rejections at each step: <a href="what-can-go-wrong.html">What can go wrong</a>. The day-end file route for updates was agreed with APEX on 23-Nov; stories v0.5 and doc v1.6 still describe a real-time U. An UPDATE is accepted on the transaction date only (rule of 24-Nov); one sent after that day’s file is rejected.</p>
+<p class="src">Source: <a href="docs/product.html#payout-advice-api">product doc 7.3</a> · <a href="docs/product.html#real-time-split-advice-api">6.4</a> · <a href="docs/stories.html#checks">SP-8 section 2</a>. Rejections at each step: <a href="what-can-go-wrong.html">What can go wrong</a>. The day-end file route for updates was agreed with APEX on 23-Nov; stories v0.6 and doc v1.6 still describe a real-time U. An UPDATE is accepted on the transaction date only (rule of 24-Nov); one sent after that day’s file is rejected.</p>
 </section>
 </main>
 <footer class="lab-footer">Illustrative explanation of the product document and stories. The documents are the requirement; where they differ, the documents win.</footer>

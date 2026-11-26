@@ -21,7 +21,7 @@
 
 /* swimlane */
 .lane-wrap { position: relative; overflow-x: auto; }
-.lanes { position: relative; display: grid; grid-template-columns: 104px repeat(8, minmax(98px, 1fr)); min-width: 890px; }
+.lanes { position: relative; display: grid; grid-template-columns: 104px repeat(9, minmax(96px, 1fr)); min-width: 980px; }
 .lane-label { grid-column: 1; display: flex; align-items: center; font: 500 12px var(--mono); color: var(--muted); padding: 0 10px 0 0; border-top: 1px solid var(--border); text-transform: uppercase; letter-spacing: .03em; }
 .lane-bg { grid-column: 2 / -1; border-top: 1px solid var(--border); }
 .lane-bg.alt, .lane-label.alt { background: #F8FAFC; }
@@ -95,15 +95,16 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 <main class="wrap">
 <p class="eyebrow">visual · split payout</p>
 <h1 class="page">Onboarding</h1>
-<p class="lead">How a partner gets split payout, from request to go-live. Most steps are operational (emails and documents between teams). Two steps change system set-up: APEX creates the vendors, and PGW configures the partner MID.</p>
+<p class="lead">How a partner gets split payout, from request to go-live. Most steps are operational (emails and documents between teams). Three steps change system set-up: Operations creates the vendors in APEX (APEX generates the beneficiary IDs), the APEX team enables the partner MID, and PGW configures it.</p>
 <div class="vp-meta">
 <span class="tag warn">Illustrative</span>
-<span class="tag grey">Reflects product doc v1.6, sections 5 and 7.1</span>
+<span class="tag grey">Reflects product doc v1.6, sections 5 and 7.1, and Operations SOP v1.1 (26-Nov-2026)</span>
 <a href="docs/product.html#partner-and-vendor-enablement-operational">Read the requirement →</a>
 <a href="docs/stories.html#prerequisites-not-pgw-work">Stories: prerequisites P1, P2 →</a>
 <a href="end-to-end.html">After set-up: End-to-end view →</a>
 </div>
-<div class="terms"><b>Terms:</b> partner = the Geidea merchant (MID) that asks for split payout; vendor = a payee of the split. APEX gives each vendor a beneficiary ID; PGW uses that ID to check the partner's requests.</div>
+<div class="terms"><b>Changed 26-Nov-2026 (agreed with the APEX team):</b> Operations creates the vendors in APEX and APEX generates each beneficiary ID. Operations sends the same list to the PGW integration team and the partner. Product doc v1.6 section 5.2 still says the APEX team creates the vendors.</div>
+<div class="terms"><b>Terms:</b> partner = the Geidea merchant (MID) that asks for split payout; vendor = a payee of the split. Operations creates each vendor in APEX, which generates its beneficiary ID; Operations sends the same list to PGW and the partner. PGW uses the ID to check the partner's requests.</div>
 
 <h2 id="who-does-what" class="section-title">Who does what</h2>
 <section class="panel" aria-label="Onboarding swimlane">
@@ -132,9 +133,9 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 <table class="t">
 <tr><th>Item</th><th>Set by</th><th>Kept in</th><th>Used for</th></tr>
 <tr><td data-l="Item">Vendor documents (business registration, IBAN in the business's name, agreement with the partner)</td><td data-l="Set by">Operations</td><td data-l="Kept in">Operations record</td><td data-l="Used for">Support for each payout, e.g. the Central Bank travel rule</td></tr>
-<tr><td data-l="Item">Vendor definition with IBAN and any commission</td><td data-l="Set by">APEX team</td><td data-l="Kept in">APEX, linked to the partner MID</td><td data-l="Used for">Paying the vendor legs</td></tr>
+<tr><td data-l="Item">Vendor definition with IBAN and any commission</td><td data-l="Set by">Operations, in the APEX interface</td><td data-l="Kept in">APEX, linked to the partner MID</td><td data-l="Used for">Paying the vendor legs</td></tr>
 <tr><td data-l="Item">Split payout on the partner MID: remittance fee, fee-bearer option, N</td><td data-l="Set by">APEX team</td><td data-l="Kept in">APEX</td><td data-l="Used for">Fees and the N-day hold. See <a href="money-flow.html">Money flow</a></td></tr>
-<tr><td data-l="Item">Beneficiary IDs</td><td data-l="Set by">APEX team creates; PGW integration team enters</td><td data-l="Kept in">APEX and PGW configuration</td><td data-l="Used for">PGW checks that each leg in a request uses a known ID</td></tr>
+<tr><td data-l="Item">Beneficiary IDs</td><td data-l="Set by">APEX generates; Operations sends the list; PGW integration team enters</td><td data-l="Kept in">APEX and PGW configuration</td><td data-l="Used for">PGW checks that each leg in a request uses a known ID</td></tr>
 <tr><td data-l="Item">Split payout enabled, split mode, fixed template or profile catalog</td><td data-l="Set by">PGW integration team</td><td data-l="Kept in">PGW configuration (the partner has no access)</td><td data-l="Used for">Building the split for each order. See <a href="split-modes.html">Split modes</a> and the <a href="simulator.html#cfg=dynamic">configuration modal</a></td></tr>
 </table>
 <p class="src">Source: <a href="docs/product.html#setup-steps">product doc 5.2</a>, <a href="docs/product.html#configuration">7.1</a></p>
@@ -149,13 +150,13 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 <li>Due diligence and screening happen once per vendor, when it is onboarded, not on every payout.</li>
 <li>New vendors, changes to a vendor's details or commission, and deactivation follow the same operational route.</li>
 <li>Vendors have no portal access. Geidea talks to the partner only.</li>
-<li>PGW holds no vendor bank details and does not check vendor status. APEX rejects a beneficiary ID that is wrong or no longer active.</li>
+<li>PGW holds no vendor bank details and does not check vendor status. APEX rejects a beneficiary ID that is wrong, no longer active or not linked to the partner MID.</li>
 </ul>
 <p class="src">Source: <a href="docs/product.html#partner-eligibility-and-agreement">product doc 5.1</a>, <a href="docs/product.html#setup-steps">5.2</a>, <a href="docs/product.html#configuration">7.1</a></p>
 </section>
 
 <h2 id="still-to-add" class="section-title">Still to add</h2>
-<div class="pending">Detail from the Vendor Payout Service Operations SOP v1.0 (03-Nov-2026): the route and form of each handover, checklists, and how the change and deactivation paths run. This page shows only what the product doc states.</div>
+<div class="pending">Detail from the Vendor Payout Service Operations SOP v1.1 (26-Nov-2026): the route and form of each handover, checklists, and how the change and deactivation paths run. Steps 5 to 9 follow SOP v1.1; the other steps follow the product doc.</div>
 </main>
 <footer class="lab-footer">Illustrative explanation of the product document. The document is the requirement; where they differ, the document wins.</footer>
 
@@ -163,7 +164,7 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 (() => {
   const $ = id => document.getElementById(id);
   const LANES = ['Partner', 'Business', 'Risk', 'Legal', 'Operations', 'APEX team', 'PGW integration'];
-  const PHASES = [['Request and approval', 1, 3], ['Vendors', 4, 5], ['PGW set-up', 6, 7], ['Live', 8, 8]];
+  const PHASES = [['Request and approval', 1, 3], ['Vendors', 4, 6], ['PGW set-up', 7, 8], ['Live', 9, 9]];
   // Steps: product doc 5.2 (wording kept close to the doc)
   const STEPS = [
     { n: 1, lane: 0, kind: 'ops', title: 'Request the service',
@@ -180,22 +181,26 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
       text: 'Operations collects and checks the due diligence documents, keeps them on record, and screens the beneficiary. A screening hit goes to Risk under the existing process.',
       list: ['Business registration', 'IBAN in the business’s name', 'Agreement or contract with the partner', 'Beneficiary screening'],
       in: ['Partner approval', 'Vendor documents'], out: ['Verified vendors'], to: 'APEX team', res: 'Vendors verified' },
-    { n: 5, lane: 5, kind: 'sys', title: 'Create vendors in APEX',
-      text: 'The APEX team creates the vendor definitions, linked to the partner MID with IBAN and any commission, and enables split payout on the partner MID.',
-      list: ['Vendor definitions: IBAN, commission', 'On the partner MID: remittance fee, fee-bearer option, N'],
-      in: ['Verified vendors'], out: ['Beneficiary IDs'], to: 'PGW integration', res: 'Beneficiary IDs' },
-    { n: 6, lane: 6, kind: 'sys', title: 'Configure the partner MID in PGW',
-      text: 'The PGW integration team enables split payout on the partner MID and sets the split mode, the template or profiles, and the beneficiary IDs.',
-      list: ['Split payout enabled', 'Split mode: Dynamic, Fixed or Profile', 'Fixed template or profile catalog', 'Beneficiary IDs as received from APEX'],
-      in: ['Beneficiary IDs', 'Split configuration'], out: ['PGW configuration'], to: '', res: 'Partner configured',
+    { n: 5, lane: 4, kind: 'sys', title: 'Create vendors in APEX',
+      text: 'In the APEX interface, Operations creates each vendor definition, linked to the partner MID, with the IBAN and any commission. APEX generates the beneficiary ID. Operations sends the same list of beneficiary IDs and vendor names to the PGW integration team and to the partner.',
+      list: ['Vendor definitions: IBAN, commission', 'Beneficiary ID generated by APEX', 'One list to PGW and the partner'],
+      in: ['Verified vendors'], out: ['Beneficiary IDs + vendor names'], to: 'APEX team, PGW integration, Partner', res: 'Beneficiary IDs', src: 'SOP v1.1, step 9 and 11 (26-Nov)' },
+    { n: 6, lane: 5, kind: 'sys', title: 'Enable split on the partner MID',
+      text: 'The APEX team enables split payout on the partner MID in APEX and sets its remittance fee, the fee-bearer option and N.',
+      list: ['Remittance fee, fee-bearer option, N'],
+      in: ['Partner approval'], out: ['Partner MID enabled in APEX'], to: 'PGW integration', res: 'Partner MID enabled', src: 'SOP v1.1, step 10' },
+    { n: 7, lane: 6, kind: 'sys', title: 'Configure the partner MID in PGW',
+      text: 'The PGW integration team enables split payout on the partner MID and sets the split mode, the template or profiles, and the beneficiary IDs exactly as received from Operations.',
+      list: ['Split payout enabled', 'Split mode: Dynamic, Fixed or Profile', 'Fixed template or profile catalog', 'Beneficiary IDs as received from Operations'],
+      in: ['Beneficiary IDs + vendor names', 'Split configuration'], out: ['PGW configuration'], to: '', res: 'Partner configured',
       link: ['Try the configuration modal', 'simulator.html#cfg=dynamic'], doc: 'configuration' },
-    { n: 7, lane: 6, kind: 'ops', title: 'Support the partner’s integration',
-      text: 'The PGW integration team shares the beneficiary IDs and the API specs with the partner and supports its integration.',
-      in: ['PGW configuration'], out: ['Beneficiary IDs', 'API specs'], to: 'Partner', res: 'Partner integrated',
+    { n: 8, lane: 6, kind: 'ops', title: 'Support the partner’s integration',
+      text: 'The PGW integration team shares the API specs with the partner and supports its integration. The partner already has the beneficiary IDs from Operations.',
+      in: ['PGW configuration'], out: ['API specs'], to: 'Partner', res: 'Partner integrated', src: 'SOP v1.1, step 13',
       link: ['See the Create Session request', 'simulator.html'] },
-    { n: 8, lane: 0, kind: 'ops', title: 'Go live',
+    { n: 9, lane: 0, kind: 'ops', title: 'Go live',
       text: 'The partner goes live and sends orders with split payout.',
-      in: ['API specs'], out: [], to: '', res: 'Live',
+      in: ['API specs', 'Beneficiary IDs + vendor names'], out: [], to: '', res: 'Live', src: 'SOP v1.1, step 14',
       link: ['Follow one order’s money', 'money-flow.html'] }
   ];
   const SIDE = [
@@ -239,7 +244,7 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
 
   // links
   const svg = $('links');
-  const EDGES = [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [4, 'hit', 'dash']];
+  const EDGES = [[1, 2], [2, 3], [3, 4], [4, 5], [5, 6], [6, 7], [7, 8], [8, 9], [4, 'hit', 'dash']];
 
   // Connector rule: same lane -> straight across. Other lane -> leave from the bottom/top centre, one turn into the left side.
   // If that vertical would cross another card, go across first, then drop into the top/bottom of the target.
@@ -292,7 +297,7 @@ table.t td:first-child { color: var(--ink); font-weight: 500; }
         <p>${s.text}</p>
         ${s.list ? `<ul>${s.list.map(x => `<li>${x}</li>`).join('')}</ul>` : ''}
         ${s.link ? `<p><a href="${s.link[1]}">${s.link[0]} →</a></p>` : ''}
-        <p class="src">Source: <a href="docs/product.html#${s.doc || 'setup-steps'}">product doc ${s.doc ? '7.1' : '5.2 step ' + s.n}</a></p>
+        <p class="src">Source: ${s.src ? s.src : `<a href="docs/product.html#${s.doc || 'setup-steps'}">product doc ${s.doc ? '7.1' : '5.2 step ' + s.n}</a>`}</p>
       </div>
       <div class="hand">
         <h4>Comes in</h4><div class="chips">${s.in.length ? s.in.map(x => `<span class="chip">${x}</span>`).join('') : '<span class="chip">Partner’s own request</span>'}</div>

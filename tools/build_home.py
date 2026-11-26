@@ -17,7 +17,7 @@ SECTIONS = [
             "line": "One partner order, paid out to the partner and its vendors from one transaction.",
             "systems": ["PGW", "APEX", "MA", "Merchant Portal"],
             "docs": [("Product document", "v1.6", "split-payout/docs/product.html"),
-                     ("PGW dev stories", "v0.5", "split-payout/docs/stories.html")],
+                     ("PGW dev stories", "v0.6", "split-payout/docs/stories.html")],
             "pages": [("End-to-end view", "split-payout/end-to-end.html"),
                       ("Money flow", "split-payout/money-flow.html"),
                       ("Onboarding", "split-payout/onboarding.html"),

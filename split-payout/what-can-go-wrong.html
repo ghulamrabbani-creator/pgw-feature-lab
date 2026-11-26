@@ -60,12 +60,12 @@
 <p class="lead">Every rejection and exception in a split payout, in the order an order meets them: from the PGW configuration to after the payout. Each case shows the message, what happens to the money and how it is fixed. "Try it" opens the simulator in that exact state.</p>
 <div class="vp-meta">
 <span class="tag warn">Illustrative</span>
-<span class="tag grey">Reflects PGW stories v0.5 and product doc v1.6</span>
+<span class="tag grey">Reflects PGW stories v0.6 and product doc v1.6</span>
 <a href="docs/product.html#validations">Read the requirement →</a>
 <a href="docs/stories.html#checks-before-payment">Stories: SP-6 checks →</a>
 <a href="docs/stories.html#checks">SP-8 checks →</a>
 </div>
-<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Updates reach APEX only in the day-end file, as agreed with APEX on 23-Nov, and are accepted on the transaction date only (rule of 24-Nov). Stories v0.5 and doc v1.6 still describe a real-time update. The PGW stories call these merchant and partner, so the messages quoted from them say "partner ID" for a vendor's ID. Messages are verbatim from the stories; PGW engineering sets the error codes.</div>
+<div class="terms"><b>Terms:</b> partner = the merchant (MID) with split payout on; vendor = a payee of the split. Updates reach APEX only in the day-end file, as agreed with APEX on 23-Nov, and are accepted on the transaction date only (rule of 24-Nov). Stories v0.6 and doc v1.6 still describe a real-time update. The PGW stories call these merchant and partner, so the messages quoted from them say "partner ID" for a vendor's ID. Messages are verbatim from the stories; PGW engineering sets the error codes.</div>
 
 <div class="strip" id="strip" role="group" aria-label="Filter by stage"></div>
 <div class="tools">
@@ -97,7 +97,7 @@
     { id: 'cfg-partner-id', s: 'cfg', code: 'SP-3 4.1–4.4', title: 'Partner ID entry is not valid', out: 'rej', outT: 'Not saved',
       when: 'Adding or editing a Partner ID in the pop-up.',
       msg: ['Use 3–20 letters, digits or hyphens.', 'This Partner ID is already in the list.', 'This Partner ID is configured on another MID (MID nnnnnnnnnnn). A partner belongs to one merchant MID only.', 'Use up to 100 characters.'],
-      money: 'None. Nothing is saved.', fix: 'Correct the entry. For 4.3, ask the APEX team which MID the vendor belongs to.',
+      money: 'None. Nothing is saved.', fix: 'Correct the entry. For 4.3, ask Operations which MID the vendor belongs to; Operations created it in APEX.',
       note: 'Why 4.3: APEX links each vendor to one partner MID. A Partner ID on a second MID makes APEX reject every split from that MID after the customer has paid.',
       story: ['SP-3 section 4', 'partner-ids'], doc: ['7.1', 'configuration'], tryHref: 'simulator.html#cfg=dynamic', tryT: 'Open the configuration' },
     { id: 'cfg-delete-used', s: 'cfg', code: 'SP-3 4.5', title: 'Deleting a Partner ID that is still in use', out: 'rej', outT: 'Not deleted',
